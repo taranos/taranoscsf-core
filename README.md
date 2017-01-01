@@ -10,7 +10,7 @@ Step 1:  The Taranos Project uses [SBT](http://www.scala-sbt.org/) for Scala bui
 Step 2:  Build and test the service core as follows:
 
 ```
-$ git clone https://github.com/taranos/csf-core.git
+$ git clone https://github.com/taranos/taranoscsf-core.git
 $ cd csf-core
 $ sbt test
 ```
@@ -33,5 +33,5 @@ This will create the artifact jar as ``target/scala-2.11/taranos-core_*.jar``.
 
 - Read FAQs
 
-- Go to the [Taranos Project](https://github.com/taranos/taranoscsf) site
+- Go to the [Taranos Project](https://github.com/taranos/taranoscsf) main project 
  
