@@ -11,11 +11,11 @@ Step 2:  Build and test the service core as follows:
 
 ```
 $ git clone https://github.com/taranos/taranoscsf-core.git
-$ cd csf-core
+$ cd taranoscsf-core
 $ sbt test
 ```
 
-If tests are satisfactory then build the service core artifact (taranos-core_*.jar) by running:
+If tests are satisfactory then build the service core artifact (``taranos-core_*.jar``) by running:
 
 ```
 $ sbt package
