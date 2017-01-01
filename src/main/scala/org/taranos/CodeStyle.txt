@@ -1,0 +1,87 @@
+
+Taranos Project - Code Style Guide
+----------------------------------
+
+The author has adopted a code style that has been influenced by several different programming languages across numerous
+environments and which emphasizes pragmatics while maintaining the highest degree of compatibility with his brain.
+Since no two brains are alike he understands that other code contributers will certainly bring their own personal
+preferences and he is mostly ok with that.  However, he asks that any contributions do try to adhere to the following
+minimalistic set of style guidelines for the sake of consistant product quality.
+
+General:
+
+1> Please use 4-space indent with no embedded tabs (i.e. do expand tabs to spaces).  Embedded tab control characters can
+cause no end of grief for multi-platform version-controlled projects.  (Idiomatic Scala uses 2-space indentation but the
+author finds that tedious on smaller displays with anything more significant than a code snippet.)
+
+2> Please wrap lines so they are no longer than 120 characters.  This will help minimize the amount of side-scrolling
+necessary when using multi-paned IDEs.  (In the author's experience this length is sufficient to allow two full
+side-by-side code windows using reasonably-sized fonts on decent HD displays.)
+
+3> Please do not OVER-document the source code.  The author adheres to the "source code is engineering documentation"
+philosophy.  In the same way that elaborate identifier adornments are semantically fragile and subject to becoming
+invalid over time (see below), so are narratives within source code and even more so.  Well-constructed code that uses
+concise yet meaningful identifiers does not require a lot of supporting comments and should not have to pay the freight
+for them in the form of time-consuming revisions that can't be automated during refactoring iterations.  Incorrect
+comments are worse than no comments at all!  When in doubt just ask yourself if another developer as competent as
+yourself should be able to infer your intent from the code.  If not, then perhaps simplifying expressions and using more
+meaningful identifiers is all that is required.  If yes, then your time would likely be better spent improving the
+code somewhere else.
+
+Scala-specific:
+
+4> Please avoid tricky and overly-compacted complex expressions.  While Scala is very permissive when it comes to those
+kinds of things they rarely provide a quantifiable runtime benefit while remaining detrimental to overall software
+engineering efforts (code literacy, human change analysis and refactoring, breakpoint debugging, etc.)  It's better to
+err on the side of readability as long as it doesn't needlessly introduce inefficiencies.
+
+5> Please use short yet concise and *non-abbreviated* names for classes, methods/functions and variables.  Generally
+speaking, identifiers need only be combinations of at most 3 or 4 nouns and verbs to be sufficiently meaningful.  It's
+the author's experience that if a concise yet meaningful name cannot be imagined for an identifier then it is an early
+indication that the underlying concept is likely ill-conceived.  Avoiding non-obvious abbreviations is important for
+developers whose native language is not English.  Don't invent new vocabulary just to save a few keystrokes!  For
+example, prefer SignalModulator instead of SigMod, SMtor, SgnlMdltr, or some similarly contorted construct.  Really, a
+little extra effort up front can make a huge positive impact on the understandability and maintainability of a shared
+codebase over time.
+
+6> Please DO NOT use Hungarian Notation or the like when creating identifiers.  Computer language semantics have no
+business in identifier names intended for humans!  They are not validated by the compiler and over the course of time
+and human meddling they WILL lose their correctness, assuming they were correct in the first place.  The author does
+make use of a few non-standard identifier adornments however which provide some useful functions:
+
+    a> Please prefix member variable names with underscore ("_").  This is a consistently useful technique to avoid
+    silly naming situations within methods involving members and locals such as instance.tapKey and then localTapKey,
+    newTapKey, myTapKey, etc.  Prefer instead instance._tapKey and then tapKey.
+
+    b> Please prefix variable names representing magic numbers, static strings, and constant quantities meaningful to
+    the problem domain with "k".  For example, kGravitationalConstant or kBitMask.  Many people including the author
+    find this to be very helpful when trying to comprehend non-trivial math expressions involving both variables and
+    constants.
+
+    c> Please append "Opt" to option type variable names.  The author finds this useful for quickly flagging where
+    special option treatment must be considered.
+
+7> Please use the existing camel-case conventions for all identifiers.
+
+8> Related to line lengths above, when wrapping long declaration lists, expressions, statements, etc., please prefer
+vertical spans to horizontal ones.  Consider commas, open braces and open parenthesis to be invitations to insert
+newlines and indents.  This aids cursory code comprehension and change diffing among other things.
+
+9> Please precede the open parenthesis ("(") in method/function declarations with a space.  This greatly simplifies
+finding actual method/function calls (which should have no space) when using an editor that does not support
+advanced code comprehension, such as vi on a production server at 3:00 AM.
+
+10> Please prefer dot-notation over Scala's infix- or suffix-notation.  The latter are fun ways to stick it to Java
+until they become tedious to comprehend and the cause of meddlesome compiler errors and warnings.  If you simply can't
+help yourself, fine, but dot-notation is the most-favored choice here for consistency's sake.
+
+11> Brace yourself.  Please use matching indentation with open and close braces ("{}") when they are used to
+encapsulate blocks of logic and to shape large data structures and the like.  Yes, we know it is not idiomatic Scala,
+but it remains a reasonable and widely-popular practice outside of the Scala universe having practical considerations.
+The author cut his programmer teeth with K&R C on twenty-four line displays so he understands the counter arguments,
+but for the sake of progress and peace on earth please just comply as best you can.
+
+Finally,
+
+12> When presented with the choice between doing something wrongly and doing it right, please choose the right way even
+when it takes additional effort.  Others will be glad you did and at the end of the day so will you.
