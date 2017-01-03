@@ -27,7 +27,7 @@ This will create the artifact jar as ``target/scala-2.11/taranos-core_*.jar``.
 
 - Explore project [code documentation](http://rawgit.com/taranos/taranoscsf-core/master/docs/api/index.html)
 
-- Learn Taranos concepts
+- Learn [_Taranos:CSF_ concepts](https://github.com/taranos/taranoscsf/wiki/Domain-Model-Concepts)
 
 - Take the Pseudo-API tutorial
 
