@@ -5,7 +5,7 @@ This is the service core component of [_Taranos:CSF_](https://github.com/taranos
 
 ### Getting Started ###
 
-Step 1:  The Taranos Project uses [SBT](http://www.scala-sbt.org/) for Scala build management.  It can be downloaded from [here](http://www.scala-sbt.org/download.html).
+Step 1:  The Taranos Project uses [_SBT_](http://www.scala-sbt.org/) for Scala build management.  It can be downloaded from [here](http://www.scala-sbt.org/download.html).
 
 Step 2:  Build and test the service core as follows:
 
@@ -25,7 +25,7 @@ This will create the artifact jar as ``target/scala-2.11/taranos-core_*.jar``.
 
 ### Next Steps ###
 
-- Explore code documentation
+- Explore project [code documentation](docs/api/index.html)
 
 - Learn Taranos concepts
 
