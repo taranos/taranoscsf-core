@@ -23,7 +23,8 @@ import play.api.libs.json.{JsError, JsSuccess, Json}
 
 object Simpler
 {
-    case class Query (sectionsOpt: Option[String])
+    case class Query (
+        _sectionsOpt: Option[String])
 
     def DecodeQuery (encoded: String): Query =
     {
@@ -34,6 +35,7 @@ object Simpler
             {
                 case JsSuccess(value, _) =>
                     Some(value.head)
+
                 case JsError(errors) =>
                     None
             }

@@ -28,7 +28,6 @@ import play.api.libs.json._
 
 object Cell
 {
-
     object ErrorCodes
     {
         val Ok                                = 0
@@ -233,8 +232,7 @@ object Cell
     val kActorName = "Cell"
 
     trait CellMessage
-        extends
-        Message
+        extends Message
 
     object RequestMessages
     {
@@ -245,7 +243,7 @@ object Cell
         case object Stop
             extends SupervisionMessage
 
-        case class ServiceCall (serviceCall: org.taranos.common.ServiceCall)
+        case class ServiceCall (_serviceCall: org.taranos.common.ServiceCall)
             extends CellMessage
 
     }
@@ -256,7 +254,7 @@ object Cell
         case object Started
             extends SupervisionMessage
 
-        case class ServiceResult (serviceResult: org.taranos.common.ServiceResult)
+        case class ServiceResult (_serviceResult: org.taranos.common.ServiceResult)
             extends CellMessage
 
     }
@@ -270,8 +268,7 @@ object Cell
         _mark: Int)
 
     trait CellReporter
-        extends
-        Reporter
+        extends Reporter
     {
         def Report (sectionsOpt: Option[String]): JsObject = Json.obj()
     }
@@ -366,17 +363,9 @@ class Cell (
         // Initialize the trunk model:
         _trunkModel.Initialize()
 
-        _trunkModel.Store(context.self)
-
         // Initialize the field model:
         _fieldModel.Initialize()
-
-        _fieldModel.Store(context.self)
     }
-
-//    private
-//    def HandleMessage_ExecuteQueryResult (resultSet: Any): Unit =
-//    {}
 
     private
     def HandleMessage_ServiceCall (serviceCall: ServiceCall): Unit =
@@ -578,7 +567,7 @@ class Cell (
                     val query = FieldModel.DecodeQuery(queryEncoded)
 
                     // Report field model:
-                    val fieldModelReport = _fieldModel.Report(fieldKey, query.sectionsOpt)
+                    val fieldModelReport = _fieldModel.Report(fieldKey, query._sectionsOpt)
 
                     // Wrap report:
                     val wrapper = Json.obj("rmf" -> fieldModelReport)
@@ -599,7 +588,7 @@ class Cell (
                     val query = TrunkModel.DecodeQuery(queryEncoded)
 
                     // Report trunk model:
-                    val trunkModelReport = _trunkModel.Report(trunkKey, query.sectionsOpt)
+                    val trunkModelReport = _trunkModel.Report(trunkKey, query._sectionsOpt)
 
                     // Wrap report:
                     val wrapper = Json.obj("rmt" -> trunkModelReport)
@@ -752,9 +741,6 @@ class Cell (
         //
         // Other:
         //
-
-//        case StorageSupervisor.ResponseMessages.ExecuteQueryResult(resultSet) =>
-//            HandleMessage_ExecuteQueryResult(resultSet)
 
         case unhandled =>
             _log.warning(s"received unhandled message (${unhandled.getClass})")

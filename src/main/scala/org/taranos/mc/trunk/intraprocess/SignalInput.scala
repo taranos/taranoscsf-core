@@ -70,9 +70,10 @@ object SignalInput
         _mode: Signal.ModeEnum.Mode,
         _tappableKeyOpt: Option[TappableElementKey])
 
-    case class Destructor (key: SignalInput.Key)
+    case class Destructor (
+        _key: SignalInput.Key)
 
-    class Query (
+    case class Query (
         keys: Vector[SignalInput.Key],
         sectionsOpt: Option[String] = None)
         extends TrunkElement.Query[SignalInput.Key](

@@ -72,7 +72,7 @@ class SignalSinkPlant
         trunk: Trunk,
         destructor: SignalSink.Destructor): SignalSink.Key =
     {
-        destructor.key match
+        destructor._key match
         {
             case key: SignalSink.Key =>
                 _sinks.get((trunk.GetKey, key)) match
@@ -122,7 +122,7 @@ class SignalSinkPlant
         }
 
         // Return sink key:
-        destructor.key
+        destructor._key
     }
 
     def DestroyAllSignalSinks (trunk: Trunk): Unit =

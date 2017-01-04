@@ -135,7 +135,8 @@ object ProbeCollector
             }
 
         val squelchThresholdOpt: Option[Real] =
-            (constructor \ FieldModel.Glossary.kPSAttrs \ FieldModel.Glossary.kPAttrsSquelchThreshold).validate[String] match
+            (constructor \ FieldModel.Glossary.kPSAttrs \
+                FieldModel.Glossary.kPAttrsSquelchThreshold).validate[String] match
 
             {
                 case JsSuccess(value, _) => Some(value.toDouble)
@@ -152,7 +153,8 @@ object ProbeCollector
             }
 
         val lobeRangePolesOpt: Option[String] =
-            (constructor \ FieldModel.Glossary.kPSAttrs \ FieldModel.Glossary.kPAttrsLobeRangePoles).validate[String] match
+            (constructor \ FieldModel.Glossary.kPSAttrs \
+                FieldModel.Glossary.kPAttrsLobeRangePoles).validate[String] match
             {
                 case JsSuccess(value, _) => Some(value)
 
@@ -160,7 +162,8 @@ object ProbeCollector
             }
 
         val lobeBearingPolesOpt: Option[String] =
-            (constructor \ FieldModel.Glossary.kPSAttrs \ FieldModel.Glossary.kPAttrsLobeBearingPoles).validate[String] match
+            (constructor \ FieldModel.Glossary.kPSAttrs \
+                FieldModel.Glossary.kPAttrsLobeBearingPoles).validate[String] match
             {
                 case JsSuccess(value, _) => Some(value)
 

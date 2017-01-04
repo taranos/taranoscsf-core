@@ -38,8 +38,8 @@ class OscillatorPatchPlant
         constructor: OscillatorPatch.Constructor): OscillatorPatch =
     {
         // Get parent emitter patch:
-        val emitterPatch: EmitterPatch = _trunkModel.GetEmitterPatchOpt(trunk.GetKey, constructor._emitterPatchKey).getOrElse(
-            throw new TrunkException(Cell.ErrorCodes.EmitterPatchUnknown))
+        val emitterPatch: EmitterPatch = _trunkModel.GetEmitterPatchOpt(trunk.GetKey, constructor._emitterPatchKey)
+            .getOrElse(throw new TrunkException(Cell.ErrorCodes.EmitterPatchUnknown))
 
         // Get modulatable (emitter patch) tap to bind with:
         val modulatableTap: SignalTap = _trunkModel.GetSignalTapOpt(trunk.GetKey, emitterPatch.GetTapKey).getOrElse(
@@ -61,7 +61,8 @@ class OscillatorPatchPlant
                     trunk.GetKey,
                     Vector(
                         new SignalTap.Constructor(
-                            _tag = constructor._tag + TrunkModel.Glossary.kTagSeparator + TrunkModel.Glossary.kESignalTap,
+                            _tag = constructor._tag + TrunkModel.Glossary.kTagSeparator +
+                                TrunkModel.Glossary.kESignalTap,
                             _mode = Signal.ModeEnum.Continuous))).head
 
             // Cannot bind with anything else:
@@ -120,7 +121,8 @@ class OscillatorPatchPlant
             trunk.GetKey,
             Vector(
                 new SignalOutput.Constructor(
-                    _tag = constructor._tag + TrunkModel.Glossary.kTagSeparator + TrunkModel.Glossary.kESignalOutput + TrunkModel.Glossary.kTagSubSeparator + FieldModel.Glossary.kQLoudness,
+                    _tag = constructor._tag + TrunkModel.Glossary.kTagSeparator + TrunkModel.Glossary.kESignalOutput +
+                        TrunkModel.Glossary.kTagSubSeparator + FieldModel.Glossary.kQLoudness,
                     _mode = Signal.ModeEnum.Continuous,
                     _modulatableKey = patch.GetKey,
                     _tappableKeyOpt = None,
@@ -131,7 +133,8 @@ class OscillatorPatchPlant
             trunk.GetKey,
             Vector(
                 new SignalOutput.Constructor(
-                    _tag = constructor._tag + TrunkModel.Glossary.kTagSeparator + TrunkModel.Glossary.kESignalOutput + TrunkModel.Glossary.kTagSubSeparator + FieldModel.Glossary.kQPeriod,
+                    _tag = constructor._tag + TrunkModel.Glossary.kTagSeparator + TrunkModel.Glossary.kESignalOutput +
+                        TrunkModel.Glossary.kTagSubSeparator + FieldModel.Glossary.kQPeriod,
                     _mode = Signal.ModeEnum.Continuous,
                     _modulatableKey = patch.GetKey,
                     _tappableKeyOpt = None,
@@ -142,7 +145,8 @@ class OscillatorPatchPlant
             trunk.GetKey,
             Vector(
                 new SignalOutput.Constructor(
-                    _tag = constructor._tag + TrunkModel.Glossary.kTagSeparator + TrunkModel.Glossary.kESignalOutput + TrunkModel.Glossary.kTagSubSeparator + FieldModel.Glossary.kQPitch,
+                    _tag = constructor._tag + TrunkModel.Glossary.kTagSeparator + TrunkModel.Glossary.kESignalOutput +
+                        TrunkModel.Glossary.kTagSubSeparator + FieldModel.Glossary.kQPitch,
                     _mode = Signal.ModeEnum.Continuous,
                     _modulatableKey = patch.GetKey,
                     _tappableKeyOpt = None,
@@ -153,7 +157,8 @@ class OscillatorPatchPlant
             trunk.GetKey,
             Vector(
                 new SignalOutput.Constructor(
-                    _tag = constructor._tag + TrunkModel.Glossary.kTagSeparator + TrunkModel.Glossary.kESignalOutput + TrunkModel.Glossary.kTagSubSeparator + FieldModel.Glossary.kQShape,
+                    _tag = constructor._tag + TrunkModel.Glossary.kTagSeparator + TrunkModel.Glossary.kESignalOutput +
+                        TrunkModel.Glossary.kTagSubSeparator + FieldModel.Glossary.kQShape,
                     _mode = Signal.ModeEnum.Continuous,
                     _modulatableKey = patch.GetKey,
                     _tappableKeyOpt = None,
@@ -164,7 +169,8 @@ class OscillatorPatchPlant
             trunk.GetKey,
             Vector(
                 new SignalOutput.Constructor(
-                    _tag = constructor._tag + TrunkModel.Glossary.kTagSeparator + TrunkModel.Glossary.kESignalOutput + TrunkModel.Glossary.kTagSubSeparator + FieldModel.Glossary.kQTone,
+                    _tag = constructor._tag + TrunkModel.Glossary.kTagSeparator + TrunkModel.Glossary.kESignalOutput +
+                        TrunkModel.Glossary.kTagSubSeparator + FieldModel.Glossary.kQTone,
                     _mode = Signal.ModeEnum.Continuous,
                     _modulatableKey = patch.GetKey,
                     _tappableKeyOpt = None,
@@ -179,7 +185,7 @@ class OscillatorPatchPlant
         trunk: Trunk,
         destructor: OscillatorPatch.Destructor): OscillatorPatch.Key =
     {
-        _patches.get((trunk.GetKey, destructor.key)) match
+        _patches.get((trunk.GetKey, destructor._key)) match
         {
             case Some(patch) =>
                 // 1: Unbind with children:
@@ -255,7 +261,7 @@ class OscillatorPatchPlant
         }
 
         // Return patch key:
-        destructor.key
+        destructor._key
     }
 
     def DestroyAllOscillatorPatches (trunk: Trunk): Unit =

@@ -86,9 +86,10 @@ object SignalLink
         _sinkKey: SignalSink.Key,
         _partOpt: Option[String] = None)
 
-    case class Destructor (key: SignalLink.Key)
+    case class Destructor (
+        _key: SignalLink.Key)
 
-    class Query (
+    case class Query (
         keys: Vector[SignalLink.Key],
         sectionsOpt: Option[String] = None)
         extends TrunkElement.Query[SignalLink.Key](

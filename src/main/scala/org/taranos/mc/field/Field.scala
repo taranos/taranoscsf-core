@@ -195,7 +195,8 @@ object Field
             }
 
         val antipodeDistanceOpt: Option[Real] =
-            (constructor \ FieldModel.Glossary.kPSAttrs \ FieldModel.Glossary.kPAttrsAntipodeDistance).validate[String] match
+            (constructor \ FieldModel.Glossary.kPSAttrs \
+                FieldModel.Glossary.kPAttrsAntipodeDistance).validate[String] match
             {
                 case JsSuccess(value, _) => Some(value.toDouble)
 
@@ -203,7 +204,8 @@ object Field
             }
 
         val geometryOpt: Option[String] =
-            (constructor \ FieldModel.Glossary.kPSAttrs \ FieldModel.Glossary.kPAttrsFieldGeometry).validate[String] match
+            (constructor \ FieldModel.Glossary.kPSAttrs \
+                FieldModel.Glossary.kPAttrsFieldGeometry).validate[String] match
             {
                 case JsSuccess(value, _) => Some(value)
 

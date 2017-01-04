@@ -71,7 +71,7 @@ class TrunkPlant
 
     def DestroyTrunk (destructor: Trunk.Destructor): Unit =
     {
-        destructor.key match
+        destructor._key match
         {
             case key: Trunk.Key =>
                 _trunks.get(key) match

@@ -74,9 +74,10 @@ object SignalInterface
         _nameOpt: Option[String] = None,
         _descriptionOpt: Option[String] = None)
 
-    case class Destructor (key: SignalInterface.Key)
+    case class Destructor (
+        _key: SignalInterface.Key)
 
-    class Query (
+    case class Query (
         keys: Vector[SignalInterface.Key],
         sectionsOpt: Option[String] = None)
         extends TrunkElement.Query[SignalInterface.Key](

@@ -72,7 +72,7 @@ class SignalLinkPlant
         trunk: Trunk,
         destructor: SignalLink.Destructor): SignalLink.Key =
     {
-        destructor.key match
+        destructor._key match
         {
             case key: SignalLink.Key =>
                 _links.get((trunk.GetKey, key)) match
@@ -103,7 +103,7 @@ class SignalLinkPlant
         }
 
         // Return link key:
-        destructor.key
+        destructor._key
     }
 
     def DestroyAllSignalLinks (trunk: Trunk): Unit =

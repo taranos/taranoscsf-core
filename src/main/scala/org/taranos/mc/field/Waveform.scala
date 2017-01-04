@@ -89,8 +89,10 @@ class Waveform (
                     FieldModel.Glossary.kPGeoEmitterPosition -> Json.arr(
                         Reportable.ReportReal3(geometry._emitterPositionUnit._x),
                         Reportable.ReportReal3(geometry._emitterPositionUnit._y)),
-                    FieldModel.Glossary.kPGeoEmitterBearingAbsolute -> Reportable.ReportReal3(geometry._emitterAbsoluteBearingUnit),
-                    FieldModel.Glossary.kPGeoEmitterBearingRelative -> Reportable.ReportReal3(geometry._emitterRelativeBearingUnit),
+                    FieldModel.Glossary.kPGeoEmitterBearingAbsolute ->
+                        Reportable.ReportReal3(geometry._emitterAbsoluteBearingUnit),
+                    FieldModel.Glossary.kPGeoEmitterBearingRelative ->
+                        Reportable.ReportReal3(geometry._emitterRelativeBearingUnit),
                     FieldModel.Glossary.kPGeoEmitterDistance -> Reportable.ReportReal1(geometry._emitterDistanceMeters)))
         }
 

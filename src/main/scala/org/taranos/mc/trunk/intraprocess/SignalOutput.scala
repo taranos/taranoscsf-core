@@ -72,9 +72,10 @@ object SignalOutput
         _tappableKeyOpt: Option[TappableElementKey],
         _partOpt: Option[String] = None)
 
-    case class Destructor (key: SignalOutput.Key)
+    case class Destructor (
+        _key: SignalOutput.Key)
 
-    class Query (
+    case class Query (
         keys: Vector[SignalOutput.Key],
         sectionsOpt: Option[String] = None)
         extends TrunkElement.Query[SignalOutput.Key](

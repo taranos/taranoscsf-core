@@ -84,7 +84,8 @@ class SignalBridgePlant
                     trunk.GetKey,
                     Vector(
                         new SignalTap.Constructor(
-                            _tag = constructor._tag + TrunkModel.Glossary.kTagSeparator + TrunkModel.Glossary.kESignalTap,
+                            _tag = constructor._tag + TrunkModel.Glossary.kTagSeparator +
+                                TrunkModel.Glossary.kESignalTap,
                             _mode = constructor._mode))).head
 
             // Cannot bind with anything else:
@@ -140,7 +141,7 @@ class SignalBridgePlant
         trunk: Trunk,
         destructor: SignalBridge.Destructor): SignalBridge.Key =
     {
-        destructor.key match
+        destructor._key match
         {
             case key: SignalBridge.Key =>
                 _bridges.get((trunk.GetKey, key)) match
@@ -188,7 +189,7 @@ class SignalBridgePlant
         }
 
         // Return bridge key:
-        destructor.key
+        destructor._key
     }
 
     def DestroyAllSignalBridges (trunk: Trunk): Unit =

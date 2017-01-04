@@ -92,7 +92,7 @@ class SignalPortPlant
         trunk: Trunk,
         destructor: SignalPort.Destructor): SignalPort.Key =
     {
-        destructor.key match
+        destructor._key match
         {
             case key: SignalPort.Key =>
                 _ports.get((trunk.GetKey, key)) match
@@ -132,7 +132,7 @@ class SignalPortPlant
         }
 
         // Return port key:
-        destructor.key
+        destructor._key
     }
 
     def DestroyAllSignalPorts (trunk: Trunk): Unit =

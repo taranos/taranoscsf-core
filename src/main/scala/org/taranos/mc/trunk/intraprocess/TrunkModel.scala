@@ -44,18 +44,7 @@ Propagation only continues if mark accepted.
 object TrunkModel
 {
     case class Query (
-        sectionsOpt: Option[String] = None)
-
-    def DeserializeFromCQL (json: String): Unit =
-    {}
-
-    def DeserializeFromJSON (json: String): Unit =
-    {}
-
-    def SerializeToJSON (fieldModel: TrunkModel): String =
-    {
-        ""
-    }
+        _sectionsOpt: Option[String] = None)
 
     def DecodeQuery (encoded: String): Query =
     {
@@ -402,16 +391,16 @@ class TrunkModel (
             destructors.foreach(destructor =>
             {
                 val trunkKeys: Vector[Trunk.Key] =
-                    if (destructor.key == Trunk.kAnyKey)
+                    if (destructor._key == Trunk.kAnyKey)
                     {
                         _trunkPlant.GetTrunkKeys
                     }
                     else
                     {
                         // Get trunk (validate):
-                        GetTrunk(destructor.key)
+                        GetTrunk(destructor._key)
 
-                        Vector(destructor.key)
+                        Vector(destructor._key)
                     }
 
                 trunkKeys.foreach(trunkKey =>
@@ -545,7 +534,7 @@ class TrunkModel (
             // Iterate destructors:
             destructors.foreach(destructor =>
             {
-                if (destructor.key == SignalInterface.kAnyKey)
+                if (destructor._key == SignalInterface.kAnyKey)
                 {
                     // Destroy all sources:
                     _signalInterfacePlant.DestroyAllSignalInterfaces(trunk)
@@ -553,7 +542,7 @@ class TrunkModel (
                 else
                 {
                     // Get interface (validate):
-                    GetSignalInterfaceOpt (trunk.GetKey, destructor.key)
+                    GetSignalInterfaceOpt (trunk.GetKey, destructor._key)
 
                     // Destroy interface:
                     _signalInterfacePlant.DestroySignalInterface(trunk, destructor)
@@ -669,10 +658,10 @@ class TrunkModel (
                 destructors.foreach(destructor =>
                 {
                     val portKeys: Vector[SignalPort.Key] =
-                        if (destructor.key == SignalPort.kAnyKey)
+                        if (destructor._key == SignalPort.kAnyKey)
                             _signalPortPlant.GetSignalPortKeys(trunk)
                         else
-                            Vector(destructor.key)
+                            Vector(destructor._key)
 
                     if (portKeys.nonEmpty)
                     {
@@ -821,10 +810,10 @@ class TrunkModel (
                 destructors.foreach(destructor =>
                 {
                     val sourceKeys: Vector[SignalSource.Key] =
-                        if (destructor.key == SignalSource.kAnyKey)
+                        if (destructor._key == SignalSource.kAnyKey)
                             _signalSourcePlant.GetSignalSourceKeys(trunk)
                         else
-                            Vector(destructor.key)
+                            Vector(destructor._key)
 
                     if (sourceKeys.nonEmpty)
                     {
@@ -956,10 +945,10 @@ class TrunkModel (
                 destructors.foreach(destructor =>
                 {
                     val sinkKeys: Vector[SignalSink.Key] =
-                        if (destructor.key == SignalSink.kAnyKey)
+                        if (destructor._key == SignalSink.kAnyKey)
                             _signalSinkPlant.GetSignalSinkKeys(trunk)
                         else
-                            Vector(destructor.key)
+                            Vector(destructor._key)
 
                     if (sinkKeys.nonEmpty)
                     {
@@ -1091,10 +1080,10 @@ class TrunkModel (
                 destructors.foreach(destructor =>
                 {
                     val linkKeys: Vector[SignalLink.Key] =
-                        if (destructor.key == SignalLink.kAnyKey)
+                        if (destructor._key == SignalLink.kAnyKey)
                             _signalLinkPlant.GetSignalLinkKeys(trunk)
                         else
-                            Vector(destructor.key)
+                            Vector(destructor._key)
 
                     if (linkKeys.nonEmpty)
                     {
@@ -1213,10 +1202,10 @@ class TrunkModel (
                 destructors.foreach(destructor =>
                 {
                     val tapKeys: Vector[SignalTap.Key] =
-                        if (destructor.key == SignalTap.kAnyKey)
+                        if (destructor._key == SignalTap.kAnyKey)
                             _signalTapPlant.GetSignalTapKeys(trunk)
                         else
-                            Vector(destructor.key)
+                            Vector(destructor._key)
 
                     if (tapKeys.nonEmpty)
                     {
@@ -1337,7 +1326,7 @@ class TrunkModel (
             // Iterate destructors:
             destructors.foreach(destructor =>
             {
-                if (destructor.key == SignalInput.kAnyKey)
+                if (destructor._key == SignalInput.kAnyKey)
                 {
                     // Destroy all inputs:
                     _signalInputPlant.DestroyAllSignalInputs(trunk)
@@ -1345,7 +1334,7 @@ class TrunkModel (
                 else
                 {
                     // Get input (validate):
-                    GetSignalInputOpt(trunk.GetKey, destructor.key)
+                    GetSignalInputOpt(trunk.GetKey, destructor._key)
 
                     // Destroy input:
                     _signalInputPlant.DestroySignalInput(trunk, destructor)
@@ -1444,7 +1433,7 @@ class TrunkModel (
             // Iterate destructors:
             destructors.foreach(destructor =>
             {
-                if (destructor.key == SignalBridge.kAnyKey)
+                if (destructor._key == SignalBridge.kAnyKey)
                 {
                     // Destroy all bridges:
                     _signalBridgePlant.DestroyAllSignalBridges(trunk)
@@ -1452,7 +1441,7 @@ class TrunkModel (
                 else
                 {
                     // Get bridge (validate):
-                    GetSignalBridgeOpt(trunk.GetKey, destructor.key)
+                    GetSignalBridgeOpt(trunk.GetKey, destructor._key)
 
                     // Destroy bridge:
                     _signalBridgePlant.DestroySignalBridge(trunk, destructor)
@@ -1551,7 +1540,7 @@ class TrunkModel (
             // Iterate destructors:
             destructors.foreach(destructor =>
             {
-                if (destructor.key == SignalOutput.kAnyKey)
+                if (destructor._key == SignalOutput.kAnyKey)
                 {
                     // Destroy all outputs:
                     _signalOutputPlant.DestroyAllSignalOutputs(trunk)
@@ -1559,7 +1548,7 @@ class TrunkModel (
                 else
                 {
                     // Get output (validate):
-                    GetSignalOutputOpt(trunk.GetKey, destructor.key)
+                    GetSignalOutputOpt(trunk.GetKey, destructor._key)
 
                     // Destroy output:
                     _signalOutputPlant.DestroySignalOutput(trunk, destructor)
@@ -1658,7 +1647,7 @@ class TrunkModel (
             // Iterate destructors:
             destructors.foreach(destructor =>
             {
-                if (destructor.key == EmitterPatch.kAnyKey)
+                if (destructor._key == EmitterPatch.kAnyKey)
                 {
                     // Destroy all patches:
                     _emitterPatchPlant.DestroyAllEmitterPatches(trunk)
@@ -1666,7 +1655,7 @@ class TrunkModel (
                 else
                 {
                     // Get patch (validate):
-                    GetEmitterPatchOpt(trunk.GetKey, destructor.key)
+                    GetEmitterPatchOpt(trunk.GetKey, destructor._key)
 
                     // Destroy patch:
                     _emitterPatchPlant.DestroyEmitterPatch(trunk, destructor)
@@ -1807,7 +1796,7 @@ class TrunkModel (
             // Iterate destructors:
             destructors.foreach(destructor =>
             {
-                if (destructor.key == OscillatorPatch.kAnyKey)
+                if (destructor._key == OscillatorPatch.kAnyKey)
                 {
                     // Destroy all patches:
                     _oscillatorPatchPlant.DestroyAllOscillatorPatches(trunk)
@@ -1815,7 +1804,7 @@ class TrunkModel (
                 else
                 {
                     // Get patch (validate):
-                    GetOscillatorPatchOpt(trunk.GetKey, destructor.key)
+                    GetOscillatorPatchOpt(trunk.GetKey, destructor._key)
 
                     // Destroy patch:
                     _oscillatorPatchPlant.DestroyOscillatorPatch(trunk, destructor)
@@ -1957,7 +1946,7 @@ class TrunkModel (
         // Iterate updates:
         updates.foreach(update =>
         {
-            patch.ImportEnvelopeDef(update.key, update.envelopeDef)
+            patch.ImportEnvelopeDef(update._key, update._envelopeDef)
         })
     }
 
@@ -1974,24 +1963,4 @@ class TrunkModel (
     }
 
     def Log (text: String): Unit = _logger.LogDebug(text)
-
-    def Store(self: akka.actor.ActorRef): Unit =
-    {
-        //        val trunk = _trunkPlant.GetTrunkOpt()
-        //        val trunkKey = trunk.Key._1
-
-        //        var cql = "delete from taranos.emitters where field_key='" + trunkKey + "';"
-        //        import com.taranos.common._
-        //        StorageSupervisor._storageSupervisor ! new StorageSupervisor.RequestMessages.ExecuteQuery(cql, self)
-        //
-        //        cql = "delete from taranos.subjects where field_key='" + trunkKey + "';"
-        //        StorageSupervisor._storageSupervisor ! new StorageSupervisor.RequestMessages.ExecuteQuery(cql, self)
-
-        //        var cql = "delete from taranos.trunks where key='" + trunkKey + "';"
-        //        import com.taranos.common._
-        //        StorageSupervisor._storageSupervisor ! new StorageSupervisor.RequestMessages.ExecuteQuery(cql, self)
-        //
-        //        cql = SerializeToCQL()
-        //        StorageSupervisor._storageSupervisor ! new StorageSupervisor.RequestMessages.ExecuteQuery(cql, self)
-    }
 }

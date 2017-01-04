@@ -79,7 +79,8 @@ class SubjectOscillatorPlant
             case JsError(errors) =>
                 throw new FieldException(Cell.ErrorCodes.ChannelDefinitionInvalid)
         }
-        val oscillatorPatchDef = (constructor._channelDef \ FieldModel.Glossary.kOscillatorPatchDef).validate[JsObject] match
+        val oscillatorPatchDef = (constructor._channelDef \
+            FieldModel.Glossary.kOscillatorPatchDef).validate[JsObject] match
         {
             case JsSuccess(value, _) => value
 

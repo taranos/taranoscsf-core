@@ -633,7 +633,8 @@ object RenderingServices
         val subjectOscillatorKeys = subjectOscillators.map(_.GetKey)
 
         // Report subject oscillators:
-        val query = new SubjectOscillator.Query(subjectOscillatorKeys, Some(FieldModel.Glossary.kRStandardCreationSections))
+        val query = new SubjectOscillator.Query(subjectOscillatorKeys,
+            Some(FieldModel.Glossary.kRStandardCreationSections))
         val subjectOscillatorReports = _fieldModel.ReportSubjectOscillators(fieldKey, subjectEmitterKey, query)
 
         // Wrap reports:

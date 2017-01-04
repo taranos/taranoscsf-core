@@ -77,7 +77,8 @@ class EmitterPatchPlant
                     trunk.GetKey,
                     Vector(
                         new SignalTap.Constructor(
-                            _tag = constructor._tag + TrunkModel.Glossary.kTagSeparator + TrunkModel.Glossary.kESignalTap,
+                            _tag = constructor._tag + TrunkModel.Glossary.kTagSeparator +
+                                TrunkModel.Glossary.kESignalTap,
                             _mode = Signal.ModeEnum.Continuous))).head
 
             // Cannot bind with anything else:
@@ -152,7 +153,7 @@ class EmitterPatchPlant
         trunk: Trunk,
         destructor: EmitterPatch.Destructor): EmitterPatch.Key =
     {
-        _patches.get((trunk.GetKey, destructor.key)) match
+        _patches.get((trunk.GetKey, destructor._key)) match
         {
             case Some(patch) =>
                 // 1: Unbind with children:
@@ -208,7 +209,7 @@ class EmitterPatchPlant
         }
 
         // Return patch key:
-        destructor.key
+        destructor._key
     }
 
     def DestroyAllEmitterPatches (trunk: Trunk): Unit =

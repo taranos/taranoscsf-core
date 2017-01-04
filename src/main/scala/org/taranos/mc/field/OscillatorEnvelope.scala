@@ -35,8 +35,8 @@ object OscillatorEnvelope
             sectionsOpt)
 
     case class Update (
-        key: Key,
-        envelopeDef: JsObject)
+        _key: Key,
+        _envelopeDef: JsObject)
 
     val kAnyKey = new Key(FieldModel.Glossary.kAnyKeyBase)
 

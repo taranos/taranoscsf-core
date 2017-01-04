@@ -98,9 +98,10 @@ object SignalTap
         _tappableKeyOpt: Option[TrunkElement.Key] = None,
         _modulatorKeyOpt: Option[SignalModulator.Key] = None)
 
-    case class Destructor (key: SignalTap.Key)
+    case class Destructor (
+        _key: SignalTap.Key)
 
-    class Query (
+    case class Query (
         keys: Vector[SignalTap.Key],
         sectionsOpt: Option[String] = None)
         extends TrunkElement.Query[SignalTap.Key](

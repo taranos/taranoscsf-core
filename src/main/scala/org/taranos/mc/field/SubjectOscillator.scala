@@ -100,7 +100,8 @@ object SubjectOscillator
     {
         val constructor = Json.parse(encoded)
 
-        val commonMeta = new CommonConstructorMetaDecoder(constructor, Cell.ErrorCodes.SubjectOscillatorConstructorInvalid)
+        val commonMeta = new CommonConstructorMetaDecoder(constructor,
+            Cell.ErrorCodes.SubjectOscillatorConstructorInvalid)
 
         val channelDef: JsObject =
             (constructor \ FieldModel.Glossary.kPSAttrs \ FieldModel.Glossary.kChannelDef).validate[JsObject] match

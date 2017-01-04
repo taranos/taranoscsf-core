@@ -84,7 +84,8 @@ class SignalOutputPlant
                     trunk.GetKey,
                     Vector(
                         new SignalTap.Constructor(
-                            _tag = constructor._tag + TrunkModel.Glossary.kTagSeparator + TrunkModel.Glossary.kESignalTap,
+                            _tag = constructor._tag + TrunkModel.Glossary.kTagSeparator +
+                                TrunkModel.Glossary.kESignalTap,
                             _mode = constructor._mode))).head
 
             // Cannot bind with anything else:
@@ -140,7 +141,7 @@ class SignalOutputPlant
         trunk: Trunk,
         destructor: SignalOutput.Destructor): SignalOutput.Key =
     {
-        destructor.key match
+        destructor._key match
         {
             case key: SignalOutput.Key =>
                 _outputs.get((trunk.GetKey, key)) match
@@ -183,7 +184,7 @@ class SignalOutputPlant
         }
 
         // Return output key:
-        destructor.key
+        destructor._key
     }
 
     def DestroyAllSignalOutputs (trunk: Trunk): Unit =

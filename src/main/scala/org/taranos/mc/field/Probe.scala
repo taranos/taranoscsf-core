@@ -119,7 +119,8 @@ object Probe
         val commonMeta = new CommonConstructorMetaDecoder(constructor, Cell.ErrorCodes.ProbeEmitterConstructorInvalid)
 
         val position: Vector3 =
-            (constructor \ FieldModel.Glossary.kPSState \ FieldModel.Glossary.kPStatePosition).validate[Vector[String]] match
+            (constructor \ FieldModel.Glossary.kPSState \
+                FieldModel.Glossary.kPStatePosition).validate[Vector[String]] match
             {
                 case JsSuccess(value, _) =>
                     new Vector3 (
@@ -132,7 +133,8 @@ object Probe
             }
 
         val rotation: Vector4 =
-            (constructor \ FieldModel.Glossary.kPSState \ FieldModel.Glossary.kPStateRotation).validate[Vector[String]] match
+            (constructor \ FieldModel.Glossary.kPSState \
+                FieldModel.Glossary.kPStateRotation).validate[Vector[String]] match
             {
                 case JsSuccess(value, _) =>
                     new Vector4 (
@@ -154,7 +156,8 @@ object Probe
             }
 
         val squelchThresholdOpt: Option[Real] =
-            (constructor \ FieldModel.Glossary.kPSAttrs \ FieldModel.Glossary.kPAttrsSquelchThreshold).validate[String] match
+            (constructor \ FieldModel.Glossary.kPSAttrs \
+                FieldModel.Glossary.kPAttrsSquelchThreshold).validate[String] match
             {
                 case JsSuccess(value, _) => Some(value.toDouble)
 
@@ -170,7 +173,8 @@ object Probe
             }
 
         val lobeRangePolesOpt: Option[String] =
-            (constructor \ FieldModel.Glossary.kPSAttrs \ FieldModel.Glossary.kPAttrsLobeRangePoles).validate[String] match
+            (constructor \ FieldModel.Glossary.kPSAttrs \
+                FieldModel.Glossary.kPAttrsLobeRangePoles).validate[String] match
             {
                 case JsSuccess(value, _) => Some(value)
 
@@ -178,7 +182,8 @@ object Probe
             }
 
         val lobeBearingPolesOpt: Option[String] =
-            (constructor \ FieldModel.Glossary.kPSAttrs \ FieldModel.Glossary.kPAttrsLobeBearingPoles).validate[String] match
+            (constructor \ FieldModel.Glossary.kPSAttrs \
+                FieldModel.Glossary.kPAttrsLobeBearingPoles).validate[String] match
             {
                 case JsSuccess(value, _) => Some(value)
 

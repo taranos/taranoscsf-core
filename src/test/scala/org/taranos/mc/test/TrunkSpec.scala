@@ -72,7 +72,7 @@ class TrunkSpec extends fixture.FlatSpec
             message match
             {
                 case serviceResult: ServiceResult =>
-                    serviceResult.serviceResult
+                    serviceResult._serviceResult
 
                 case _ =>
                     assert(false); null

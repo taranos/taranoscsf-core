@@ -148,7 +148,8 @@ object OscillatorPatch
         _tappableKeyOpt: Option[TappableElementKey],
         _patchDef: JsObject)
 
-    case class Destructor (key: OscillatorPatch.Key)
+    case class Destructor (
+        _key: OscillatorPatch.Key)
 
     case class Query (
         keys: Vector[OscillatorPatch.Key],
@@ -176,7 +177,8 @@ object OscillatorPatch
 //            val sections = new ReportSectionsParser(sectionsOpt)
 
             report ++=
-                ((patchDef \ FieldModel.Glossary.kEnvelopeDef \ oscillatorEnvelopeKey._uniqueKey).validate[JsObject] match
+                ((patchDef \ FieldModel.Glossary.kEnvelopeDef \
+                    oscillatorEnvelopeKey._uniqueKey).validate[JsObject] match
                 {
                     case JsSuccess(value, _) => value
 
@@ -262,7 +264,8 @@ object OscillatorPatch
             }
 
         val patchDef: JsObject =
-            (constructor \ TrunkModel.Glossary.kPSAttrs \ FieldModel.Glossary.kOscillatorPatchDef).validate[JsObject] match
+            (constructor \ TrunkModel.Glossary.kPSAttrs \
+                FieldModel.Glossary.kOscillatorPatchDef).validate[JsObject] match
             {
                 case JsSuccess(value, _) => value
 
@@ -502,7 +505,8 @@ class OscillatorPatch (
 
     def MacroSetLoudnessCeiling (ceiling: String) =
     {
-        val newEnvelopeDef = (_attrs._patchDef \ FieldModel.Glossary.kEnvelopeDef \ FieldModel.Glossary.kQLoudness).as[JsObject] ++ Json.obj(FieldModel.Glossary.kEnvelopeCeiling -> ceiling)
+        val newEnvelopeDef = (_attrs._patchDef \ FieldModel.Glossary.kEnvelopeDef \
+            FieldModel.Glossary.kQLoudness).as[JsObject] ++ Json.obj(FieldModel.Glossary.kEnvelopeCeiling -> ceiling)
         ImportEnvelopeDef(new OscillatorEnvelope.Key(FieldModel.Glossary.kQLoudness), newEnvelopeDef)
     }
 
@@ -518,7 +522,8 @@ class OscillatorPatch (
 
     def MacroSetLoudnessFloor (floor: String)
     {
-        val newEnvelopeDef = (_attrs._patchDef \ FieldModel.Glossary.kEnvelopeDef \ FieldModel.Glossary.kQLoudness).as[JsObject] ++ Json.obj(FieldModel.Glossary.kEnvelopeFloor -> floor)
+        val newEnvelopeDef = (_attrs._patchDef \ FieldModel.Glossary.kEnvelopeDef \
+            FieldModel.Glossary.kQLoudness).as[JsObject] ++ Json.obj(FieldModel.Glossary.kEnvelopeFloor -> floor)
         ImportEnvelopeDef(new OscillatorEnvelope.Key(FieldModel.Glossary.kQLoudness), newEnvelopeDef)
     }
 
@@ -530,7 +535,8 @@ class OscillatorPatch (
 
     def MacroSetPitchCeiling (ceiling: String)
     {
-        val newEnvelopeDef = (_attrs._patchDef \ FieldModel.Glossary.kEnvelopeDef \ FieldModel.Glossary.kQPitch).as[JsObject] ++ Json.obj(FieldModel.Glossary.kEnvelopeCeiling -> ceiling)
+        val newEnvelopeDef = (_attrs._patchDef \ FieldModel.Glossary.kEnvelopeDef \
+            FieldModel.Glossary.kQPitch).as[JsObject] ++ Json.obj(FieldModel.Glossary.kEnvelopeCeiling -> ceiling)
         ImportEnvelopeDef(new OscillatorEnvelope.Key(FieldModel.Glossary.kQPitch), newEnvelopeDef)
     }
 
@@ -546,7 +552,8 @@ class OscillatorPatch (
 
     def MacroSetPitchFloor (floor: String)
     {
-        val newEnvelopeDef = (_attrs._patchDef \ FieldModel.Glossary.kEnvelopeDef \ FieldModel.Glossary.kQPitch).as[JsObject] ++ Json.obj(FieldModel.Glossary.kEnvelopeFloor -> floor)
+        val newEnvelopeDef = (_attrs._patchDef \ FieldModel.Glossary.kEnvelopeDef \
+            FieldModel.Glossary.kQPitch).as[JsObject] ++ Json.obj(FieldModel.Glossary.kEnvelopeFloor -> floor)
         ImportEnvelopeDef(new OscillatorEnvelope.Key(FieldModel.Glossary.kQPitch), newEnvelopeDef)
     }
 

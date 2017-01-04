@@ -19,15 +19,7 @@
 package org.taranos.mc.field
 
 
-//
-// VectorN
-//
-
 trait VectorN
-
-//
-// Vector1
-//
 
 class Vector1 (
     var _x: Double = 0f)
@@ -38,10 +30,6 @@ class Vector1 (
         _x = newValue._x
     }
 }
-
-//
-// Vector2
-//
 
 class Vector2 (
     var _x: Double = 0f,
@@ -54,10 +42,6 @@ class Vector2 (
         _y = newValue._y
     }
 }
-
-//
-// Vector3
-//
 
 class Vector3 (
     var _x: Double = 0f,
@@ -72,10 +56,6 @@ class Vector3 (
         _z = newValue._z
     }
 }
-
-//
-// Vector4
-//
 
 class Vector4 (
     var _w: Double = 0f,

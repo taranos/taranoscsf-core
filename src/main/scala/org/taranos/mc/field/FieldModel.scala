@@ -29,19 +29,11 @@ import play.api.libs.json.{JsObject, Json}
 
 object FieldModel
 {
+    val kMidiMaxFrequency = math.pow(2f, (127 - 69) / 12f) * 440f
+    val kMaxPitch = math.ceil(kMidiMaxFrequency)
+
     case class Query (
-        sectionsOpt: Option[String] = None)
-
-    def DeserializeFromCQL (json: String): Unit =
-    {}
-
-    def DeserializeFromJSON (json: String): Unit =
-    {}
-
-    def SerializeToJSON (fieldInstance: FieldModel): String =
-    {
-        ""
-    }
+        _sectionsOpt: Option[String] = None)
 
     def DecodeQuery (encoded: String): Query =
     {
@@ -60,9 +52,6 @@ object FieldModel
         protected[mc]
         def Report (fieldKey: Field.Key, sectionsOpt: Option[String]): JsObject
     }
-
-    val kMidiMaxFrequency = math.pow(2f, (127 - 69) / 12f) * 440f
-    val kMaxPitch = math.ceil(kMidiMaxFrequency)
 
     // String glossary:
     object Glossary
@@ -1074,7 +1063,8 @@ class FieldModel (
                     update._nameOpt.foreach(name => subjectOscillator.SetNameOpt(Some(name)))
 
                     // Update description:
-                    update._descriptionOpt.foreach(description => subjectOscillator.SetDescriptionOpt(Some(description)))
+                    update._descriptionOpt.foreach(description =>
+                        subjectOscillator.SetDescriptionOpt(Some(description)))
 
                 case None => throw new FieldException(Cell.ErrorCodes.SubjectOscillatorUnknown)
             }
@@ -1851,10 +1841,10 @@ class FieldModel (
         val field = GetField(fieldKey)
 
         // Collect waveforms:
-        val collectorPosition = query.collectorPositionOpt.getOrElse(new Body.Position)
-        val collectorRotation = query.collectorRotationOpt.getOrElse(new Body.Rotation)
-        val antipodeDistanceMeters: Real = query.antipodeDistanceOpt.getOrElse(field.GetAntipodeDistance)
-        val fieldGeometry = query.fieldGeometryOpt.getOrElse(field.GetGeometry)
+        val collectorPosition = query._collectorPositionOpt.getOrElse(new Body.Position)
+        val collectorRotation = query._collectorRotationOpt.getOrElse(new Body.Rotation)
+        val antipodeDistanceMeters: Real = query._antipodeDistanceOpt.getOrElse(field.GetAntipodeDistance)
+        val fieldGeometry = query._fieldGeometryOpt.getOrElse(field.GetGeometry)
         val waveforms = fieldGeometry match
         {
             case FieldModel.Glossary.kGeometryPlanar =>
@@ -1863,10 +1853,10 @@ class FieldModel (
                     antipodeDistanceMeters,
                     collectorPosition,
                     collectorRotation,
-                    query.acoustic_aOpt,
-                    query.lobeRangeOpt,
-                    query.lobeRangeEnvelopeOpt,
-                    query.lobeBearingEnvelopeOpt)
+                    query._acoustic_aOpt,
+                    query._lobeRangeOpt,
+                    query._lobeRangeEnvelopeOpt,
+                    query._lobeBearingEnvelopeOpt)
 
             case FieldModel.Glossary.kGeometrySpherical =>
                 CollectWaveforms_2S(
@@ -1874,16 +1864,16 @@ class FieldModel (
                     antipodeDistanceMeters,
                     collectorPosition,
                     collectorRotation,
-                    query.acoustic_aOpt,
-                    query.lobeRangeOpt,
-                    query.lobeRangeEnvelopeOpt,
-                    query.lobeBearingEnvelopeOpt)
+                    query._acoustic_aOpt,
+                    query._lobeRangeOpt,
+                    query._lobeRangeEnvelopeOpt,
+                    query._lobeBearingEnvelopeOpt)
 
             case _ => Vector.empty[Waveform]
         }
 
         // Determine waveform squelch threshold:
-        val squelchThresholdDb: Real = query.squelchThresholdOpt.getOrElse(0f)
+        val squelchThresholdDb: Real = query._squelchThresholdOpt.getOrElse(0f)
 
         // Partition waveforms into those with body geometry and those without:
         val bodyWaveforms = new mutable.ArrayBuffer[Waveform]
@@ -1906,8 +1896,8 @@ class FieldModel (
 
         // Generate reports by appending body geometry wavefield reports to the end of geometry-less ones:
         val reports =
-            fieldWaveforms.map(_.Report(new ReportSectionsParser(query.sectionsOpt))) ++
-            bodyWaveformsSorted.map(_.Report(new ReportSectionsParser(query.sectionsOpt)))
+            fieldWaveforms.map(_.Report(new ReportSectionsParser(query._sectionsOpt))) ++
+            bodyWaveformsSorted.map(_.Report(new ReportSectionsParser(query._sectionsOpt)))
 
         // Return reports vector:
         reports.toVector
@@ -1938,16 +1928,16 @@ class FieldModel (
         }
 
         val samplerQuery = new Sampler.Query(
-            fieldGeometryOpt = Some(field.GetGeometry),
-            antipodeDistanceOpt = Some(field.GetAntipodeDistance),
-            collectorPositionOpt = Some(probe.GetPosition),
-            collectorRotationOpt = Some(probe.GetRotation),
-            acoustic_aOpt = Some(probeCollector.GetAcoustic_a),
-            squelchThresholdOpt = probeCollector.GetSquelchThresholdOpt,
-            lobeRangeOpt = probeCollector.GetLobeRangeOpt,
-            lobeRangeEnvelopeOpt = probeCollector.GetLobeRangeEnvelopeOpt,
-            lobeBearingEnvelopeOpt = probeCollector.GetLobeBearingEnvelopeOpt,
-            sectionsOpt = query.sectionsOpt)
+            _fieldGeometryOpt = Some(field.GetGeometry),
+            _antipodeDistanceOpt = Some(field.GetAntipodeDistance),
+            _collectorPositionOpt = Some(probe.GetPosition),
+            _collectorRotationOpt = Some(probe.GetRotation),
+            _acoustic_aOpt = Some(probeCollector.GetAcoustic_a),
+            _squelchThresholdOpt = probeCollector.GetSquelchThresholdOpt,
+            _lobeRangeOpt = probeCollector.GetLobeRangeOpt,
+            _lobeRangeEnvelopeOpt = probeCollector.GetLobeRangeEnvelopeOpt,
+            _lobeBearingEnvelopeOpt = probeCollector.GetLobeBearingEnvelopeOpt,
+            _sectionsOpt = query._sectionsOpt)
 
         ReportWaveformsAtSampler(fieldKey, samplerQuery)
     }
@@ -2456,176 +2446,5 @@ class FieldModel (
     {
         val fieldConstructor = Field.Constructor(_tag = FieldModel.Glossary.kBang + FieldModel.Glossary.kEDefaultField)
         _defaultFieldOpt = Some(CreateFields(Vector[Field.Constructor](fieldConstructor)).head)
-    }
-
-    def SerializeToCQL (): String =
-    {
-        val fieldKey = new Field.Key("default")
-        val field = _fieldPlant.GetFieldOpt(fieldKey).get
-
-        def SerializeEmitters(builder: StringBuilder): Unit =
-        {
-            //            for (emitter <- _subjectEmitterPlant.GetSubjectEmitters(fieldKey))
-            //            {
-            //                builder.append(
-            //                    "insert into " +
-            //                        "taranos.emitters " +
-            //                        "(" +
-            //                        "field_key," +
-            //                        "key," +
-            //                        "keyset," +
-            //                        "keyset_key," +
-            //                        "bk," +
-            //                        "fk" +
-            //                        ") " +
-            //                        "values " +
-            //                        "(" +
-            //                        "'" + fieldKey._1 + "'," +
-            //                        "'" + emitter.Key._1 + "'," +
-            //                        "''," +
-            //                        "''," +
-            //                        "''," +
-            //                        "''" +
-            //                        ");")
-            //            }
-
-            for (emitter <- _fieldEmitterPlant.GetFieldEmitters(field))
-            {
-                builder.append(
-                    "insert into " +
-                        "taranos.emitters " +
-                        "(" +
-                        "field_key," +
-                        "key," +
-                        "keyset," +
-                        "keyset_key," +
-                        "bk," +
-                        "fk" +
-                        ") " +
-                        "values " +
-                        "(" +
-                        "'" + fieldKey._uniqueKey + "'," +
-                        "'" + emitter.GetKey._uniqueKey + "'," +
-                        "''," +
-                        "''," +
-                        "''," +
-                        "''" +
-                        ");")
-            }
-        }
-
-        def SerializeSubjects (builder: StringBuilder): Unit =
-        {
-            for (subject <- _subjectPlant.GetSubjects(field))
-            {
-                builder.append(
-                    "insert into " +
-                        "taranos.subjects " +
-                        "(" +
-                        "field_key," +
-                        "key," +
-                        "keyset," +
-                        "keyset_key," +
-                        "state_posx," +
-                        "state_posy," +
-                        "state_posz," +
-                        "state_rotw," +
-                        "state_rotx," +
-                        "state_roty," +
-                        "state_rotz" +
-                        ") " +
-                        "values " +
-                        "(" +
-                        "'" + fieldKey._uniqueKey + "'," +
-                        "'" + subject.GetKey._uniqueKey + "'," +
-                        "''," +
-                        "''," +
-                        subject.GetPosition._x + "," +
-                        subject.GetPosition._y + "," +
-                        subject.GetPosition._z + "," +
-                        subject.GetRotation._w + "," +
-                        subject.GetRotation._x + "," +
-                        subject.GetRotation._y + "," +
-                        subject.GetRotation._z +
-                        ");")
-            }
-        }
-
-        def SerializeField (builder: StringBuilder): Unit =
-        {
-            // Insert subject key rows:
-            for (subject <- _subjectPlant.GetSubjects(field))
-            {
-                builder.append(
-                    "insert into " +
-                        "taranos.fields " +
-                        "(" +
-                        "key," +
-                        "keyset," +
-                        "keyset_key" +
-                        ") " +
-                        "values " +
-                        "(" +
-                        "'" + fieldKey._uniqueKey + "'," +
-                        "'bk'," +
-                        "'" + subject.GetKey._uniqueKey + "'" +
-                        ");")
-            }
-
-            // Insert state row:
-            {
-                builder.append(
-                    "insert into " +
-                        "taranos.fields " +
-                        "(" +
-                        "key," +
-                        "keyset," +
-                        "keyset_key," +
-                        "state_a_c," +
-                        "state_a_rho," +
-                        "state_antipodeDistance" +
-                        ") " +
-                        "values " +
-                        "(" +
-                        "'" + fieldKey._uniqueKey + "'," +
-                        "''," +
-                        "''," +
-                        field.GetAcoustic_c + "," +
-                        field.GetAcoustic_r + "," +
-                        field.GetAntipodeDistance +
-                        ");")
-            }
-        }
-
-        val builder: StringBuilder = new StringBuilder
-
-        builder.append("begin batch ")
-
-        SerializeEmitters(builder)
-
-        SerializeSubjects(builder)
-
-        SerializeField(builder)
-
-        builder.append("apply batch;")
-
-        builder.toString()
-    }
-
-    def Store (self: akka.actor.ActorRef): Unit =
-    {
-//        val fieldKey = new Field.Key("default")
-//
-//        var cql = "delete from taranos.emitters where field_key='" + fieldKey._uniqueKey + "';"
-//        StorageSupervisor._storageSupervisor ! new StorageSupervisor.RequestMessages.ExecuteQuery(cql, self)
-//
-//        cql = "delete from taranos.subjects where field_key='" + fieldKey._uniqueKey + "';"
-//        StorageSupervisor._storageSupervisor ! new StorageSupervisor.RequestMessages.ExecuteQuery(cql, self)
-//
-//        cql = "delete from taranos.fields where key='" + fieldKey._uniqueKey + "';"
-//        StorageSupervisor._storageSupervisor ! new StorageSupervisor.RequestMessages.ExecuteQuery(cql, self)
-//
-//        cql = SerializeToCQL()
-//        StorageSupervisor._storageSupervisor ! new StorageSupervisor.RequestMessages.ExecuteQuery(cql, self)
     }
 }

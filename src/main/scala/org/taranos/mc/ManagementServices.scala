@@ -43,7 +43,7 @@ object ManagementServices
         val query = FieldModel.DecodeQuery(queryEncoded)
 
         // Report current cell:
-        val cellReport = _cell.Report(query.sectionsOpt)
+        val cellReport = _cell.Report(query._sectionsOpt)
 
         // Wrap report:
         val wrapper = Json.obj("rc" -> cellReport)

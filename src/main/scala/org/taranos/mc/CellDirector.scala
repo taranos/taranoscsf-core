@@ -36,7 +36,7 @@ object CellDirector
         case object Stop
             extends SupervisionMessage
 
-        case class ServiceCall (serviceCall: org.taranos.common.ServiceCall)
+        case class ServiceCall (_serviceCall: org.taranos.common.ServiceCall)
             extends CellDirectorMessage
     }
 

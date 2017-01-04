@@ -108,7 +108,7 @@ class SignalInputPlant
         trunk: Trunk,
         destructor: SignalInput.Destructor): SignalInput.Key =
     {
-        destructor.key match
+        destructor._key match
         {
             case key: SignalInput.Key =>
                 _inputs.get((trunk.GetKey, key)) match
@@ -147,7 +147,7 @@ class SignalInputPlant
         }
 
         // Return input key:
-        destructor.key
+        destructor._key
     }
 
     def DestroyAllSignalInputs (trunk: Trunk): Unit =

@@ -43,9 +43,10 @@ object SignalSource
         _nameOpt: Option[String] = None,
         _descriptionOpt: Option[String] = None)
 
-    case class Destructor (key: SignalSource.Key)
+    case class Destructor (
+        _key: SignalSource.Key)
 
-    class Query (
+    case class Query (
         keys: Vector[SignalSource.Key],
         sectionsOpt: Option[String] = None)
         extends TrunkElement.Query[SignalSource.Key](

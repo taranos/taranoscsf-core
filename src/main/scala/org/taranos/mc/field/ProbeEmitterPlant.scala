@@ -173,7 +173,8 @@ class ProbeEmitterPlant
                         SignalInterface.kAnyKey,
                         Vector(
                             new SignalPort.Constructor(
-                                _tag = constructor._tag + FieldModel.Glossary.kTagSeparator + TrunkModel.Glossary.kESignalPort,
+                                _tag = constructor._tag + FieldModel.Glossary.kTagSeparator +
+                                    TrunkModel.Glossary.kESignalPort,
                                 _aliasOpt = Some(debangedAlias),
                                 _mode = Signal.ModeEnum.Continuous))).head
 
@@ -182,7 +183,8 @@ class ProbeEmitterPlant
                         trunkKey,
                         Vector(
                             new SignalInput.Constructor(
-                                _tag = constructor._tag + FieldModel.Glossary.kTagSeparator + TrunkModel.Glossary.kESignalInput,
+                                _tag = constructor._tag + FieldModel.Glossary.kTagSeparator +
+                                    TrunkModel.Glossary.kESignalInput,
                                 _mode = Signal.ModeEnum.Continuous,
                                 _tappableKeyOpt = Some(port.GetTapKey)))).head
                     input.GetKey

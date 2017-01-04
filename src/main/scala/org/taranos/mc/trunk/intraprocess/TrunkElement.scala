@@ -28,7 +28,9 @@ object TrunkElement
 {
     type UniqueKey = String
 
-    case class Key (_uniqueKey: UniqueKey, _symbol: Symbol)
+    case class Key (
+        _uniqueKey: UniqueKey,
+        _symbol: Symbol)
     {
         def apply = (_uniqueKey, _symbol)
     }

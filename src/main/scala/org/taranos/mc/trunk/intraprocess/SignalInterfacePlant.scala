@@ -68,7 +68,7 @@ class SignalInterfacePlant
         trunk: Trunk,
         destructor: SignalInterface.Destructor): SignalInterface.Key =
     {
-        _interfaces.get((trunk.GetKey, destructor.key)) match
+        _interfaces.get((trunk.GetKey, destructor._key)) match
         {
             case Some(interface) =>
                 // 1: Unbind with children:
@@ -95,7 +95,7 @@ class SignalInterfacePlant
         }
 
         // Return interface key:
-        destructor.key
+        destructor._key
     }
 
     def DestroyAllSignalInterfaces (trunk: Trunk): Unit =

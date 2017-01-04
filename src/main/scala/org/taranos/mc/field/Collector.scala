@@ -22,10 +22,6 @@ import org.taranos.mc.Common.{Real, ReportSectionsParser, Reportable}
 import play.api.libs.json.{JsObject, Json}
 
 
-//
-// A collector represents a wavefield sampling transducer.
-//
-
 object Collector
 {
     abstract
@@ -81,7 +77,8 @@ object Collector
                 report ++= Json.obj(FieldModel.Glossary.kPAttrsLobeRangePoles -> _lobeRangePolesOpt.get)
 
             if (_squelchThresholdOpt.isDefined)
-                report ++= Json.obj(FieldModel.Glossary.kPAttrsSquelchThreshold -> Reportable.ReportReal1(_squelchThresholdOpt.get))
+                report ++= Json.obj(FieldModel.Glossary.kPAttrsSquelchThreshold ->
+                    Reportable.ReportReal1(_squelchThresholdOpt.get))
 
             super.Report(sections) ++ report
         }
@@ -127,10 +124,12 @@ object Collector
             var report = Json.obj()
 
             if (_bearingEnvelopeOpt.isDefined)
-                report ++= Json.obj(FieldModel.Glossary.kPStateBearingEnvelope -> _bearingEnvelopeOpt.get.Report(sections))
+                report ++= Json.obj(FieldModel.Glossary.kPStateBearingEnvelope ->
+                    _bearingEnvelopeOpt.get.Report(sections))
 
             if (_distanceEnvelopeOpt.isDefined)
-                report ++= Json.obj(FieldModel.Glossary.kPStateDistanceEnvelope -> _distanceEnvelopeOpt.get.Report(sections))
+                report ++= Json.obj(FieldModel.Glossary.kPStateDistanceEnvelope ->
+                    _distanceEnvelopeOpt.get.Report(sections))
             
             report
         }

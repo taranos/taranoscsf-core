@@ -23,7 +23,8 @@ import org.taranos.mc.field._
 import org.taranos.mc.trunk.intraprocess.EmitterPatch.Channel
 import org.taranos.mc.trunk.intraprocess.Signal.{Continuous, SignalTypes}
 import org.taranos.mc.trunk.intraprocess.TestableElement.TestableUpdateStateDecoder
-import org.taranos.mc.trunk.intraprocess.TrunkElement.{CommonConstructorMetaDecoder, CommonDestructorMetaDecoder, CommonQueryDecoder, CommonUpdateMetaDecoder}
+import org.taranos.mc.trunk.intraprocess.TrunkElement.{CommonConstructorMetaDecoder, CommonDestructorMetaDecoder,
+    CommonQueryDecoder, CommonUpdateMetaDecoder}
 import org.taranos.mc.{Cell, CellLogger}
 import play.api.libs.json._
 
@@ -135,7 +136,8 @@ object EmitterPatch
         _tappableKeyOpt: Option[TappableElementKey],
         _patchDef: JsObject)
 
-    case class Destructor (key: EmitterPatch.Key)
+    case class Destructor (
+        _key: EmitterPatch.Key)
 
     case class Query (
         keys: Vector[EmitterPatch.Key],
@@ -465,7 +467,8 @@ class EmitterPatch (
         val newChannelDef = Json.obj(
             FieldModel.Glossary.kEnvelopeDef -> envelopeDef,
             FieldModel.Glossary.kOscillatorPatchDef -> oscillatorPatchDef)
-        val newChannelDefs = (_attrs._patchDef \ FieldModel.Glossary.kChannelDef).as[JsObject] ++ Json.obj(channelTag -> newChannelDef)
+        val newChannelDefs = (_attrs._patchDef \ FieldModel.Glossary.kChannelDef).as[JsObject] ++
+            Json.obj(channelTag -> newChannelDef)
         val newEmitterPatchDef = _attrs._patchDef ++ Json.obj(FieldModel.Glossary.kChannelDef -> newChannelDefs)
         val update = EmitterPatch.Update(_meta._key, _patchDefOpt = Some(newEmitterPatchDef))
         _trunkModel.UpdateEmitterPatches(_refs._trunkKey, Vector(update))
@@ -487,7 +490,8 @@ class EmitterPatch (
 
             case JsError(errors) => throw new TrunkException(Cell.ErrorCodes.MacroInvalid)
         }
-        val newEnvelopeDef = (channelDef \ FieldModel.Glossary.kEnvelopeDef).as[JsObject] ++ Json.obj(FieldModel.Glossary.kEnvelopeCeiling -> ceiling)
+        val newEnvelopeDef = (channelDef \ FieldModel.Glossary.kEnvelopeDef).as[JsObject] ++
+            Json.obj(FieldModel.Glossary.kEnvelopeCeiling -> ceiling)
         val newChannelDef = channelDef ++ Json.obj(FieldModel.Glossary.kEnvelopeDef -> newEnvelopeDef)
         ImportChannelDef(channelTag, newChannelDef)
     }
@@ -514,7 +518,8 @@ class EmitterPatch (
 
             case JsError(errors) => throw new TrunkException(Cell.ErrorCodes.MacroInvalid)
         }
-        val newEnvelopeDef = (channelDef \ FieldModel.Glossary.kEnvelopeDef).as[JsObject] ++ Json.obj(FieldModel.Glossary.kEnvelopeFloor -> floor)
+        val newEnvelopeDef = (channelDef \ FieldModel.Glossary.kEnvelopeDef).as[JsObject] ++
+            Json.obj(FieldModel.Glossary.kEnvelopeFloor -> floor)
         val newChannelDef = channelDef ++ Json.obj(FieldModel.Glossary.kEnvelopeDef -> newEnvelopeDef)
         ImportChannelDef(channelTag, newChannelDef)
     }

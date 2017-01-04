@@ -87,9 +87,10 @@ object SignalSink
         _descriptionOpt: Option[String] = None,
         _mode: Signal.ModeEnum.Mode = Signal.ModeEnum.Unbiased)
 
-    case class Destructor (key: SignalSink.Key)
+    case class Destructor (
+        _key: SignalSink.Key)
 
-    class Query (
+    case class Query (
         keys: Vector[SignalSink.Key],
         sectionsOpt: Option[String] = None)
         extends TrunkElement.Query[SignalSink.Key](

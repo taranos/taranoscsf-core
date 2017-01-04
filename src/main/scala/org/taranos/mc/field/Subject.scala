@@ -95,7 +95,8 @@ object Subject
         val commonMeta = new CommonConstructorMetaDecoder(constructor, Cell.ErrorCodes.SubjectConstructorInvalid)
 
         val position: Vector3 =
-            (constructor \ FieldModel.Glossary.kPSState \ FieldModel.Glossary.kPStatePosition).validate[Vector[String]] match
+            (constructor \ FieldModel.Glossary.kPSState \
+                FieldModel.Glossary.kPStatePosition).validate[Vector[String]] match
             {
                 case JsSuccess(value, _) =>
                     new Vector3 (
@@ -108,7 +109,8 @@ object Subject
             }
 
         val rotation: Vector4 =
-            (constructor \ FieldModel.Glossary.kPSState \ FieldModel.Glossary.kPStateRotation).validate[Vector[String]] match
+            (constructor \ FieldModel.Glossary.kPSState \
+                FieldModel.Glossary.kPStateRotation).validate[Vector[String]] match
             {
                 case JsSuccess(value, _) =>
                     new Vector4 (

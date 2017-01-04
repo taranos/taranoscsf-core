@@ -348,7 +348,8 @@ object Envelope
         }
 
         // Extract pole definitions:
-        val extractedPoleDefKeys = envelopeDef.keys.intersect(Set(FieldModel.Glossary.kEnvelopePolesDef, FieldModel.Glossary.kEnvelopePolesPackedDef))
+        val extractedPoleDefKeys = envelopeDef.keys.intersect(Set(FieldModel.Glossary.kEnvelopePolesDef,
+            FieldModel.Glossary.kEnvelopePolesPackedDef))
         if (extractedPoleDefKeys.size != 1)
             throw new FieldException(Cell.ErrorCodes.EnvelopeDefinitionInvalid)
 
@@ -421,7 +422,8 @@ object Envelope
         val newEnvelope = new Envelope.DiscreteEnvelope()
 
         // Extract pole definitions:
-        val extractedPoleDefKeys = envelopeDef.keys.intersect(Set(FieldModel.Glossary.kEnvelopePolesDef, FieldModel.Glossary.kEnvelopePolesPackedDef))
+        val extractedPoleDefKeys = envelopeDef.keys.intersect(Set(FieldModel.Glossary.kEnvelopePolesDef,
+            FieldModel.Glossary.kEnvelopePolesPackedDef))
         if (extractedPoleDefKeys.size != 1)
             throw new FieldException(Cell.ErrorCodes.EnvelopeDefinitionInvalid)
 

@@ -72,9 +72,10 @@ object SignalBridge
         _tappableKeyOpt: Option[TappableElementKey],
         _partOpt: Option[String] = None)
 
-    case class Destructor (key: SignalBridge.Key)
+    case class Destructor (
+        _key: SignalBridge.Key)
 
-    class Query (
+    case class Query (
         keys: Vector[SignalBridge.Key],
         sectionsOpt: Option[String] = None)
         extends TrunkElement.Query[SignalBridge.Key](

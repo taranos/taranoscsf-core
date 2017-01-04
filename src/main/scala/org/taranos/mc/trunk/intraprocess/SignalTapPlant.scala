@@ -87,7 +87,7 @@ class SignalTapPlant
         trunk: Trunk,
         destructor: SignalTap.Destructor): SignalTap.Key =
     {
-        destructor.key match
+        destructor._key match
         {
             case key: SignalTap.Key =>
                 _taps.get((trunk.GetKey, key)) match
@@ -131,7 +131,7 @@ class SignalTapPlant
         }
 
         // Return tap key:
-        destructor.key
+        destructor._key
     }
 
     def DestroyAllSignalTaps (trunk: Trunk): Unit =

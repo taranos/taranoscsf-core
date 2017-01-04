@@ -122,7 +122,8 @@ object Trunk
 
                 // Add oscillator patch refs:
                 if (_oscillatorPatchKeys.nonEmpty)
-                    report ++= Json.obj(TrunkModel.Glossary.kEOscillatorPatch -> _oscillatorPatchKeys.map(TrunkElement.EncodeKey))
+                    report ++= Json.obj(TrunkModel.Glossary.kEOscillatorPatch ->
+                        _oscillatorPatchKeys.map(TrunkElement.EncodeKey))
             }
 
             report ++=
@@ -141,7 +142,8 @@ object Trunk
         _nameOpt: Option[String] = None,
         _descriptionOpt: Option[String] = None)
 
-    case class Destructor (key: Trunk.Key)
+    case class Destructor (
+        _key: Trunk.Key)
 
     case class Query (
         keys: Vector[Trunk.Key],

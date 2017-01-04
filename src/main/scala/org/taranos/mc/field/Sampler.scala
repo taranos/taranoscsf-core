@@ -26,16 +26,16 @@ import play.api.libs.json.{JsError, JsSuccess, Json}
 object Sampler
 {
     case class Query (
-        fieldGeometryOpt: Option[String],
-        antipodeDistanceOpt: Option[Real],
-        collectorPositionOpt: Option[Body.Position],
-        collectorRotationOpt: Option[Body.Rotation],
-        acoustic_aOpt: Option[Real],
-        squelchThresholdOpt: Option[Real],
-        lobeRangeOpt: Option[Real],
-        lobeRangeEnvelopeOpt: Option[Envelope.ContinuousEnvelope],
-        lobeBearingEnvelopeOpt: Option[Envelope.ContinuousEnvelope],
-        sectionsOpt: Option[String])
+        _fieldGeometryOpt: Option[String],
+        _antipodeDistanceOpt: Option[Real],
+        _collectorPositionOpt: Option[Body.Position],
+        _collectorRotationOpt: Option[Body.Rotation],
+        _acoustic_aOpt: Option[Real],
+        _squelchThresholdOpt: Option[Real],
+        _lobeRangeOpt: Option[Real],
+        _lobeRangeEnvelopeOpt: Option[Envelope.ContinuousEnvelope],
+        _lobeBearingEnvelopeOpt: Option[Envelope.ContinuousEnvelope],
+        _sectionsOpt: Option[String])
 
     def DecodeQuery (encoded: String): Query =
     {

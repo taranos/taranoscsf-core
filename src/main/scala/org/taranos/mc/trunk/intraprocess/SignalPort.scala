@@ -101,7 +101,8 @@ object SignalPort
         _aliasOpt: Option[String],
         _mode: Signal.ModeEnum.Mode)
 
-    case class Destructor (key: SignalPort.Key)
+    case class Destructor (
+        _key: SignalPort.Key)
 
     case class Query (
         keys: Vector[SignalPort.Key],
