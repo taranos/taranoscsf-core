@@ -29,8 +29,8 @@ libraryDependencies += "com.typesafe.akka" % "akka-actor_2.11" % "2.3.4"
 
 // Play Framework's JSON library
 //libraryDependencies += "com.typesafe.play" % "play-json_2.11" % "2.3.9"
-//libraryDependencies += "com.typesafe.play" % "play-json_2.11" % "2.3.10"
-libraryDependencies += "com.typesafe.play" % "play-json_2.11" % "2.3.8"
+libraryDependencies += "com.typesafe.play" % "play-json_2.11" % "2.3.10"
+//libraryDependencies += "com.typesafe.play" % "play-json_2.11" % "2.3.8"
 
 // ScalaTest
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.6" % "test"
