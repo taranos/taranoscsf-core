@@ -41,10 +41,22 @@ class TrunkSpec extends fixture.FlatSpec
         // Create a cell director actor:
         val _cellDirectorRef = _actorSystem.actorOf(CellDirector.MakeProps, "TestCellDirector")
 
+        private
+        def StartCellDirector (): Unit =
+        {
+            _inbox.send(_cellDirectorRef, CellDirector.RequestMessages.Start)
 
-        _cellDirectorRef ! CellDirector.RequestMessages.Start
+            import scala.concurrent.duration._
+            val message = _inbox.receive(1.minute)
+            message match
+            {
+                case CellDirector.ResponseMessages.Started =>
 
-        def CallService(
+                case _ => assert(false)
+            }
+        }
+
+        def CallService (
             serviceName: String,
             serviceArgs: AnyRef*): org.taranos.common.ServiceResult =
         {
@@ -56,7 +68,9 @@ class TrunkSpec extends fixture.FlatSpec
                     result :+= (arg match
                     {
                         case jsValue: JsValue => Json.stringify(jsValue)
+
                         case value: String => value
+
                         case _ => "?"
                     })
                 }
@@ -68,7 +82,7 @@ class TrunkSpec extends fixture.FlatSpec
                 CellDirector.RequestMessages.ServiceCall(ServiceCall(serviceName, ArgsHelper(serviceArgs))))
 
             import scala.concurrent.duration._
-            val message = _inbox.receive(10.minutes)
+            val message = _inbox.receive(10.minutes)    // Generous timeout to allow for debugging.
             message match
             {
                 case serviceResult: ServiceResult =>
@@ -78,6 +92,9 @@ class TrunkSpec extends fixture.FlatSpec
                     assert(false); null
             }
         }
+
+
+        StartCellDirector()
     }
 
     def withFixture(test: OneArgTest) =

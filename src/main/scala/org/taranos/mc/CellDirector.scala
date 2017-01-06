@@ -93,7 +93,7 @@ class CellDirector
         CreateCell(Cell.Glossary.kEDefaultCell)
 
         // Tell supervisor we've started:
-        context.parent ! Cell.ResponseMessages.Started
+        sender ! CellDirector.ResponseMessages.Started
     }
 
     private

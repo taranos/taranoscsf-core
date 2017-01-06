@@ -17,20 +17,15 @@
 //
 
 name := "taranos-core"
-
 version := "0.2"
 
 scalaVersion := "2.11.8"
 
 // Akka
-//libraryDependencies += "com.typesafe.akka" % "akka-actor_2.11" % "2.3.8"
-//libraryDependencies += "com.typesafe.akka" % "akka-actor_2.11" % "2.3.15"
 libraryDependencies += "com.typesafe.akka" % "akka-actor_2.11" % "2.3.4"
 
 // Play Framework's JSON library
-//libraryDependencies += "com.typesafe.play" % "play-json_2.11" % "2.3.9"
-//libraryDependencies += "com.typesafe.play" % "play-json_2.11" % "2.3.10"
-libraryDependencies += "com.typesafe.play" % "play-json_2.11" % "2.3.8"
+libraryDependencies += "com.typesafe.play" % "play-json_2.11" % "2.3.10"
 
 // ScalaTest
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.6" % "test"
