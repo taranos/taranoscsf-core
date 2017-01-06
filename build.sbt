@@ -31,3 +31,4 @@ libraryDependencies += "com.typesafe.play" % "play-json_2.11" % "2.3.10"
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.6" % "test"
 
 scalacOptions += "-feature"
+
