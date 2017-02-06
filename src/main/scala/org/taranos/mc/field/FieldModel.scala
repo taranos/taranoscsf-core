@@ -2442,9 +2442,12 @@ class FieldModel (
     }
 
 
-    def Initialize (): Unit =
+    def Initialize (isTesting: Boolean = false): Unit =
     {
-        val fieldConstructor = Field.Constructor(_tag = FieldModel.Glossary.kBang + FieldModel.Glossary.kEDefaultField)
+        val tag = new StringBuilder(if (isTesting) TrunkModel.Glossary.kBang else "")
+        tag ++= FieldModel.Glossary.kEDefaultField
+
+        val fieldConstructor = Field.Constructor(_tag = tag.toString())
         _defaultFieldOpt = Some(CreateFields(Vector[Field.Constructor](fieldConstructor)).head)
     }
 }

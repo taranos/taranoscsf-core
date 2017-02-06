@@ -1956,9 +1956,12 @@ class TrunkModel (
         _defaultTrunkOpt.getOrElse(throw new TrunkException(Cell.ErrorCodes.TrunkUnknown))
     }
 
-    def Initialize(): Unit =
+    def Initialize (isTesting: Boolean = false): Unit =
     {
-        val trunkConstructor = Trunk.Constructor(_tag = TrunkModel.Glossary.kBang + TrunkModel.Glossary.kEDefaultTrunk)
+        val tag = new StringBuilder(if (isTesting) TrunkModel.Glossary.kBang else "")
+        tag ++= TrunkModel.Glossary.kEDefaultTrunk
+
+        val trunkConstructor = Trunk.Constructor(_tag = tag.toString())
         _defaultTrunkOpt = Some(_trunkPlant.CreateTrunk(trunkConstructor))
     }
 

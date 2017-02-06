@@ -305,6 +305,27 @@ object Cell
         // elements
         val kECell = "c"
         val kEDefaultCell = kDefaultPrefix + kECell
+
+        // other
+        val kIsTesting = "t"
+    }
+
+    case class Destructor (
+        _isTesting: Boolean)
+
+    def DecodeDestructor (encoded: String): Destructor =
+    {
+        val destructor = Json.parse(encoded)
+
+        val isTesting: Boolean =
+            (destructor \ Cell.Glossary.kIsTesting).validate[String] match
+            {
+                case JsSuccess(value, _) => true
+
+                case JsError(errors) => false
+            }
+
+        new Destructor(isTesting)
     }
 }
 
@@ -345,7 +366,7 @@ class Cell (
 
     def AddKillOrder (killOrder: KillOrder) = _killOrders += killOrder
 
-    def Reset () =
+    def Reset (isTesting: Boolean = false) =
     {
         // Allocate new trunk model:
         _trunkModel = new TrunkModel(this)
@@ -361,10 +382,10 @@ class Cell (
         _killOrders = mutable.ArrayBuffer[KillOrder]()
 
         // Initialize the trunk model:
-        _trunkModel.Initialize()
+        _trunkModel.Initialize(isTesting)
 
         // Initialize the field model:
-        _fieldModel.Initialize()
+        _fieldModel.Initialize(isTesting)
     }
 
     private
@@ -659,7 +680,7 @@ class Cell (
     private
     def HandleMessage_Start (): Unit =
     {
-        Reset()
+        Reset(isTesting = false)
 
         // Tell supervisor we've started:
         context.parent ! Cell.ResponseMessages.Started

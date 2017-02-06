@@ -28,8 +28,10 @@ object ManagementServices
     def DestroyCell (serviceArgs: Vector[String])
         (implicit _cell: Cell): ServiceResult =
     {
+        val destructor = Cell.DecodeDestructor(serviceArgs.head)
+
         // Reset cell:
-        _cell.Reset()
+        _cell.Reset(destructor._isTesting)
 
         // Reply nothing:
         ServiceResult(0, Vector.empty[String])
