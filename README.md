@@ -29,7 +29,7 @@ This will create the artifact jar as ``target/scala-2.11/taranos-core_*.jar``.
 
 - Learn [_Taranos:CSF_ concepts](https://github.com/taranos/taranoscsf/wiki/Domain-Model-Concepts)
 
-- Take the Pseudo-API tutorial
+- Work with the [Pseudo-API tutorials](https://github.com/taranos/taranoscsf/wiki/PAPI-Tutorials)
 
 - Read FAQs
 
