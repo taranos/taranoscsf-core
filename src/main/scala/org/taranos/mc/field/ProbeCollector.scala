@@ -52,7 +52,7 @@ object ProbeCollector
 
             if (_aliasOpt.isDefined)
                 report ++=
-                    Json.obj(FieldModel.Glossary.kPSMeta -> _aliasOpt.get)
+                    Json.obj(FieldModel.Glossary.kPMetaAlias -> _aliasOpt.get)
 
             report
         }

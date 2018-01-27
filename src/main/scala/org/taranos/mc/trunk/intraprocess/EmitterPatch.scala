@@ -277,13 +277,13 @@ object EmitterPatch
         new Destructor(commonMeta._key)
     }
 
-    def DecodeQuery (encoded: String): Query =
+    def DecodeQuery (encoded: String, isKeysRequired: Boolean = true): Query =
     {
         val query = Json.parse(encoded)
 
-        val commonQuery = new CommonQueryDecoder[EmitterPatch.Key](query)
+        val commonQuery = new CommonQueryDecoder[EmitterPatch.Key](query, isKeysRequired)
 
-        new Query(commonQuery._keysOpt.get, commonQuery._sectionsOpt)
+        new Query(commonQuery._keysOpt.getOrElse(Vector.empty[EmitterPatch.Key]), commonQuery._sectionsOpt)
     }
 
     def DecodeUpdate (encoded: String): Update =

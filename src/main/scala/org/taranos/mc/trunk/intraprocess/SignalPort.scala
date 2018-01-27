@@ -57,7 +57,7 @@ object SignalPort
 
             if (_aliasOpt.isDefined)
                 report ++=
-                    Json.obj(TrunkModel.Glossary.kPSMeta -> _aliasOpt.get)
+                    Json.obj(TrunkModel.Glossary.kPMetaAlias -> _aliasOpt.get)
 
             report
         }

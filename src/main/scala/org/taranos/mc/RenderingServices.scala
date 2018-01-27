@@ -1263,7 +1263,7 @@ object RenderingServices
 
         // Decode query:
         val queryEncoded = serviceArgs(2)
-        val query = EmitterPatch.DecodeQuery(queryEncoded)
+        val query = EmitterPatch.DecodeQuery(queryEncoded, isKeysRequired = false)
         val newQuery = new EmitterPatch.Query(Vector(subjectEmitterOpt.get.GetPatchKey), query._sectionsOpt)
 
         // Report emitter patches:
