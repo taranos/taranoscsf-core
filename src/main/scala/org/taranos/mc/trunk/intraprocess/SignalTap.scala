@@ -129,7 +129,7 @@ object SignalTap
         val mode = biasedMeta._modeOpt.getOrElse(Signal.ModeEnum.Unbiased)
 
         val tappableKeyOpt: Option[TrunkElement.Key] =
-            (constructor \ TrunkModel.Glossary.kESignalTap).validate[String] match
+            (constructor \ TrunkModel.Glossary.kPSRefs \ TrunkModel.Glossary.kESignalTap).validate[String] match
             {
                 case JsSuccess(value, _) => Some(TrunkElement.DecodeKey[TrunkElement.Key](value))
                 case JsError(errors) => None

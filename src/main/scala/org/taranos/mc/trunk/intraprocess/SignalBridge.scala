@@ -107,7 +107,6 @@ object SignalBridge
                 case JsSuccess(value, _) =>
                     val key = TrunkElement.DecodeKey[TrunkElement.Key](value)
                     key match
-
                     {
                         case _: TappableElementKey => Some(key.asInstanceOf[TappableElementKey])
 
@@ -126,7 +125,6 @@ object SignalBridge
                 case JsSuccess(value, _) =>
                     val key = TrunkElement.DecodeKey[TrunkElement.Key](value)
                     key match
-
                     {
                         case _: ModulatableElementKey => key.asInstanceOf[ModulatableElementKey]
 
