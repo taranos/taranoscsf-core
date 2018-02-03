@@ -131,7 +131,7 @@ object ProbeCollector
             {
                 case JsSuccess(value, _) => Some(value.toDouble)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val squelchThresholdOpt: Option[Real] =
@@ -141,7 +141,7 @@ object ProbeCollector
             {
                 case JsSuccess(value, _) => Some(value.toDouble)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val lobeRangeOpt: Option[Real] =
@@ -149,7 +149,7 @@ object ProbeCollector
             {
                 case JsSuccess(value, _) => Some(value.toDouble)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val lobeRangePolesOpt: Option[String] =
@@ -158,7 +158,7 @@ object ProbeCollector
             {
                 case JsSuccess(value, _) => Some(value)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val lobeBearingPolesOpt: Option[String] =
@@ -167,10 +167,10 @@ object ProbeCollector
             {
                 case JsSuccess(value, _) => Some(value)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
-        new Constructor(
+        Constructor(
             commonMeta._tag,
             commonMeta._badgeOpt,
             commonMeta._nameOpt,
@@ -190,7 +190,7 @@ object ProbeCollector
         val commonMeta = new CommonDestructorMetaDecoder[ProbeCollector.Key](
             destructor, Cell.ErrorCodes.ProbeCollectorDestructorInvalid)
 
-        new Destructor(commonMeta._key, commonMeta._scope)
+        Destructor(commonMeta._key, commonMeta._scope)
     }
 
     def DecodeQuery (encoded: String): Query =
@@ -199,7 +199,7 @@ object ProbeCollector
 
         val commonQuery = new CommonQueryDecoder[ProbeCollector.Key](query)
 
-        new Query(commonQuery._keysOpt.get, commonQuery._sectionsOpt)
+        Query(commonQuery._keysOpt.get, commonQuery._sectionsOpt)
     }
 
     def DecodeUpdate (encoded: String): Update =
@@ -214,7 +214,7 @@ object ProbeCollector
             {
                 case JsSuccess(value, _) => Some(value.toDouble)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val squelchThresholdOpt: Option[Real] =
@@ -223,7 +223,7 @@ object ProbeCollector
             {
                 case JsSuccess(value, _) => Some(value.toDouble)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val lobeRangeOpt: Option[Real] =
@@ -231,7 +231,7 @@ object ProbeCollector
             {
                 case JsSuccess(value, _) => Some(value.toDouble)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val lobeRangePolesOpt: Option[String] =
@@ -239,7 +239,7 @@ object ProbeCollector
             {
                 case JsSuccess(value, _) => Some(value)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val lobeBearingPolesOpt: Option[String] =
@@ -247,10 +247,10 @@ object ProbeCollector
             {
                 case JsSuccess(value, _) => Some(value)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
-        new Update(
+        Update(
             commonMeta._key,
             commonMeta._nameOpt,
             commonMeta._descriptionOpt,
@@ -279,9 +279,11 @@ class ProbeCollector (
     protected
     val _meta = meta
 
-    def GetAliasOpt = _meta._aliasOpt
+    def GetAliasOpt: Option[String] =
+        _meta._aliasOpt
 
-    def SetAliasOpt (aliasOpt: Option[String]) = _meta._aliasOpt = aliasOpt
+    def SetAliasOpt (aliasOpt: Option[String]): Unit =
+        _meta._aliasOpt = aliasOpt
 
     //
     // Attrs:
@@ -289,29 +291,35 @@ class ProbeCollector (
     protected
     val _attrs = attrs
 
-    def GetAcoustic_a = _attrs._acoustic_a
+    def GetAcoustic_a: Real =
+        _attrs._acoustic_a
 
-    def GetLobeRangeOpt = _attrs._lobeRangeOpt
+    def GetLobeRangeOpt: Option[Real] =
+        _attrs._lobeRangeOpt
 
-    def GetSquelchThresholdOpt = _attrs._squelchThresholdOpt
+    def GetSquelchThresholdOpt: Option[Real] =
+        _attrs._squelchThresholdOpt
 
-    def SetAcoustic_a (acoustic_a: Real) = _attrs._acoustic_a = acoustic_a
+    def SetAcoustic_a (acoustic_a: Real): Unit =
+        _attrs._acoustic_a = acoustic_a
 
-    def SetLobeBearingPolesOpt (lobeBearingPolesOpt: Option[String]) =
+    def SetLobeBearingPolesOpt (lobeBearingPolesOpt: Option[String]): Unit =
     {
         _attrs._lobeBearingPolesOpt = lobeBearingPolesOpt
         ImportBearingPoles()
     }
 
-    def SetLobeRangePolesOpt (lobeRangePolesOpt: Option[String]) =
+    def SetLobeRangePolesOpt (lobeRangePolesOpt: Option[String]): Unit =
     {
         _attrs._lobeRangePolesOpt = lobeRangePolesOpt
         ImportRangePoles()
     }
 
-    def SetLobeRangeOpt (lobeRangeOpt: Option[Real]) = _attrs._lobeRangeOpt = lobeRangeOpt
+    def SetLobeRangeOpt (lobeRangeOpt: Option[Real]): Unit =
+        _attrs._lobeRangeOpt = lobeRangeOpt
 
-    def SetSquelchThresholdOpt (squelchThresholdOpt: Option[Real]) = _attrs._squelchThresholdOpt = squelchThresholdOpt
+    def SetSquelchThresholdOpt (squelchThresholdOpt: Option[Real]): Unit =
+        _attrs._squelchThresholdOpt = squelchThresholdOpt
 
     //
     // Refs:
@@ -319,7 +327,8 @@ class ProbeCollector (
     protected
     val _refs = refs
 
-    def GetParentKey = _refs._parentKey
+    def GetParentKey: Body.Key =
+        _refs._parentKey
 
     //
     // State:

@@ -23,7 +23,8 @@ import org.taranos.mc.Common.ReportSectionsParser
 import org.taranos.mc.trunk.intraprocess.BiasedElement.{BiasedConstructorMetaDecoder, BiasedUpdateMetaDecoder}
 import org.taranos.mc.trunk.intraprocess.Signal.SignalTypes
 import org.taranos.mc.trunk.intraprocess.TestableElement.TestableUpdateStateDecoder
-import org.taranos.mc.trunk.intraprocess.TrunkElement.{CommonConstructorMetaDecoder, CommonDestructorMetaDecoder, CommonQueryDecoder, CommonUpdateMetaDecoder}
+import org.taranos.mc.trunk.intraprocess.TrunkElement.{CommonConstructorMetaDecoder, CommonDestructorMetaDecoder,
+    CommonQueryDecoder, CommonUpdateMetaDecoder}
 import play.api.libs.json.{JsError, JsObject, JsSuccess, Json}
 
 
@@ -119,8 +120,8 @@ object SignalLink
             {
                 case JsSuccess(value, _) => TrunkElement.DecodeKey[SignalSource.Key](value)
 
-                case JsError(errors) =>
-                    throw new TrunkException(
+                case JsError(_) =>
+                    throw TrunkException(
                         Cell.ErrorCodes.SignalLinkConstructorInvalid,
                         "missing source key property")
             }
@@ -130,8 +131,8 @@ object SignalLink
             {
                 case JsSuccess(value, _) => TrunkElement.DecodeKey[SignalSink.Key](value)
 
-                case JsError(errors) =>
-                    throw new TrunkException(
+                case JsError(_) =>
+                    throw TrunkException(
                         Cell.ErrorCodes.SignalLinkConstructorInvalid,
                         "missing sink key property")
             }
@@ -141,10 +142,10 @@ object SignalLink
             {
                 case JsSuccess(value, _) => Some(value)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
-        new Constructor(
+        Constructor(
             commonMeta._tag,
             commonMeta._badgeOpt,
             commonMeta._nameOpt,
@@ -162,7 +163,7 @@ object SignalLink
         val commonMeta = new CommonDestructorMetaDecoder[SignalLink.Key](
             destructor, Cell.ErrorCodes.SignalLinkDestructorInvalid)
 
-        new Destructor(commonMeta._key)
+        Destructor(commonMeta._key)
     }
 
     def DecodeQuery (encoded: String): Query =
@@ -171,7 +172,7 @@ object SignalLink
 
         val commonQuery = new CommonQueryDecoder[SignalLink.Key](query)
 
-        new Query(commonQuery._keysOpt.get, commonQuery._sectionsOpt)
+        Query(commonQuery._keysOpt.get, commonQuery._sectionsOpt)
     }
 
     def DecodeUpdate (encoded: String): Update =
@@ -185,7 +186,7 @@ object SignalLink
 
         val testableState = new TestableUpdateStateDecoder(update)
 
-        new Update(
+        Update(
             commonMeta._key,
             commonMeta._nameOpt,
             commonMeta._descriptionOpt,
@@ -207,7 +208,8 @@ class SignalLink (
     protected
     val _meta = meta
 
-    def GetMode = _meta._mode
+    def GetMode: Signal.ModeEnum.Mode =
+        _meta._mode
 
     //
     // Attrs:
@@ -237,7 +239,7 @@ class SignalLink (
                         _attrs._partOpt.getOrElse(TrunkElement.EncodeKey(GetKey)),
                         isReciprocal = false)
 
-                case None => throw new TrunkException(Cell.ErrorCodes.SignalSinkInvalid)
+                case None => throw TrunkException(Cell.ErrorCodes.SignalSinkInvalid)
             }
         }
     }
@@ -258,14 +260,16 @@ class SignalLink (
                         _attrs._partOpt.getOrElse(TrunkElement.EncodeKey(GetKey)),
                         isReciprocal = false)
 
-                case None => throw new TrunkException(Cell.ErrorCodes.SignalSourceInvalid)
+                case None => throw TrunkException(Cell.ErrorCodes.SignalSourceInvalid)
             }
         }
     }
 
-    def GetSinkKey: SignalSink.Key = _refs._sinkKey
+    def GetSinkKey: SignalSink.Key =
+        _refs._sinkKey
 
-    def GetSourceKey: SignalSource.Key = _refs._sourceKey
+    def GetSourceKey: SignalSource.Key =
+        _refs._sourceKey
 
     def UnbindSink (isReciprocal: Boolean): Unit =
     {
@@ -309,7 +313,7 @@ class SignalLink (
     {
         // Link must be passing-through a signal (links do not perform default propagation):
         val signal = signalOpt.getOrElse(
-            throw new TrunkException(Cell.ErrorCodes.SignalInvalid, "signal must be valid"))
+            throw TrunkException(Cell.ErrorCodes.SignalInvalid, "signal must be valid"))
 
         // If signal is virtual then accept its mark:
         if (signal._scalar.isInstanceOf[Signal.Virtual])
@@ -317,7 +321,7 @@ class SignalLink (
 
         // There must be a valid sink bound with the link:
         val sink = _trunkModel.GetSignalSinkOpt(GetTrunkKey, _refs._sinkKey).getOrElse(
-            throw new TrunkException(Cell.ErrorCodes.SignalLinkSinkless))
+            throw TrunkException(Cell.ErrorCodes.SignalLinkSinkless))
 
         // Forward signal to child sink:
         signal._propagatorKeyOpt = Some(GetKey)
@@ -349,18 +353,18 @@ class SignalLink (
             report ++=
                 Json.obj(TrunkModel.Glossary.kRSignalSinks -> _trunkModel.ReportSignalSinks(
                     GetTrunkKey,
-                    new SignalSink.Query(Vector(_refs._sinkKey), sectionsOpt)))
+                    SignalSink.Query(Vector(_refs._sinkKey), sectionsOpt)))
 
             report ++=
                 Json.obj(TrunkModel.Glossary.kRSignalSources -> _trunkModel.ReportSignalSources(
                     GetTrunkKey,
-                    new SignalSource.Query(Vector(_refs._sourceKey), sectionsOpt)))
+                    SignalSource.Query(Vector(_refs._sourceKey), sectionsOpt)))
         }
 
         report
     }
 
-    def TestSignal (signal: Signal[_ >: SignalTypes]) =
+    def PropagateTest (signal: Signal[_ >: SignalTypes]): Unit =
     {
         Propagate(Some(signal))
     }

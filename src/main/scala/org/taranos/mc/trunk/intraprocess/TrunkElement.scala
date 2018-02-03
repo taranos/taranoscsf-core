@@ -32,7 +32,8 @@ object TrunkElement
         _uniqueKey: UniqueKey,
         _symbol: Symbol)
     {
-        def apply = (_uniqueKey, _symbol)
+        def apply: (UniqueKey, Symbol) =
+            (_uniqueKey, _symbol)
     }
 
     abstract
@@ -101,7 +102,8 @@ object TrunkElement
         val _keys: Vector[KeyType],
         val _sectionsOpt: Option[String] = None)
     {
-        def GetKeys: Vector[KeyType] = _keys
+        def GetKeys: Vector[KeyType] =
+            _keys
     }
 
     class CommonConstructorMetaDecoder (
@@ -113,7 +115,7 @@ object TrunkElement
             {
                 case JsSuccess(value, _) => Some(value)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val _descriptionOpt: Option[String] =
@@ -121,7 +123,7 @@ object TrunkElement
             {
                 case JsSuccess(value, _) => Some(value)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val _nameOpt: Option[String] =
@@ -129,7 +131,7 @@ object TrunkElement
             {
                 case JsSuccess(value, _) => Some(value)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val _tag: String =
@@ -137,8 +139,8 @@ object TrunkElement
             {
                 case JsSuccess(value, _) => value
 
-                case JsError(errors) =>
-                    throw new TrunkException(errorCode, "missing tag property")
+                case JsError(_) =>
+                    throw TrunkException(errorCode, "missing tag property")
             }
     }
 
@@ -152,8 +154,8 @@ object TrunkElement
                 case JsSuccess(value, _) =>
                     TrunkElement.DecodeKey[KeyType](value)
 
-                case JsError(errors) =>
-                    throw new TrunkException(errorCode, "missing key property")
+                case JsError(_) =>
+                    throw TrunkException(errorCode, "missing key property")
             }
     }
 
@@ -174,7 +176,7 @@ object TrunkElement
                         {
                             case "error.expected.jsarray" => Some(Vector.empty[KeyType])
 
-                            case _ => throw new TrunkException(Cell.ErrorCodes.KeysInvalid)
+                            case _ => throw TrunkException(Cell.ErrorCodes.KeysInvalid)
                         }
                 }
             }
@@ -186,7 +188,7 @@ object TrunkElement
             {
                 case JsSuccess(value, _) => Some(value.head)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
     }
 
@@ -200,8 +202,8 @@ object TrunkElement
                 case JsSuccess(value, _) =>
                     TrunkElement.DecodeKey[KeyType](value)
 
-                case JsError(errors) =>
-                    throw new TrunkException(errorCode, "missing key property")
+                case JsError(_) =>
+                    throw TrunkException(errorCode, "missing key property")
             }
 
         val _nameOpt: Option[String] =
@@ -209,7 +211,7 @@ object TrunkElement
             {
                 case JsSuccess(value, _) => Some(value)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val _descriptionOpt: Option[String] =
@@ -217,7 +219,7 @@ object TrunkElement
             {
                 case JsSuccess(value, _) => Some(value)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
     }
 
@@ -225,7 +227,7 @@ object TrunkElement
     {
         val parts = encoded.split(TrunkModel.Glossary.kPartSeparator)
         if (parts.length < 2)
-            throw new TrunkException(Cell.ErrorCodes.KeyInvalid)
+            throw TrunkException(Cell.ErrorCodes.KeyInvalid)
 
         val uniqueKey = if (parts.length == 3) parts(0) + TrunkModel.Glossary.kPartSeparator + parts(1) else parts(0)
 
@@ -255,7 +257,7 @@ object TrunkElement
 
             case TrunkModel.Glossary.kEOscillatorPatch => new OscillatorPatch.Key(uniqueKey)
 
-            case _ => throw new TrunkException(Cell.ErrorCodes.KeyInvalid)
+            case _ => throw TrunkException(Cell.ErrorCodes.KeyInvalid)
         }
 
         key.asInstanceOf[KeyType]
@@ -291,7 +293,7 @@ object TrunkElement
 
             case 'OscillatorPatch => TrunkModel.Glossary.kEOscillatorPatch
 
-            case _ => throw new TrunkException(Cell.ErrorCodes.KeyInvalid)
+            case _ => throw TrunkException(Cell.ErrorCodes.KeyInvalid)
         }
 
         uniqueKey + TrunkModel.Glossary.kPartSeparator + symbol
@@ -322,18 +324,23 @@ trait TrunkElement[KeyType <: TrunkElement.Key]
     protected
     val _meta: TrunkElement.Meta[KeyType]
 
-    def GetKey: KeyType = _meta._key
+    def GetKey: KeyType =
+        _meta._key
 
-    def GetTag = _meta._tag
+    def GetTag: String =
+        _meta._tag
 
-    def SetNameOpt (nameOpt: Option[String]) = _meta._nameOpt = nameOpt
+    def SetNameOpt (nameOpt: Option[String]): Unit =
+        _meta._nameOpt = nameOpt
 
-    def SetDescriptionOpt (descriptionOpt: Option[String]) = _meta._descriptionOpt = descriptionOpt
+    def SetDescriptionOpt (descriptionOpt: Option[String]): Unit =
+        _meta._descriptionOpt = descriptionOpt
 
     protected
     val _refs: TrunkElement.Refs
 
-    def GetTrunkKey = _refs._trunkKey
+    def GetTrunkKey: Trunk.Key =
+        _refs._trunkKey
 
     protected
     val _state: TrunkElement.State
@@ -343,8 +350,20 @@ trait TrunkElement[KeyType <: TrunkElement.Key]
 }
 
 
+object ModulatableElement
+{
+    case class ModulatedSignals (
+        _signals: Iterable[(Option[String], Signal[_ >: SignalTypes])] =
+        Iterable.empty[(Option[String], Signal[_ >: SignalTypes])])
+}
+
 trait ModulatableElement
 {
+    /**
+      * Modulate the given signal into zero or more new signals.
+      */
+    def Modulate (signal: Signal[_ >: SignalTypes]): ModulatableElement.ModulatedSignals
+
     /**
      * Return the key of the signal tap associated with the modulatable element.
      */
@@ -365,7 +384,7 @@ object AliasedElement
                     val (_, debangedAlias) = TrunkElement.DebangTag(value)
                     Some(debangedAlias)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
     }
 
@@ -378,7 +397,7 @@ object AliasedElement
                     val (_, debangedAlias) = TrunkElement.DebangTag(value)
                     Some(debangedAlias)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
     }
 }
@@ -433,7 +452,7 @@ object BiasedElement
             {
                 case JsSuccess(value, _) => Some(Signal.ModeEnum.FromFriendly(value))
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
     }
 
@@ -444,7 +463,7 @@ object BiasedElement
             {
                 case JsSuccess(value, _) => Some(Signal.ModeEnum.FromFriendly(value))
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
     }
 }
@@ -491,11 +510,12 @@ trait NotifierElement
      * Set notifier's listener element.
      * @param listenerOpt The listener element.
      */
-    def SetListenerOpt (listenerOpt: Option[ListenerElement]) = _listenerOpt = listenerOpt
+    def SetListenerOpt (listenerOpt: Option[ListenerElement]): Unit =
+        _listenerOpt = listenerOpt
 }
 
 
-trait PropagatorElement
+trait PropagatingElement
 {
     protected
     val kUnmarked = -1
@@ -503,23 +523,35 @@ trait PropagatorElement
     private
     var _mark: Int = kUnmarked
 
-    def GetMark = _mark
-
-    def MarkPathSegment (markingSignal: Signal[Signal.Virtual]): Unit =
-    {
-        Propagate(Some(markingSignal))
-    }
-
-    def SetMark (mark: Int) = _mark = mark
+    /**
+      * Get element's path mark.
+      */
+    def GetMark: Int =
+        _mark
 
     /**
-     * Forward a signal to the next propagator.
-     * @param signalOpt Signal to propagate.
+      * Mark downstream path elements from current element using virtual signal.
+      * @param markingSignal Virtual signal value.
+      */
+    def MarkPathSegment (markingSignal: Signal[Signal.Virtual]): Unit =
+        Propagate(Some(markingSignal))
+
+    /**
+      * Set element's path mark.
+      * @param mark Path mark value.
+      */
+    def SetMark (mark: Int): Unit =
+        _mark = mark
+
+    /**
+     * Forward a signal to the next element of the propagation chain.
+     * @param signalOpt Signal to forward.
      */
     def Propagate (
         signalOpt: Option[Signal[_ >: SignalTypes]] = None,
         partOpt: Option[String] = None)
 }
+
 
 trait TappableElement
 {
@@ -541,12 +573,16 @@ object TestableElement
             {
                 case JsSuccess(value, _) => Some(value)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
     }
 }
 
 trait TestableElement
 {
-    def TestSignal (signal: Signal[_ >: SignalTypes])
+    /**
+      * Forward a test signal to the next element of the propagation chain.
+      * @param signal Signal to forward.
+      */
+    def PropagateTest (signal: Signal[_ >: SignalTypes])
 }

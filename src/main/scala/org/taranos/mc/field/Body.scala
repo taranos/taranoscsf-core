@@ -149,7 +149,7 @@ object Body
 //                parts(1).toDouble,
 //                parts(2).toDouble))
 
-            case _ => throw new FieldException(Cell.ErrorCodes.PositionInvalid)
+            case _ => throw FieldException(Cell.ErrorCodes.PositionInvalid)
         }
     }
 
@@ -168,7 +168,7 @@ object Body
 //                parts(2).toDouble,
 //                parts(3).toDouble))
 
-            case _ => throw new FieldException(Cell.ErrorCodes.RotationInvalid)
+            case _ => throw FieldException(Cell.ErrorCodes.RotationInvalid)
         }
     }
 }

@@ -36,10 +36,10 @@ object Simpler
                 case JsSuccess(value, _) =>
                     Some(value.head)
 
-                case JsError(errors) =>
+                case JsError(_) =>
                     None
             }
 
-        new Query(sectionsOpt)
+        Query(sectionsOpt)
     }
 }

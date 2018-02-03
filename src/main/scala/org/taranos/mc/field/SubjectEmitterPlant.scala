@@ -46,7 +46,7 @@ class SubjectEmitterPlant
         _trunkModel.CreateEmitterPatches(
             field.GetTrunkKey,
             Vector(
-                new EmitterPatch.Constructor(
+                EmitterPatch.Constructor(
                     _tag = tag,
                     _fieldKey = field.GetKey,
                     _emitterKey = emitterKey,
@@ -62,7 +62,7 @@ class SubjectEmitterPlant
     {
         _trunkModel.DestroyEmitterPatches(
             field.GetTrunkKey,
-            Vector(new EmitterPatch.Destructor(emitter.GetPatchKey)))
+            Vector(EmitterPatch.Destructor(emitter.GetPatchKey)))
     }
 
     def DeployEmitterPatch (
@@ -75,7 +75,7 @@ class SubjectEmitterPlant
         // Get emitter's patch:
         val emitterPatch =
             _trunkModel.GetEmitterPatchOpt(trunkKey, emitter.GetPatchKey).getOrElse(
-                throw new FieldException(Cell.ErrorCodes.EmitterPatchUnknown))
+                throw FieldException(Cell.ErrorCodes.EmitterPatchUnknown))
 
         // Tell patch to import new patch definition:
         _logger.LogDebug(s"DEP: importing emitter patch definition: $patchDefOpt")
@@ -92,7 +92,7 @@ class SubjectEmitterPlant
             val channelDef = Json.obj(
                 FieldModel.Glossary.kChannelTag -> channelTag,
                 FieldModel.Glossary.kOscillatorPatchDef -> channel._oscillatorPatchDef)
-            val oscillatorConstructor = new SubjectOscillator.Constructor(
+            val oscillatorConstructor = SubjectOscillator.Constructor(
                 _tag = emitter.GetTag + FieldModel.Glossary.kTagSeparator + channelTag,
                 _channelDef = channelDef)
             _logger.LogDebug(s"DEP: creating SubjectOscillator: $oscillatorConstructor")
@@ -113,7 +113,7 @@ class SubjectEmitterPlant
         // Get emitter's patch:
         val emitterPatch =
             _trunkModel.GetEmitterPatchOpt(trunkKey, emitter.GetPatchKey).getOrElse(
-                throw new FieldException(Cell.ErrorCodes.EmitterPatchUnknown))
+                throw FieldException(Cell.ErrorCodes.EmitterPatchUnknown))
 
         emitterPatch.GetOscillatorPatchKeysMap.foreach(pair =>
         {
@@ -121,10 +121,10 @@ class SubjectEmitterPlant
         
             val oscillatorPatch =
                 _trunkModel.GetOscillatorPatchOpt(trunkKey, oscillatorPatchKey).getOrElse(
-                    throw new FieldException(Cell.ErrorCodes.OscillatorPatchUnknown))
+                    throw FieldException(Cell.ErrorCodes.OscillatorPatchUnknown))
             val oscillatorKey = oscillatorPatch.GetOscillatorKey
         
-            val oscillatorDestructor = new SubjectOscillator.Destructor(
+            val oscillatorDestructor = SubjectOscillator.Destructor(
                 _key = oscillatorKey.asInstanceOf[SubjectOscillator.Key],
                 _scope = 'ScopeDeep)
             _logger.LogDebug(s"DEP: destroying SubjectOscillator: $oscillatorDestructor")
@@ -160,33 +160,34 @@ class SubjectEmitterPlant
 
         // 3: Bind with/create children:
         {
-            // Get modulator key, creating a new input if necessary:
-            val modulatorKey: SignalModulator.Key = constructor._modulatorKeyOpt match
+            // Get modulatable key, creating a new signal input if necessary:
+            val modulatableKey: SignalModulator.Key = constructor._modulatableKeyOpt match
             {
                 case Some(key) => key
 
                 case None =>
-                    // Create a new port:
-                    val (_, debangedAlias) = FieldElement.DebangTag(constructor._tag)
-                    val port = _trunkModel.CreateSignalPorts(
-                        trunkKey,
-                        SignalInterface.kAnyKey,
-                        Vector(
-                            new SignalPort.Constructor(
-                                _tag = constructor._tag + FieldModel.Glossary.kTagSeparator +
-                                    TrunkModel.Glossary.kESignalPort,
-                                _aliasOpt = Some(debangedAlias),
-                                _mode = Signal.ModeEnum.Continuous))).head
-
-                    // Create input using new port's tap:
+                    // Create a new signal input element:
                     val input = _trunkModel.CreateSignalInputs(
                         trunkKey,
                         Vector(
-                            new SignalInput.Constructor(
+                            SignalInput.Constructor(
                                 _tag = constructor._tag + FieldModel.Glossary.kTagSeparator +
                                     TrunkModel.Glossary.kESignalInput,
+                                _mode = Signal.ModeEnum.Continuous))).head
+
+                    // Create a new signal port element:
+                    val (_, debangedAlias) = FieldElement.DebangTag(constructor._tag)
+                    _trunkModel.CreateSignalPorts(
+                        trunkKey,
+                        SignalInterface.kAnyKey,
+                        Vector(
+                            SignalPort.Constructor(
+                                _tag = constructor._tag + FieldModel.Glossary.kTagSeparator +
+                                    TrunkModel.Glossary.kESignalPort,
+                                _aliasOpt = Some(debangedAlias),
                                 _mode = Signal.ModeEnum.Continuous,
-                                _tappableKeyOpt = Some(port.GetTapKey)))).head
+                                _inputKeyOpt = Some(input.GetKey)))).head
+
                     input.GetKey
             }
 
@@ -198,7 +199,7 @@ class SubjectEmitterPlant
                 field = field,
                 emitterKey = emitter.GetKey,
                 tag = constructor._tag + FieldModel.Glossary.kTagSeparator + TrunkModel.Glossary.kEEmitterPatch,
-                modulatorKey = modulatorKey,
+                modulatorKey = modulatableKey,
                 patchDef = patchDef)
         }
 
@@ -245,7 +246,7 @@ class SubjectEmitterPlant
                     _subjectEmitters -= ((field.GetKey, emitter.GetKey))
                 }
 
-            case None => throw new FieldException(Cell.ErrorCodes.SubjectEmitterUnknown)
+            case None => throw FieldException(Cell.ErrorCodes.SubjectEmitterUnknown)
         }
 
         // Return subject emitter key:
@@ -262,7 +263,7 @@ class SubjectEmitterPlant
         _subjectEmitters.filter(_._1._1 == fieldKey).foreach(emitterPair =>
         {
             val ((_, pairEmitterKey), _) = emitterPair
-            val subjectEmitterDestructor = new SubjectEmitter.Destructor(pairEmitterKey, scope)
+            val subjectEmitterDestructor = SubjectEmitter.Destructor(pairEmitterKey, scope)
             DestroySubjectEmitter(field, subjectEmitterDestructor, isForcedDestroy = true)
         })
     }
@@ -278,10 +279,10 @@ class SubjectEmitterPlant
             case _: SubjectEmitter.Key =>
                 val opt = _subjectEmitters.get((field.GetKey, key))
                 if (isRequired && opt.isEmpty)
-                    throw new FieldException(Cell.ErrorCodes.SubjectEmitterUnknown)
+                    throw FieldException(Cell.ErrorCodes.SubjectEmitterUnknown)
                 opt
 
-            case _ => throw new FieldException(Cell.ErrorCodes.SubjectEmitterKeyInvalid)
+            case _ => throw FieldException(Cell.ErrorCodes.SubjectEmitterKeyInvalid)
         }
     }
 
@@ -333,5 +334,6 @@ class SubjectEmitterPlant
             }).keys.map(pair => pair._2).toVector
     }
 
-    def GetElementCount (fieldKey: Field.Key): Int = _subjectEmitters.count(_._1._1 == fieldKey)
+    def GetElementCount (fieldKey: Field.Key): Int =
+        _subjectEmitters.count(_._1._1 == fieldKey)
 }

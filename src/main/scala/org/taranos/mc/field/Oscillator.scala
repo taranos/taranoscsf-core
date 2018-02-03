@@ -111,14 +111,14 @@ trait Oscillator[KeyType <: Oscillator.Key]
     def GetPatchKey: OscillatorPatch.Key
 
     override
-    def InvokeMacro (makro: JsObject) =
+    def InvokeMacro (makro: JsObject): Unit =
     {
         def CheckArgsCount (
             args: Vector[String],
             minCount: Int,
             maxCount: Int) =
             if (args.size < minCount || args.size > maxCount)
-                throw new FieldException(Cell.ErrorCodes.MacroInvalid)
+                throw FieldException(Cell.ErrorCodes.MacroInvalid)
 
         makro.fields.foreach(field =>
         {
@@ -128,7 +128,7 @@ trait Oscillator[KeyType <: Oscillator.Key]
             {
                 case JsSuccess(value, _) => value
 
-                case JsError(errors) => throw new FieldException(Cell.ErrorCodes.MacroInvalid)
+                case JsError(_) => throw FieldException(Cell.ErrorCodes.MacroInvalid)
             }
 
             fieldName match
@@ -183,30 +183,30 @@ trait Oscillator[KeyType <: Oscillator.Key]
                     val wavesetId = args.head
                     MacroSetWavesetId(wavesetId)
 
-                case _ => throw new FieldException(Cell.ErrorCodes.MacroInvalid)
+                case _ => throw FieldException(Cell.ErrorCodes.MacroInvalid)
             }
         })
     }
 
-    def MacroSetLoudnessCeiling (ceiling: String)
+    def MacroSetLoudnessCeiling (ceiling: String): Unit
 
-    def MacroSetLoudnessPoles (polesPacked: String)
+    def MacroSetLoudnessPoles (polesPacked: String): Unit
 
-    def MacroSetLoudnessFloor (floor: String)
+    def MacroSetLoudnessFloor (floor: String): Unit
 
-    def MacroSetPeriodPoles (polesPacked: String)
+    def MacroSetPeriodPoles (polesPacked: String): Unit
 
-    def MacroSetPitchCeiling (ceiling: String)
+    def MacroSetPitchCeiling (ceiling: String): Unit
 
-    def MacroSetPitchPoles (polesPacked: String)
+    def MacroSetPitchPoles (polesPacked: String): Unit
 
-    def MacroSetPitchFloor (floor: String)
+    def MacroSetPitchFloor (floor: String): Unit
 
-    def MacroSetShapePoles (polesPacked: String)
+    def MacroSetShapePoles (polesPacked: String): Unit
 
-    def MacroSetTonePoles (polesPacked: String)
+    def MacroSetTonePoles (polesPacked: String): Unit
 
-    def MacroSetWavesetId (wavesetId: String)
+    def MacroSetWavesetId (wavesetId: String): Unit
 
-    def UnbindPatch()
+    def UnbindPatch (): Unit
 }

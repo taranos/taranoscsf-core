@@ -115,10 +115,10 @@ class SignalSinkPlant
                         // 6: Remove element from store:
                         _sinks -= ((trunk.GetKey, sink.GetKey))
 
-                    case None => throw new TrunkException(Cell.ErrorCodes.SignalSinkUnknown)
+                    case None => throw TrunkException(Cell.ErrorCodes.SignalSinkUnknown)
                 }
 
-            case _ => throw new TrunkException(Cell.ErrorCodes.SignalSinkInvalid)
+            case _ => throw TrunkException(Cell.ErrorCodes.SignalSinkInvalid)
         }
 
         // Return sink key:
@@ -133,7 +133,7 @@ class SignalSinkPlant
         _sinks.filter(_._1._1 == trunkKey).foreach(sinkPair =>
         {
             val ((_, pairSinkKey), _) = sinkPair
-            val sinkDestructor = new SignalSink.Destructor(pairSinkKey)
+            val sinkDestructor = SignalSink.Destructor(pairSinkKey)
             DestroySignalSink(trunk, sinkDestructor)
         })
     }
@@ -149,10 +149,10 @@ class SignalSinkPlant
             case _: SignalSink.Key =>
                 val opt = _sinks.get((trunk.GetKey, key))
                 if (isRequired && opt.isEmpty)
-                    throw new TrunkException(Cell.ErrorCodes.SignalSinkUnknown)
+                    throw TrunkException(Cell.ErrorCodes.SignalSinkUnknown)
                 opt
 
-            case _ => throw new TrunkException(Cell.ErrorCodes.SignalSinkKeyInvalid)
+            case _ => throw TrunkException(Cell.ErrorCodes.SignalSinkKeyInvalid)
         }
     }
 
@@ -172,5 +172,6 @@ class SignalSinkPlant
         _sinks.filter(_._1._1 == trunkKey).keys.map(_._2).toVector
     }
 
-    def GetElementCount (trunkKey: Trunk.Key): Int = _sinks.count(_._1._1 == trunkKey)
+    def GetElementCount (trunkKey: Trunk.Key): Int =
+        _sinks.count(_._1._1 == trunkKey)
 }

@@ -23,7 +23,8 @@ import org.taranos.mc.Common.ReportSectionsParser
 import org.taranos.mc.trunk.intraprocess.BiasedElement.{BiasedConstructorMetaDecoder, BiasedUpdateMetaDecoder}
 import org.taranos.mc.trunk.intraprocess.Signal.SignalTypes
 import org.taranos.mc.trunk.intraprocess.TestableElement.TestableUpdateStateDecoder
-import org.taranos.mc.trunk.intraprocess.TrunkElement.{CommonConstructorMetaDecoder, CommonDestructorMetaDecoder, CommonQueryDecoder, CommonUpdateMetaDecoder}
+import org.taranos.mc.trunk.intraprocess.TrunkElement.{CommonConstructorMetaDecoder, CommonDestructorMetaDecoder,
+    CommonQueryDecoder, CommonUpdateMetaDecoder}
 import play.api.libs.json.{JsError, JsObject, JsSuccess, Json}
 
 
@@ -132,10 +133,10 @@ object SignalTap
             (constructor \ TrunkModel.Glossary.kPSRefs \ TrunkModel.Glossary.kESignalTap).validate[String] match
             {
                 case JsSuccess(value, _) => Some(TrunkElement.DecodeKey[TrunkElement.Key](value))
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
-        new Constructor(
+        Constructor(
             commonMeta._tag,
             commonMeta._badgeOpt,
             commonMeta._nameOpt,
@@ -151,7 +152,7 @@ object SignalTap
         val commonMeta = new CommonDestructorMetaDecoder[SignalTap.Key](
             destructor, Cell.ErrorCodes.SignalTapDestructorInvalid)
 
-        new Destructor(commonMeta._key)
+        Destructor(commonMeta._key)
     }
 
     def DecodeQuery (encoded: String): Query =
@@ -160,7 +161,7 @@ object SignalTap
 
         val commonQuery = new CommonQueryDecoder[SignalTap.Key](query)
 
-        new Query(commonQuery._keysOpt.get, commonQuery._sectionsOpt)
+        Query(commonQuery._keysOpt.get, commonQuery._sectionsOpt)
     }
 
     def DecodeUpdate (encoded: String): Update =
@@ -174,7 +175,7 @@ object SignalTap
 
         val testableState = new TestableUpdateStateDecoder(update)
 
-        new Update(
+        Update(
             commonMeta._key,
             commonMeta._nameOpt,
             commonMeta._descriptionOpt,
@@ -198,7 +199,8 @@ class SignalTap (
     protected
     val _meta = meta
 
-    def GetMode = _meta._mode
+    def GetMode: Signal.ModeEnum.Mode =
+        _meta._mode
 
     //
     // Attrs:
@@ -214,7 +216,7 @@ class SignalTap (
 
     def BindModulator (
         modulatorKey: SignalModulator.Key,
-        isListener: Boolean) =
+        isListener: Boolean): Unit =
     {
         _refs._modulatorKeyOpt = Some(modulatorKey)
 
@@ -224,7 +226,7 @@ class SignalTap (
             {
                 case Some(sink) => sink.SetListenerOpt(Some(this))
 
-                case None => throw new TrunkException(Cell.ErrorCodes.SignalTapSinkless)
+                case None => throw TrunkException(Cell.ErrorCodes.SignalTapSinkless)
             }
         }
     }
@@ -241,7 +243,7 @@ class SignalTap (
             {
                 case Some(sink) => sink.BindTap(GetKey, isReciprocal = false)
 
-                case None => throw new TrunkException(Cell.ErrorCodes.SignalSinkInvalid)
+                case None => throw TrunkException(Cell.ErrorCodes.SignalSinkInvalid)
             }
         }
     }
@@ -257,18 +259,22 @@ class SignalTap (
             {
                 case Some(source) => source.BindTap(GetKey, isReciprocal = false)
 
-                case None => throw new TrunkException(Cell.ErrorCodes.SignalSourceInvalid)
+                case None => throw TrunkException(Cell.ErrorCodes.SignalSourceInvalid)
             }
         }
     }
 
-    def GetModulatorKeyOpt: Option[SignalModulator.Key] = _refs._modulatorKeyOpt
+    def GetModulatorKeyOpt: Option[SignalModulator.Key] =
+        _refs._modulatorKeyOpt
 
-    def GetSinkKey: SignalSink.Key = _refs._sinkKey
+    def GetSinkKey: SignalSink.Key =
+        _refs._sinkKey
 
-    def GetSourceKey: SignalSource.Key = _refs._sourceKey
+    def GetSourceKey: SignalSource.Key =
+        _refs._sourceKey
 
-    def UnbindModulator () = _refs._modulatorKeyOpt = None
+    def UnbindModulator (): Unit =
+        _refs._modulatorKeyOpt = None
 
     def UnbindSink (isReciprocal: Boolean): Unit =
     {
@@ -312,7 +318,7 @@ class SignalTap (
         {
             case Some(sink) => sink.GetLastTrappedSignalOpt
 
-            case None => throw new TrunkException(Cell.ErrorCodes.SignalTapSinkless)
+            case None => throw TrunkException(Cell.ErrorCodes.SignalTapSinkless)
         }
     }
 
@@ -322,7 +328,7 @@ class SignalTap (
         {
             case Some(sink) => sink.GetTrappedSignals
 
-            case None => throw new TrunkException(Cell.ErrorCodes.SignalTapSinkless)
+            case None => throw TrunkException(Cell.ErrorCodes.SignalTapSinkless)
         }
     }
 
@@ -335,7 +341,7 @@ class SignalTap (
                     _trunkModel,
                     GetTrunkKey,
                     modulatorKey)
-                modulator.Trigger()
+                modulator.Activate()
 
             case None =>
                 Propagate()
@@ -347,7 +353,7 @@ class SignalTap (
         partOpt: Option[String]): Unit =
     {
         def PassThrough (signalOpt: Option[Signal[_ >: SignalTypes]]) =
-            SignalModulator.ModulatedSignals(
+            ModulatableElement.ModulatedSignals(
                 signalOpt match
                 {
                     case Some(signal) => List((None, signal))
@@ -361,13 +367,13 @@ class SignalTap (
             val signal = signalOpt.get
 
             // Attempt to modulate signal:
-            val modulatedSignals: SignalModulator.ModulatedSignals =
+            val modulatedSignals: ModulatableElement.ModulatedSignals =
                 // If signal is virtual then accept its mark and bypass normal modulation:
                 if (signal._scalar.isInstanceOf[Signal.Virtual])
                 {
                     SetMark(signal._ordinal)
 
-                    SignalModulator.ModulatedSignals(
+                    ModulatableElement.ModulatedSignals(
                         List(
                             (None, signal)))
                 }
@@ -387,7 +393,7 @@ class SignalTap (
                                     {
                                         case Some(input) => input.Modulate(signal)
 
-                                        case None => throw new TrunkException(Cell.ErrorCodes.SignalTapModulatorless)
+                                        case None => throw TrunkException(Cell.ErrorCodes.SignalTapModulatorless)
                                     }
 
                                 // Forward signal to emitter patch:
@@ -396,7 +402,7 @@ class SignalTap (
                                     {
                                         case Some(emitterPatch) => emitterPatch.Modulate(signal)
 
-                                        case None => throw new TrunkException(Cell.ErrorCodes.SignalTapModulatorless)
+                                        case None => throw TrunkException(Cell.ErrorCodes.SignalTapModulatorless)
                                     }
 
                                 // Forward signal to oscillator patch:
@@ -405,12 +411,12 @@ class SignalTap (
                                     {
                                         case Some(oscillatorPatch) => oscillatorPatch.Modulate(signal)
 
-                                        case None => throw new TrunkException(Cell.ErrorCodes.SignalTapModulatorless)
+                                        case None => throw TrunkException(Cell.ErrorCodes.SignalTapModulatorless)
                                     }
 
                                 // Anything else provides no modulation:
                                 case _ =>
-                                    SignalModulator.ModulatedSignals()
+                                    ModulatableElement.ModulatedSignals()
                             }
 
                         case None =>
@@ -427,7 +433,7 @@ class SignalTap (
 
                 // There must be a valid source bound with the tap:
                 val source = _trunkModel.GetSignalSourceOpt(GetTrunkKey, _refs._sourceKey).getOrElse(
-                    throw new TrunkException(Cell.ErrorCodes.SignalTapSourceless))
+                    throw TrunkException(Cell.ErrorCodes.SignalTapSourceless))
 
                 forwardSignal._propagatorKeyOpt = Some(GetKey)
                 _trunkModel.Log( s"$GetTag propagating ${forwardSignal.ToFriendly}")
@@ -474,19 +480,19 @@ class SignalTap (
                 report ++=
                     Json.obj(TrunkModel.Glossary.kRSignalSinks -> _trunkModel.ReportSignalSinks(
                         GetTrunkKey,
-                        new SignalSink.Query(Vector(_refs._sinkKey), sectionsOpt)))
+                        SignalSink.Query(Vector(_refs._sinkKey), sectionsOpt)))
 
             if (_refs._sourceKey != SignalSource.kNoneKey)
                 report ++=
                     Json.obj(TrunkModel.Glossary.kRSignalSources -> _trunkModel.ReportSignalSources(
                         GetTrunkKey,
-                        new SignalSource.Query(Vector(_refs._sourceKey), sectionsOpt)))
+                        SignalSource.Query(Vector(_refs._sourceKey), sectionsOpt)))
         }
 
         report
     }
 
-    def TestSignal (signal: Signal[_ >: SignalTypes]) =
+    def PropagateTest (signal: Signal[_ >: SignalTypes]): Unit =
     {
         Propagate(Some(signal))
     }

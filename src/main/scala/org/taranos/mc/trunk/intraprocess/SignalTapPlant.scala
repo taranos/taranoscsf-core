@@ -35,13 +35,13 @@ class SignalTapPlant
         constructor: SignalTap.Constructor): SignalTap =
     {
         // Create sink element (child):
-        val sinkConstructor = new SignalSink.Constructor(
+        val sinkConstructor = SignalSink.Constructor(
             _tag = constructor._tag + TrunkModel.Glossary.kTagSeparator + TrunkModel.Glossary.kESignalSink,
             _mode = constructor._mode)
         val sink = _trunkModel.CreateSignalSinks(trunk.GetKey, Vector(sinkConstructor)).head
 
         // Create source element (child):
-        val sourceConstructor = new SignalSource.Constructor(
+        val sourceConstructor = SignalSource.Constructor(
             _tag = constructor._tag + TrunkModel.Glossary.kTagSeparator + TrunkModel.Glossary.kESignalSource)
         val source = _trunkModel.CreateSignalSources(trunk.GetKey, Vector(sourceConstructor)).head
 
@@ -111,23 +111,23 @@ class SignalTapPlant
                         // Sink:
                         if (sinkKey != SignalSink.kNoneKey)
                         {
-                            val sinkDestructor = new SignalSink.Destructor(sinkKey)
+                            val sinkDestructor = SignalSink.Destructor(sinkKey)
                             _trunkModel.DestroySignalSinks(trunk.GetKey, Vector(sinkDestructor))
                         }
                         // Source:
                         if (sourceKey != SignalSource.kNoneKey)
                         {
-                            val sourceDestructor = new SignalSource.Destructor(sourceKey)
+                            val sourceDestructor = SignalSource.Destructor(sourceKey)
                             _trunkModel.DestroySignalSources(trunk.GetKey, Vector(sourceDestructor))
                         }
 
                         // 3: Remove element from store:
                         _taps -= ((trunk.GetKey, key))
 
-                    case None => throw new TrunkException(Cell.ErrorCodes.SignalTapUnknown)
+                    case None => throw TrunkException(Cell.ErrorCodes.SignalTapUnknown)
                 }
 
-            case _ => throw new TrunkException(Cell.ErrorCodes.SignalTapInvalid)
+            case _ => throw TrunkException(Cell.ErrorCodes.SignalTapInvalid)
         }
 
         // Return tap key:
@@ -142,7 +142,7 @@ class SignalTapPlant
         _taps.filter(_._1._1 == trunkKey).foreach(tapPair =>
         {
             val ((_, pairTapKey), _) = tapPair
-            val tapDestructor = new SignalTap.Destructor(pairTapKey)
+            val tapDestructor = SignalTap.Destructor(pairTapKey)
             DestroySignalTap(trunk, tapDestructor)
         })
     }
@@ -158,10 +158,10 @@ class SignalTapPlant
             case _: SignalTap.Key =>
                 val opt = _taps.get((trunk.GetKey, key))
                 if (isRequired && opt.isEmpty)
-                    throw new TrunkException(Cell.ErrorCodes.SignalTapUnknown)
+                    throw TrunkException(Cell.ErrorCodes.SignalTapUnknown)
                 opt
 
-            case _ => throw new TrunkException(Cell.ErrorCodes.SignalTapKeyInvalid)
+            case _ => throw TrunkException(Cell.ErrorCodes.SignalTapKeyInvalid)
         }
     }
 
@@ -181,5 +181,6 @@ class SignalTapPlant
         _taps.filter(_._1._1 == trunkKey).keys.map(_._2).toVector
     }
 
-    def GetElementCount (trunkKey: Trunk.Key): Int = _taps.count(_._1._1 == trunkKey)
+    def GetElementCount (trunkKey: Trunk.Key): Int =
+        _taps.count(_._1._1 == trunkKey)
 }

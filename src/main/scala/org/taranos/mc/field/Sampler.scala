@@ -46,7 +46,7 @@ object Sampler
             {
                 case JsSuccess(value, _) => Some(value.head)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val antipodeDistanceOpt: Option[Real] =
@@ -54,7 +54,7 @@ object Sampler
             {
                 case JsSuccess(value, _) => Some(value.head.toDouble)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val collectorPositionOpt: Option[Body.Position] =
@@ -71,10 +71,10 @@ object Sampler
                             Some(new Body.Position(pos3._x, pos3._y, pos3._z))
 
                         case _ =>
-                            throw new FieldException(Cell.ErrorCodes.PositionInvalid)
+                            throw FieldException(Cell.ErrorCodes.PositionInvalid)
                     }
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val collectorRotationOpt: Option[Body.Rotation] =
@@ -91,10 +91,10 @@ object Sampler
                             Some(new Body.Rotation(rot4._w, rot4._x, rot4._y, rot4._z))
 
                         case _ =>
-                            throw new FieldException(Cell.ErrorCodes.RotationInvalid)
+                            throw FieldException(Cell.ErrorCodes.RotationInvalid)
                     }
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val acoustic_aOpt: Option[Real] =
@@ -102,7 +102,7 @@ object Sampler
             {
                 case JsSuccess(value, _) => Some(value.head.toDouble)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val squelchThresholdOpt: Option[Real] =
@@ -110,7 +110,7 @@ object Sampler
             {
                 case JsSuccess(value, _) => Some(value.head.toDouble)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val lobeRangeOpt: Option[Real] =
@@ -118,7 +118,7 @@ object Sampler
             {
                 case JsSuccess(value, _) => Some(value.head.toDouble)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val lobeRangeEnvelopeOpt: Option[Envelope.ContinuousEnvelope] =
@@ -133,7 +133,7 @@ object Sampler
                     val envelope = Envelope.DecodeContinuousEnvelopeDef(envelopeDef)
                     Some(envelope)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val lobeBearingEnvelopeOpt: Option[Envelope.ContinuousEnvelope] =
@@ -148,7 +148,7 @@ object Sampler
                     val envelope = Envelope.DecodeContinuousEnvelopeDef(envelopeDef)
                     Some(envelope)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val sectionsOpt: Option[String] =
@@ -156,10 +156,10 @@ object Sampler
             {
                 case JsSuccess(value, _) => Some(value.head)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
-        new Query(
+        Query(
             fieldGeometryOpt,
             antipodeDistanceOpt,
             collectorPositionOpt,

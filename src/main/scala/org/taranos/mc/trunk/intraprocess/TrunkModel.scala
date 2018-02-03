@@ -30,7 +30,6 @@ import play.api.libs.json.{JsObject, Json}
 
 Marking strategy
 ----------------
-port        self
 source      self
 sink        self if all links marked; all links pre-marked if directly destroyed
 link        self
@@ -52,13 +51,14 @@ object TrunkModel
 
         val commonQuery = new CommonQueryDecoder[TrunkElement.Key](query, isKeysRequired = false)
 
-        new Query(commonQuery._sectionsOpt)
+        Query(commonQuery._sectionsOpt)
     }
 
     trait TrunkModelReporter
         extends Reporter
     {
-        def Report (sectionsOpt: Option[String]): JsObject = Json.obj()
+        def Report (sectionsOpt: Option[String]): JsObject =
+            Json.obj()
 
         protected[mc]
         def Report (trunkKey: Trunk.Key, sectionsOpt: Option[String]): JsObject
@@ -159,9 +159,11 @@ class TrunkModel (
     private
     var _fieldModelOpt: Option[FieldModel] = None
 
-    def BindFieldModel (fieldModel: FieldModel) = _fieldModelOpt = Some(fieldModel)
+    def BindFieldModel (fieldModel: FieldModel): Unit =
+        _fieldModelOpt = Some(fieldModel)
 
-    def GetFieldModel = _fieldModelOpt.getOrElse(throw new TrunkException(Cell.ErrorCodes.TrunkInvalid))
+    def GetFieldModel: FieldModel =
+        _fieldModelOpt.getOrElse(throw TrunkException(Cell.ErrorCodes.TrunkInvalid))
 
     private
     var _defaultTrunkOpt: Option[Trunk] = None
@@ -218,7 +220,7 @@ class TrunkModel (
         new Signal[Mode](signalOrdinal, scalar)
     }
 
-    def Kill (killOrder: Cell.KillOrder) =
+    def Kill (killOrder: Cell.KillOrder): Unit =
     {
         // Continue kill only if kill order's trunk is still valid:
         val trunkOpt: Option[Trunk] =
@@ -235,15 +237,6 @@ class TrunkModel (
         trunkOpt.foreach(trunk =>
         {
 //val markedKeys = trunk.GetMarked(killOrder._mark)
-            trunk.GetSignalPortKeys.foreach(key =>
-            {
-                val port = GetSignalPortOpt(trunk.GetKey, key).get
-                if (port.GetMark == killOrder._mark)
-                {
-                    val destructor = SignalPort.Destructor(key)
-                    _signalPortPlant.DestroySignalPort(trunk, destructor)
-                }
-            })
 
             trunk.GetSignalSourceKeys.foreach(key =>
             {
@@ -384,7 +377,7 @@ class TrunkModel (
     def DestroyTrunks (destructors: Vector[Trunk.Destructor]): Unit =
     {
         if (destructors.isEmpty)
-            throw new TrunkException(Cell.ErrorCodes.TrunkDestructorInvalid)
+            throw TrunkException(Cell.ErrorCodes.TrunkDestructorInvalid)
         else
         {
             // Iterate destructors:
@@ -470,7 +463,7 @@ class TrunkModel (
         // Return trunk:
         _trunkPlant.GetTrunkOpt(trunkKey).getOrElse{
             assert(true)
-            throw new TrunkException(Cell.ErrorCodes.TrunkUnknown)}
+            throw TrunkException(Cell.ErrorCodes.TrunkUnknown)}
     }
 
     def ReportTrunks (query: Trunk.Query): Vector[JsObject] =
@@ -528,7 +521,7 @@ class TrunkModel (
         val trunk = GetTrunk(trunkKey)
 
         if (destructors.isEmpty)
-            throw new TrunkException(Cell.ErrorCodes.SignalInterfaceDestructorInvalid)
+            throw TrunkException(Cell.ErrorCodes.SignalInterfaceDestructorInvalid)
         else
         {
             // Iterate destructors:
@@ -601,7 +594,7 @@ class TrunkModel (
                     update._descriptionOpt.foreach(description => interface.SetDescriptionOpt(Some(description)))
 
                 case None =>
-                    throw new TrunkException(Cell.ErrorCodes.SignalInterfaceUnknown)
+                    throw TrunkException(Cell.ErrorCodes.SignalInterfaceUnknown)
             }
         })
     }
@@ -627,7 +620,7 @@ class TrunkModel (
 
         // Get interface:
         val interface = _trunkModel.GetSignalInterfaceOpt(trunk.GetKey, effectiveInterfaceKey).getOrElse(
-            throw new TrunkException(Cell.ErrorCodes.SignalInterfaceUnknown))
+            throw TrunkException(Cell.ErrorCodes.SignalInterfaceUnknown))
 
         // Iterate constructors creating signal ports:
         constructors.map(constructor =>
@@ -641,44 +634,32 @@ class TrunkModel (
 
     def DestroySignalPorts(
         trunkKey: Trunk.Key,
-        destructors: Vector[SignalPort.Destructor]) =
+        destructors: Vector[SignalPort.Destructor]): Unit =
     {
         // Get trunk (validate):
         val trunk = GetTrunk(trunkKey)
 
         if (destructors.isEmpty)
-            throw new TrunkException(Cell.ErrorCodes.SignalPortDestructorInvalid)
+            throw TrunkException(Cell.ErrorCodes.SignalPortDestructorInvalid)
         else
         {
-            if (destructors.nonEmpty)
+            // Iterate destructors:
+            destructors.foreach(destructor =>
             {
-                val markingSignal = _trunkModel.CreateSignal[Signal.Virtual](())
-
-                // Iterate destructors:
-                destructors.foreach(destructor =>
+                if (destructor._key == SignalPort.kAnyKey)
                 {
-                    val portKeys: Vector[SignalPort.Key] =
-                        if (destructor._key == SignalPort.kAnyKey)
-                            _signalPortPlant.GetSignalPortKeys(trunk)
-                        else
-                            Vector(destructor._key)
+                    // Destroy all sources:
+                    _signalPortPlant.DestroyAllSignalPorts(trunk)
+                }
+                else
+                {
+                    // Get port (validate):
+                    GetSignalPortOpt (trunk.GetKey, destructor._key)
 
-                    if (portKeys.nonEmpty)
-                    {
-                        portKeys.foreach(key =>
-                        {
-                            GetSignalPortOpt(trunk.GetKey, key) match
-                            {
-                                case Some(port) => port.MarkPathSegment(markingSignal)
-
-                                case None =>    // Should not happen.
-                            }
-                        })
-
-                        _cell.AddKillOrder(Cell.KillOrder(trunk.GetKey, markingSignal._ordinal))
-                    }
-                })
-            }
+                    // Destroy port:
+                    _signalPortPlant.DestroySignalPort(trunk, destructor)
+                }
+            })
         }
     }
 
@@ -733,7 +714,7 @@ class TrunkModel (
                     {
                         case Some(interface) => interface.GetPortKeys.toSet
 
-                        case None => throw new TrunkException(Cell.ErrorCodes.SignalInterfaceUnknown)
+                        case None => throw TrunkException(Cell.ErrorCodes.SignalInterfaceUnknown)
                     }
 
                 }
@@ -767,12 +748,25 @@ class TrunkModel (
                     // Update signal:
                     if (update._signalEncodedOpt.isDefined)
                     {
-                        val signalEncoded = update._signalEncodedOpt.get
-                        val signal = Signal.DecodeSignal(trunk, signalEncoded, port.GetMode)
-                        port.PutSignal(signal)
+                        port.GetInputKeyOpt match
+                        {
+                            case Some(inputKey) =>
+                                _signalInputPlant.GetSignalInputOpt (trunk, inputKey) match
+                                {
+                                    case Some (input) =>
+                                        val signalEncoded = update._signalEncodedOpt.get
+                                        val signal = Signal.DecodeSignal (trunk, signalEncoded, port.GetMode)
+                                        input.PutSignal (signal)
+
+                                    case None => // ERROR!
+                                }
+
+                            case None =>
+                                // WARNING
+                        }
                     }
 
-                case None => throw new TrunkException(Cell.ErrorCodes.SignalPortUnknown)
+                case None => throw TrunkException(Cell.ErrorCodes.SignalPortUnknown)
             }
         })
     }
@@ -793,13 +787,13 @@ class TrunkModel (
 
     def DestroySignalSources(
         trunkKey: Trunk.Key,
-        destructors: Vector[SignalSource.Destructor]) =
+        destructors: Vector[SignalSource.Destructor]): Unit =
     {
         // Get trunk (validate):
         val trunk = GetTrunk(trunkKey)
 
         if (destructors.isEmpty)
-            throw new TrunkException(Cell.ErrorCodes.SignalSourceDestructorInvalid)
+            throw TrunkException(Cell.ErrorCodes.SignalSourceDestructorInvalid)
         else
         {
             if (destructors.nonEmpty)
@@ -899,10 +893,10 @@ class TrunkModel (
                     {
                         val signalEncoded = update._signalEncodedOpt.get
                         val signal = Signal.DecodeSignal(trunk, signalEncoded, source.GetMode)
-                        source.TestSignal(signal)
+                        source.PropagateTest(signal)
                     }
 
-                case None => throw new TrunkException(Cell.ErrorCodes.SignalSourceUnknown)
+                case None => throw TrunkException(Cell.ErrorCodes.SignalSourceUnknown)
             }
         })
     }
@@ -928,13 +922,13 @@ class TrunkModel (
 
     def DestroySignalSinks(
         trunkKey: Trunk.Key,
-        destructors: Vector[SignalSink.Destructor]) =
+        destructors: Vector[SignalSink.Destructor]): Unit =
     {
         // Get trunk (validate):
         val trunk = GetTrunk(trunkKey)
 
         if (destructors.isEmpty)
-            throw new TrunkException(Cell.ErrorCodes.SignalSinkDestructorInvalid)
+            throw TrunkException(Cell.ErrorCodes.SignalSinkDestructorInvalid)
         else
         {
             if (destructors.nonEmpty)
@@ -1039,10 +1033,10 @@ class TrunkModel (
                     {
                         val signalEncoded = update._signalEncodedOpt.get
                         val signal = Signal.DecodeSignal(trunk, signalEncoded, sink.GetMode)
-                        sink.TestSignal(signal)
+                        sink.PropagateTest(signal)
                     }
 
-                case None => throw new TrunkException(Cell.ErrorCodes.SignalSinkUnknown)
+                case None => throw TrunkException(Cell.ErrorCodes.SignalSinkUnknown)
             }
         })
     }
@@ -1063,13 +1057,13 @@ class TrunkModel (
 
     def DestroySignalLinks(
         trunkKey: Trunk.Key,
-        destructors: Vector[SignalLink.Destructor]) =
+        destructors: Vector[SignalLink.Destructor]): Unit =
     {
         // Get trunk (validate):
         val trunk = GetTrunk(trunkKey)
 
         if (destructors.isEmpty)
-            throw new TrunkException(Cell.ErrorCodes.SignalLinkDestructorInvalid)
+            throw TrunkException(Cell.ErrorCodes.SignalLinkDestructorInvalid)
         else
         {
             if (destructors.nonEmpty)
@@ -1161,10 +1155,10 @@ class TrunkModel (
                     {
                         val signalEncoded = update._signalEncodedOpt.get
                         val signal = Signal.DecodeSignal(trunk, signalEncoded, link.GetMode)
-                        link.TestSignal(signal)
+                        link.PropagateTest(signal)
                     }
 
-                case None => throw new TrunkException(Cell.ErrorCodes.SignalLinkUnknown)
+                case None => throw TrunkException(Cell.ErrorCodes.SignalLinkUnknown)
             }
         })
     }
@@ -1185,13 +1179,13 @@ class TrunkModel (
 
     def DestroySignalTaps(
         trunkKey: Trunk.Key,
-        destructors: Vector[SignalTap.Destructor]) =
+        destructors: Vector[SignalTap.Destructor]): Unit =
     {
         // Get trunk (validate):
         val trunk = GetTrunk(trunkKey)
 
         if (destructors.isEmpty)
-            throw new TrunkException(Cell.ErrorCodes.SignalTapDestructorInvalid)
+            throw TrunkException(Cell.ErrorCodes.SignalTapDestructorInvalid)
         else
         {
             if (destructors.nonEmpty)
@@ -1290,10 +1284,10 @@ class TrunkModel (
                     {
                         val signalEncoded = update._signalEncodedOpt.get
                         val signal = Signal.DecodeSignal(trunk, signalEncoded, tap.GetMode)
-                        tap.TestSignal(signal)
+                        tap.PropagateTest(signal)
                     }
 
-                case None => throw new TrunkException(Cell.ErrorCodes.SignalTapUnknown)
+                case None => throw TrunkException(Cell.ErrorCodes.SignalTapUnknown)
             }
         })
     }
@@ -1320,7 +1314,7 @@ class TrunkModel (
         val trunk = GetTrunk(trunkKey)
 
         if (destructors.isEmpty)
-            throw new TrunkException(Cell.ErrorCodes.SignalInputDestructorInvalid)
+            throw TrunkException(Cell.ErrorCodes.SignalInputDestructorInvalid)
         else
         {
             // Iterate destructors:
@@ -1397,10 +1391,10 @@ class TrunkModel (
                     {
                         val signalEncoded = update._signalEncodedOpt.get
                         val signal = Signal.DecodeSignal(trunk, signalEncoded, input.GetMode)
-                        input.TestSignal(signal)
+                        input.PropagateTest(signal)
                     }
 
-                case None => throw new TrunkException(Cell.ErrorCodes.SignalInputUnknown)
+                case None => throw TrunkException(Cell.ErrorCodes.SignalInputUnknown)
             }
         })
     }
@@ -1427,7 +1421,7 @@ class TrunkModel (
         val trunk = GetTrunk(trunkKey)
 
         if (destructors.isEmpty)
-            throw new TrunkException(Cell.ErrorCodes.SignalBridgeDestructorInvalid)
+            throw TrunkException(Cell.ErrorCodes.SignalBridgeDestructorInvalid)
         else
         {
             // Iterate destructors:
@@ -1504,10 +1498,10 @@ class TrunkModel (
                     {
                         val signalEncoded = update._signalEncodedOpt.get
                         val signal = Signal.DecodeSignal(trunk, signalEncoded, bridge.GetMode)
-                        bridge.TestSignal(signal)
+                        bridge.PropagateTest(signal)
                     }
 
-                case None => throw new TrunkException(Cell.ErrorCodes.SignalBridgeUnknown)
+                case None => throw TrunkException(Cell.ErrorCodes.SignalBridgeUnknown)
             }
         })
     }
@@ -1534,7 +1528,7 @@ class TrunkModel (
         val trunk = GetTrunk(trunkKey)
 
         if (destructors.isEmpty)
-            throw new TrunkException(Cell.ErrorCodes.SignalOutputDestructorInvalid)
+            throw TrunkException(Cell.ErrorCodes.SignalOutputDestructorInvalid)
         else
         {
             // Iterate destructors:
@@ -1611,10 +1605,10 @@ class TrunkModel (
                     {
                         val signalEncoded = update._signalEncodedOpt.get
                         val signal = Signal.DecodeSignal(trunk, signalEncoded, output.GetMode)
-                        output.TestSignal(signal)
+                        output.PropagateTest(signal)
                     }
 
-                case None => throw new TrunkException(Cell.ErrorCodes.SignalOutputUnknown)
+                case None => throw TrunkException(Cell.ErrorCodes.SignalOutputUnknown)
             }
         })
     }
@@ -1641,7 +1635,7 @@ class TrunkModel (
         val trunk = GetTrunk(trunkKey)
 
         if (destructors.isEmpty)
-            throw new TrunkException(Cell.ErrorCodes.EmitterPatchDestructorInvalid)
+            throw TrunkException(Cell.ErrorCodes.EmitterPatchDestructorInvalid)
         else
         {
             // Iterate destructors:
@@ -1760,10 +1754,10 @@ class TrunkModel (
                     {
                         val signalEncoded = update._signalEncodedOpt.get
                         val signal = Signal.DecodeSignal(trunk, signalEncoded, patch.GetMode)
-                        patch.TestSignal(signal)
+                        patch.PropagateTest(signal)
                     }
 
-                case None => throw new TrunkException(Cell.ErrorCodes.EmitterPatchUnknown)
+                case None => throw TrunkException(Cell.ErrorCodes.EmitterPatchUnknown)
             }
         })
     }
@@ -1790,7 +1784,7 @@ class TrunkModel (
         val trunk = GetTrunk(trunkKey)
 
         if (destructors.isEmpty)
-            throw new TrunkException(Cell.ErrorCodes.OscillatorPatchDestructorInvalid)
+            throw TrunkException(Cell.ErrorCodes.OscillatorPatchDestructorInvalid)
         else
         {
             // Iterate destructors:
@@ -1848,7 +1842,7 @@ class TrunkModel (
                 {
                     case Some(emitterPatch) => emitterPatch.GetOscillatorPatchKeysMap.values.toSet
 
-                    case None => throw new TrunkException(Cell.ErrorCodes.EmitterPatchUnknown)
+                    case None => throw TrunkException(Cell.ErrorCodes.EmitterPatchUnknown)
                 }
 
             }
@@ -1889,10 +1883,10 @@ class TrunkModel (
                     {
                         val signalEncoded = update._signalEncodedOpt.get
                         val signal = Signal.DecodeSignal(trunk, signalEncoded, patch.GetMode)
-                        patch.TestSignal(signal)
+                        patch.PropagateTest(signal)
                     }
 
-                case None => throw new TrunkException(Cell.ErrorCodes.OscillatorPatchUnknown)
+                case None => throw TrunkException(Cell.ErrorCodes.OscillatorPatchUnknown)
             }
         })
     }
@@ -1910,7 +1904,7 @@ class TrunkModel (
         GetTrunk(trunkKey)
 
         // Get envelope's patch:
-        val patch: OscillatorPatch = GetOscillatorPatchOpt(trunkKey, oscillatorPatchKey, isRequired = true).get
+        val patch: OscillatorPatch = GetOscillatorPatchOpt(trunkKey, oscillatorPatchKey).get
 
         // Calculate valid keys as intersect of requested keys and keys known by field:
         val knownKeys = Set(
@@ -1941,7 +1935,7 @@ class TrunkModel (
         GetTrunk(trunkKey)
 
         // Get envelope's patch:
-        val patch: OscillatorPatch = GetOscillatorPatchOpt(trunkKey, oscillatorPatchKey, isRequired = true).get
+        val patch: OscillatorPatch = GetOscillatorPatchOpt(trunkKey, oscillatorPatchKey).get
 
         // Iterate updates:
         updates.foreach(update =>
@@ -1951,10 +1945,8 @@ class TrunkModel (
     }
 
 
-    def GetDefaultTrunk =
-    {
-        _defaultTrunkOpt.getOrElse(throw new TrunkException(Cell.ErrorCodes.TrunkUnknown))
-    }
+    def GetDefaultTrunk: Trunk =
+        _defaultTrunkOpt.getOrElse(throw TrunkException(Cell.ErrorCodes.TrunkUnknown))
 
     def Initialize (isTesting: Boolean = false): Unit =
     {
@@ -1965,5 +1957,6 @@ class TrunkModel (
         _defaultTrunkOpt = Some(_trunkPlant.CreateTrunk(trunkConstructor))
     }
 
-    def Log (text: String): Unit = _logger.LogDebug(text)
+    def Log (text: String): Unit =
+        _logger.LogDebug(text)
 }

@@ -96,10 +96,10 @@ class SignalLinkPlant
                         // 6: Remove element from store:
                         _links -= ((trunk.GetKey, link.GetKey))
 
-                    case None => throw new TrunkException(Cell.ErrorCodes.SignalLinkUnknown)
+                    case None => throw TrunkException(Cell.ErrorCodes.SignalLinkUnknown)
                 }
 
-            case _ => throw new TrunkException(Cell.ErrorCodes.SignalLinkInvalid)
+            case _ => throw TrunkException(Cell.ErrorCodes.SignalLinkInvalid)
         }
 
         // Return link key:
@@ -114,7 +114,7 @@ class SignalLinkPlant
         _links.filter(_._1._1 == trunkKey).foreach(linkPair =>
         {
             val ((_, pairLinkKey), _) = linkPair
-            val linkDestructor = new SignalLink.Destructor(pairLinkKey)
+            val linkDestructor = SignalLink.Destructor(pairLinkKey)
             DestroySignalLink(trunk, linkDestructor)
         })
     }
@@ -130,10 +130,10 @@ class SignalLinkPlant
             case _: SignalLink.Key =>
                 val opt = _links.get((trunk.GetKey, key))
                 if (isRequired && opt.isEmpty)
-                    throw new TrunkException(Cell.ErrorCodes.SignalLinkUnknown)
+                    throw TrunkException(Cell.ErrorCodes.SignalLinkUnknown)
                 opt
 
-            case _ => throw new TrunkException(Cell.ErrorCodes.SignalLinkKeyInvalid)
+            case _ => throw TrunkException(Cell.ErrorCodes.SignalLinkKeyInvalid)
         }
     }
 
@@ -153,5 +153,6 @@ class SignalLinkPlant
         _links.filter(_._1._1 == trunkKey).keys.map(_._2).toVector
     }
 
-    def GetElementCount (trunkKey: Trunk.Key): Int = _links.count(_._1._1 == trunkKey)
+    def GetElementCount (trunkKey: Trunk.Key): Int =
+        _links.count(_._1._1 == trunkKey)
 }

@@ -83,8 +83,8 @@ object SignalPath
 
 trait SignalPath[KeyType <: SignalPath.Key]
     extends BiasedElement[KeyType]
-        with PropagatorElement
-        with TestableElement
+            with PropagatingElement
+            with TestableElement
 {
     /**
      * Associate the signal path with a signal sink.

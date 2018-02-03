@@ -90,7 +90,7 @@ object FieldOscillator
         val commonCall = new CommonCallDecoder[FieldOscillator.Key](
             call, Cell.ErrorCodes.FieldOscillatorCallInvalid)
 
-        new Call(commonCall._elementKey, commonCall._macro)
+        Call(commonCall._elementKey, commonCall._macro)
     }
 
     def DecodeConstructor (encoded: String): Constructor =
@@ -105,13 +105,13 @@ object FieldOscillator
             {
                 case JsSuccess(value, _) => value
 
-                case JsError(errors) =>
-                    throw new FieldException(
+                case JsError(_) =>
+                    throw FieldException(
                         Cell.ErrorCodes.OscillatorPatchConstructorInvalid,
                         "missing channel definition element")
             }
 
-        new Constructor(
+        Constructor(
             commonMeta._tag,
             commonMeta._badgeOpt,
             commonMeta._nameOpt,
@@ -126,7 +126,7 @@ object FieldOscillator
         val commonMeta = new CommonDestructorMetaDecoder[FieldOscillator.Key](
             destructor, Cell.ErrorCodes.FieldOscillatorDestructorInvalid)
 
-        new Destructor(commonMeta._key, commonMeta._scope)
+        Destructor(commonMeta._key, commonMeta._scope)
     }
 
     def DecodeQuery (encoded: String): Query =
@@ -135,7 +135,7 @@ object FieldOscillator
 
         val commonQuery = new CommonQueryDecoder[FieldOscillator.Key](query)
 
-        new Query(commonQuery._keysOpt.get, commonQuery._sectionsOpt)
+        Query(commonQuery._keysOpt.get, commonQuery._sectionsOpt)
     }
 
     def DecodeUpdate (encoded: String): Update =
@@ -145,7 +145,7 @@ object FieldOscillator
         val commonMeta = new CommonUpdateMetaDecoder[FieldOscillator.Key](
             update, Cell.ErrorCodes.FieldOscillatorUpdateInvalid)
 
-        new Update(
+        Update(
             commonMeta._key,
             commonMeta._nameOpt,
             commonMeta._descriptionOpt)
@@ -177,11 +177,14 @@ class FieldOscillator (
     protected
     val _refs = refs
 
-    def GetParentKey = _refs._parentKey
+    def GetParentKey: Emitter.Key =
+        _refs._parentKey
 
-    def GetPatchKey = _refs._oscillatorPatchKey
+    def GetPatchKey: OscillatorPatch.Key =
+        _refs._oscillatorPatchKey
 
-    def UnbindPatch () = _refs._oscillatorPatchKey = OscillatorPatch.kNoneKey
+    def UnbindPatch (): Unit =
+        _refs._oscillatorPatchKey = OscillatorPatch.kNoneKey
 
     //
     // State:
@@ -217,73 +220,73 @@ class FieldOscillator (
     // Macros:
     //
 
-    def MacroSetLoudnessCeiling (ceiling: String)
+    def MacroSetLoudnessCeiling (ceiling: String): Unit =
     {
         val patch = _fieldModel.GetOscillatorPatchOpt(_refs._fieldKey, _refs._oscillatorPatchKey).getOrElse(
-            throw new FieldException(Cell.ErrorCodes.FieldOscillatorPatchless))
+            throw FieldException(Cell.ErrorCodes.FieldOscillatorPatchless))
         patch.MacroSetLoudnessCeiling(ceiling)
     }
 
-    def MacroSetLoudnessPoles (polesPacked: String)
+    def MacroSetLoudnessPoles (polesPacked: String): Unit =
     {
         val patch = _fieldModel.GetOscillatorPatchOpt(_refs._fieldKey, _refs._oscillatorPatchKey).getOrElse(
-            throw new FieldException(Cell.ErrorCodes.FieldOscillatorPatchless))
+            throw FieldException(Cell.ErrorCodes.FieldOscillatorPatchless))
         patch.MacroSetLoudnessPoles(polesPacked)
     }
 
-    def MacroSetLoudnessFloor (floor: String)
+    def MacroSetLoudnessFloor (floor: String): Unit =
     {
         val patch = _fieldModel.GetOscillatorPatchOpt(_refs._fieldKey, _refs._oscillatorPatchKey).getOrElse(
-            throw new FieldException(Cell.ErrorCodes.FieldOscillatorPatchless))
+            throw FieldException(Cell.ErrorCodes.FieldOscillatorPatchless))
         patch.MacroSetLoudnessFloor(floor)
     }
 
-    def MacroSetPeriodPoles (polesPacked: String)
+    def MacroSetPeriodPoles (polesPacked: String): Unit =
     {
         val patch = _fieldModel.GetOscillatorPatchOpt(_refs._fieldKey, _refs._oscillatorPatchKey).getOrElse(
-            throw new FieldException(Cell.ErrorCodes.FieldOscillatorPatchless))
+            throw FieldException(Cell.ErrorCodes.FieldOscillatorPatchless))
         patch.MacroSetPeriodPoles(polesPacked)
     }
 
-    def MacroSetPitchCeiling (ceiling: String)
+    def MacroSetPitchCeiling (ceiling: String): Unit =
     {
         val patch = _fieldModel.GetOscillatorPatchOpt(_refs._fieldKey, _refs._oscillatorPatchKey).getOrElse(
-            throw new FieldException(Cell.ErrorCodes.FieldOscillatorPatchless))
+            throw FieldException(Cell.ErrorCodes.FieldOscillatorPatchless))
         patch.MacroSetPitchCeiling(ceiling)
     }
 
-    def MacroSetPitchPoles (polesPacked: String)
+    def MacroSetPitchPoles (polesPacked: String): Unit =
     {
         val patch = _fieldModel.GetOscillatorPatchOpt(_refs._fieldKey, _refs._oscillatorPatchKey).getOrElse(
-            throw new FieldException(Cell.ErrorCodes.FieldOscillatorPatchless))
+            throw FieldException(Cell.ErrorCodes.FieldOscillatorPatchless))
         patch.MacroSetPitchPoles(polesPacked)
     }
 
-    def MacroSetPitchFloor (floor: String)
+    def MacroSetPitchFloor (floor: String): Unit =
     {
         val patch = _fieldModel.GetOscillatorPatchOpt(_refs._fieldKey, _refs._oscillatorPatchKey).getOrElse(
-            throw new FieldException(Cell.ErrorCodes.FieldOscillatorPatchless))
+            throw FieldException(Cell.ErrorCodes.FieldOscillatorPatchless))
         patch.MacroSetPitchFloor(floor)
     }
 
-    def MacroSetShapePoles (polesPacked: String)
+    def MacroSetShapePoles (polesPacked: String): Unit =
     {
         val patch = _fieldModel.GetOscillatorPatchOpt(_refs._fieldKey, _refs._oscillatorPatchKey).getOrElse(
-            throw new FieldException(Cell.ErrorCodes.FieldOscillatorPatchless))
+            throw FieldException(Cell.ErrorCodes.FieldOscillatorPatchless))
         patch.MacroSetShapePoles(polesPacked)
     }
 
-    def MacroSetTonePoles (polesPacked: String)
+    def MacroSetTonePoles (polesPacked: String): Unit =
     {
         val patch = _fieldModel.GetOscillatorPatchOpt(_refs._fieldKey, _refs._oscillatorPatchKey).getOrElse(
-            throw new FieldException(Cell.ErrorCodes.FieldOscillatorPatchless))
+            throw FieldException(Cell.ErrorCodes.FieldOscillatorPatchless))
         patch.MacroSetTonePoles(polesPacked)
     }
 
-    def MacroSetWavesetId (wavesetId: String)
+    def MacroSetWavesetId (wavesetId: String): Unit =
     {
         val patch = _fieldModel.GetOscillatorPatchOpt(_refs._fieldKey, _refs._oscillatorPatchKey).getOrElse(
-            throw new FieldException(Cell.ErrorCodes.FieldOscillatorPatchless))
+            throw FieldException(Cell.ErrorCodes.FieldOscillatorPatchless))
         patch.MacroSetWavesetId(wavesetId)
     }
 }

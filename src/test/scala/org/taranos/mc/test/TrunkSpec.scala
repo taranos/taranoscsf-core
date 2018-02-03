@@ -112,7 +112,7 @@ class TrunkSpec extends fixture.FlatSpec
     def CountTrunkElements (
         f: FixtureParam,
         trunkKey: String,
-        specificElements: String*): Int =
+        specificElements: String*): (Int, String) =
     {
         val elements =
             if (specificElements.isEmpty)
@@ -132,10 +132,8 @@ class TrunkSpec extends fixture.FlatSpec
             else
                 specificElements
         val report = ReportTrunkPlants(f, trunkKey)
-        var sum: Int = 0
-        for (element <- elements)
-            sum += (report \ trunkKey \ element \ "ec").as[String].toInt
-        sum
+        val sum = elements.map(element => (report \ trunkKey \ element \ "ec").as[String].toInt).sum
+        (sum, report.toString)
     }
 
     def ReportTrunkPlants (
@@ -200,14 +198,14 @@ class TrunkSpec extends fixture.FlatSpec
             assert((trunkReport \ "m" \ "n").as[String] == trunk1Renamed)
 
             // Destroy trunk:
-            assert(CountTrunkElements(f, expectedTrunk1Key, "t") == 1)
-            assert(CountTrunkElements(f, expectedTrunk1Key, "si") == 1)
-            assert(CountTrunkElements(f, expectedTrunk1Key) == 2)
+            assert(CountTrunkElements(f, expectedTrunk1Key, "t")._1 == 1)
+            assert(CountTrunkElements(f, expectedTrunk1Key, "si")._1 == 1)
+            assert(CountTrunkElements(f, expectedTrunk1Key)._1 == 2)
             serviceResult = f.cellDirector.CallService("DestroyTrunks", trunkDestructor)
             assert(serviceResult._status == Cell.ErrorCodes.Ok)
-            assert(CountTrunkElements(f, expectedTrunk1Key, "t") == 0)
-            assert(CountTrunkElements(f, expectedTrunk1Key, "si") == 0)
-            assert(CountTrunkElements(f, expectedTrunk1Key) == 0)
+            assert(CountTrunkElements(f, expectedTrunk1Key, "t")._1 == 0)
+            assert(CountTrunkElements(f, expectedTrunk1Key, "si")._1 == 0)
+            assert(CountTrunkElements(f, expectedTrunk1Key)._1 == 0)
 
             // Get trunk report (should be none reporting):
             serviceResult = f.cellDirector.CallService("ReportTrunks", query)
@@ -333,8 +331,8 @@ class TrunkSpec extends fixture.FlatSpec
             //
 
             // Destroy interfaces:
-            assert(CountTrunkElements(f, expectedTrunk1Key, "si") == 3)
-            assert(CountTrunkElements(f, expectedTrunk1Key) == 4)
+            assert(CountTrunkElements(f, expectedTrunk1Key, "si")._1 == 3)
+            assert(CountTrunkElements(f, expectedTrunk1Key)._1 == 4)
             val interface1Destructor = Json.obj(
                 "m" -> Json.obj(
                     "k" -> expectedInterface1Key))
@@ -347,8 +345,8 @@ class TrunkSpec extends fixture.FlatSpec
                 interface1Destructor,
                 interface2Destructor)
             assert(serviceResult._status == Cell.ErrorCodes.Ok)
-            assert(CountTrunkElements(f, expectedTrunk1Key, "si") == 1)
-            assert(CountTrunkElements(f, expectedTrunk1Key) == 2)
+            assert(CountTrunkElements(f, expectedTrunk1Key, "si")._1 == 1)
+            assert(CountTrunkElements(f, expectedTrunk1Key)._1 == 2)
 
             // Confirm interface states (should be none reporting):
             query = Json.obj(
@@ -517,8 +515,8 @@ class TrunkSpec extends fixture.FlatSpec
             //
 
             // Destroy ports:
-            assert(CountTrunkElements(f, expectedTrunk1Key, "sp") == 2)
-            assert(CountTrunkElements(f, expectedTrunk1Key) == 12)
+            assert(CountTrunkElements(f, expectedTrunk1Key, "sp")._1 == 2)
+            assert(CountTrunkElements(f, expectedTrunk1Key)._1 == 6)
             val port1Destructor = Json.obj(
                 "m" -> Json.obj(
                     "k" -> expectedPort1Key))
@@ -531,8 +529,8 @@ class TrunkSpec extends fixture.FlatSpec
                 port1Destructor,
                 port2Destructor)
             assert(serviceResult._status == Cell.ErrorCodes.Ok)
-            assert(CountTrunkElements(f, expectedTrunk1Key, "sp") == 0)
-            assert(CountTrunkElements(f, expectedTrunk1Key) == 4)
+            assert(CountTrunkElements(f, expectedTrunk1Key, "sp")._1 == 0)
+            assert(CountTrunkElements(f, expectedTrunk1Key)._1 == 4)
 
             // Confirm port states (should be none reporting):
             query = Json.obj(
@@ -557,10 +555,8 @@ class TrunkSpec extends fixture.FlatSpec
                 expectedTrunk1Key,
                 interface1Destructor)
             assert(serviceResult._status == Cell.ErrorCodes.Ok)
-            CountTrunkElements(f, expectedTrunk1Key)
 
             // Destroy trunk:
-            CountTrunkElements(f, expectedTrunk1Key)
             serviceResult = f.cellDirector.CallService("DestroyTrunks", trunkDestructor)
             assert(serviceResult._status == Cell.ErrorCodes.Ok)
         }
@@ -652,8 +648,8 @@ class TrunkSpec extends fixture.FlatSpec
                 }
 
             // Destroy sources:
-            assert(CountTrunkElements(f, expectedTrunk1Key, "ss") == 1)
-            assert(CountTrunkElements(f, expectedTrunk1Key) == 3)
+            assert(CountTrunkElements(f, expectedTrunk1Key, "ss")._1 == 1)
+            assert(CountTrunkElements(f, expectedTrunk1Key)._1 == 3)
             val sourceCDestructor = Json.obj(
                 "m" -> Json.obj(
                     "k" -> expectedSource1Key))
@@ -662,8 +658,8 @@ class TrunkSpec extends fixture.FlatSpec
                 expectedTrunk1Key,
                 sourceCDestructor)
             assert(serviceResult._status == Cell.ErrorCodes.Ok)
-            assert(CountTrunkElements(f, expectedTrunk1Key, "ss") == 0)
-            assert(CountTrunkElements(f, expectedTrunk1Key) == 2)
+            assert(CountTrunkElements(f, expectedTrunk1Key, "ss")._1 == 0)
+            assert(CountTrunkElements(f, expectedTrunk1Key)._1 == 2)
 
             // Get source reports:
             query = Json.obj(
@@ -778,8 +774,8 @@ class TrunkSpec extends fixture.FlatSpec
                 }
 
             // Destroy sinks:
-            assert(CountTrunkElements(f, expectedTrunk1Key, "sk") == 1)
-            assert(CountTrunkElements(f, expectedTrunk1Key) == 3)
+            assert(CountTrunkElements(f, expectedTrunk1Key, "sk")._1 == 1)
+            assert(CountTrunkElements(f, expectedTrunk1Key)._1 == 3)
             val sinkCDestructor = Json.obj(
                 "m" -> Json.obj(
                     "k" -> expectedSink1Key))
@@ -788,8 +784,8 @@ class TrunkSpec extends fixture.FlatSpec
                 expectedTrunk1Key,
                 sinkCDestructor)
             assert(serviceResult._status == Cell.ErrorCodes.Ok)
-            assert(CountTrunkElements(f, expectedTrunk1Key, "sk") == 0)
-            assert(CountTrunkElements(f, expectedTrunk1Key) == 2)
+            assert(CountTrunkElements(f, expectedTrunk1Key, "sk")._1 == 0)
+            assert(CountTrunkElements(f, expectedTrunk1Key)._1 == 2)
 
             // Get sink reports:
             query = Json.obj(
@@ -958,10 +954,10 @@ class TrunkSpec extends fixture.FlatSpec
                 }
 
             // Destroy links:
-            assert(CountTrunkElements(f, expectedTrunk1Key, "ss") == 1)
-            assert(CountTrunkElements(f, expectedTrunk1Key, "sl") == 1)
-            assert(CountTrunkElements(f, expectedTrunk1Key, "sk") == 1)
-            assert(CountTrunkElements(f, expectedTrunk1Key) == 5)
+            assert(CountTrunkElements(f, expectedTrunk1Key, "ss")._1 == 1)
+            assert(CountTrunkElements(f, expectedTrunk1Key, "sl")._1 == 1)
+            assert(CountTrunkElements(f, expectedTrunk1Key, "sk")._1 == 1)
+            assert(CountTrunkElements(f, expectedTrunk1Key)._1 == 5)
             val linkCDestructor = Json.obj(
                 "m" -> Json.obj(
                     "k" -> expectedLink1Key))
@@ -970,10 +966,10 @@ class TrunkSpec extends fixture.FlatSpec
                 expectedTrunk1Key,
                 linkCDestructor)
             assert(serviceResult._status == Cell.ErrorCodes.Ok)
-            assert(CountTrunkElements(f, expectedTrunk1Key, "ss") == 1)
-            assert(CountTrunkElements(f, expectedTrunk1Key, "sl") == 0)
-            assert(CountTrunkElements(f, expectedTrunk1Key, "sk") == 0)
-            assert(CountTrunkElements(f, expectedTrunk1Key) == 3)
+            assert(CountTrunkElements(f, expectedTrunk1Key, "ss")._1 == 1)
+            assert(CountTrunkElements(f, expectedTrunk1Key, "sl")._1 == 0)
+            assert(CountTrunkElements(f, expectedTrunk1Key, "sk")._1 == 0)
+            assert(CountTrunkElements(f, expectedTrunk1Key)._1 == 3)
 
             // Get link reports:
             query = Json.obj(
@@ -1263,11 +1259,11 @@ class TrunkSpec extends fixture.FlatSpec
             //
 
             // Destroy tap:
-            assert(CountTrunkElements(f, expectedTrunk1Key, "st") == 1)
-            assert(CountTrunkElements(f, expectedTrunk1Key, "sk") == 2)
-            assert(CountTrunkElements(f, expectedTrunk1Key, "sl") == 1)
-            assert(CountTrunkElements(f, expectedTrunk1Key, "ss") == 1)
-            assert(CountTrunkElements(f, expectedTrunk1Key) == 7)
+            assert(CountTrunkElements(f, expectedTrunk1Key, "st")._1 == 1)
+            assert(CountTrunkElements(f, expectedTrunk1Key, "sk")._1 == 2)
+            assert(CountTrunkElements(f, expectedTrunk1Key, "sl")._1 == 1)
+            assert(CountTrunkElements(f, expectedTrunk1Key, "ss")._1 == 1)
+            assert(CountTrunkElements(f, expectedTrunk1Key)._1 == 7)
             val tap2Destructor = Json.obj(
                 "m" -> Json.obj(
                     "k" -> expectedTap1Key))
@@ -1276,11 +1272,11 @@ class TrunkSpec extends fixture.FlatSpec
                 expectedTrunk1Key,
                 tap2Destructor)
             assert(serviceResult._status == Cell.ErrorCodes.Ok)
-            assert(CountTrunkElements(f, expectedTrunk1Key, "st") == 0)
-            assert(CountTrunkElements(f, expectedTrunk1Key, "sk") == 0)
-            assert(CountTrunkElements(f, expectedTrunk1Key, "sl") == 0)
-            assert(CountTrunkElements(f, expectedTrunk1Key, "ss") == 0)
-            assert(CountTrunkElements(f, expectedTrunk1Key) == 2)
+            assert(CountTrunkElements(f, expectedTrunk1Key, "st")._1 == 0)
+            assert(CountTrunkElements(f, expectedTrunk1Key, "sk")._1 == 0)
+            assert(CountTrunkElements(f, expectedTrunk1Key, "sl")._1 == 0)
+            assert(CountTrunkElements(f, expectedTrunk1Key, "ss")._1 == 0)
+            assert(CountTrunkElements(f, expectedTrunk1Key)._1 == 2)
 
             // Get tap report:
             query = Json.obj(
@@ -1308,7 +1304,7 @@ class TrunkSpec extends fixture.FlatSpec
     it must "pass basic signal input tests" in
         { f =>
             val expectedInput1Key = "smi1~smi"
-            val expectedTap1Key = "smi1.sp.st~st"
+            val expectedTap1Key = "smi1.st~st"
             val input1Name = "smi1"
             val input1Tag = "!smi1"
 
@@ -1409,8 +1405,8 @@ class TrunkSpec extends fixture.FlatSpec
             //
 
             // Destroy inputs:
-            assert(CountTrunkElements(f, expectedTrunk1Key, "smi") == 1)
-            assert(CountTrunkElements(f, expectedTrunk1Key) == 7)
+            assert(CountTrunkElements(f, expectedTrunk1Key, "smi")._1 == 1)
+            assert(CountTrunkElements(f, expectedTrunk1Key)._1 == 6)
             val inputDestructor = Json.obj(
                 "m" -> Json.obj(
                     "k" -> expectedInput1Key))
@@ -1419,8 +1415,8 @@ class TrunkSpec extends fixture.FlatSpec
                 expectedTrunk1Key,
                 inputDestructor)
             assert(serviceResult._status == Cell.ErrorCodes.Ok)
-            assert(CountTrunkElements(f, expectedTrunk1Key, "smi") == 0)
-            assert(CountTrunkElements(f, expectedTrunk1Key) == 6)
+            assert(CountTrunkElements(f, expectedTrunk1Key, "smi")._1 == 0)
+            assert(CountTrunkElements(f, expectedTrunk1Key)._1 == 2)
 
             // Get input report:
             query = Json.obj(
@@ -1439,7 +1435,7 @@ class TrunkSpec extends fixture.FlatSpec
             // Destroy trunk:
             serviceResult = f.cellDirector.CallService("DestroyTrunks", trunkDestructor)
             assert(serviceResult._status == Cell.ErrorCodes.Ok)
-            assert(CountTrunkElements(f, expectedTrunk1Key) == 0)
+            assert(CountTrunkElements(f, expectedTrunk1Key)._1 == 0)
         }
 
 
@@ -1611,8 +1607,8 @@ class TrunkSpec extends fixture.FlatSpec
             //
 
             // Destroy bridges:
-            assert(CountTrunkElements(f, expectedTrunk1Key, "smb") == 1)
-            assert(CountTrunkElements(f, expectedTrunk1Key) == 12)
+            assert(CountTrunkElements(f, expectedTrunk1Key, "smb")._1 == 1)
+            assert(CountTrunkElements(f, expectedTrunk1Key)._1 == 11)
             val bridgeDestructor = Json.obj(
                 "m" -> Json.obj(
                     "k" -> expectedBridge1Key))
@@ -1621,8 +1617,8 @@ class TrunkSpec extends fixture.FlatSpec
                 expectedTrunk1Key,
                 bridgeDestructor)
             assert(serviceResult._status == Cell.ErrorCodes.Ok)
-            assert(CountTrunkElements(f, expectedTrunk1Key, "smb") == 0)
-            assert(CountTrunkElements(f, expectedTrunk1Key) == 9)
+            assert(CountTrunkElements(f, expectedTrunk1Key, "smb")._1 == 0)
+            assert(CountTrunkElements(f, expectedTrunk1Key)._1 == 8)
 
             // Get bridge report:
             query = Json.obj(
@@ -1641,7 +1637,7 @@ class TrunkSpec extends fixture.FlatSpec
             // Destroy trunk:
             serviceResult = f.cellDirector.CallService("DestroyTrunks", trunkDestructor)
             assert(serviceResult._status == Cell.ErrorCodes.Ok)
-            assert(CountTrunkElements(f, expectedTrunk1Key) == 0)
+            assert(CountTrunkElements(f, expectedTrunk1Key)._1 == 0)
         }
 
     //
@@ -1812,9 +1808,8 @@ class TrunkSpec extends fixture.FlatSpec
             //
 
             // Destroy outputs:
-//var r = ReportTrunkPlants(f, expectedTrunk1Key)
-            assert(CountTrunkElements(f, expectedTrunk1Key, "smo") == 1)
-            assert(CountTrunkElements(f, expectedTrunk1Key) == 12)
+            assert(CountTrunkElements(f, expectedTrunk1Key, "smo")._1 == 1)
+            assert(CountTrunkElements(f, expectedTrunk1Key)._1 == 11)
             val outputDestructor = Json.obj(
                 "m" -> Json.obj(
                     "k" -> expectedOutput1Key))
@@ -1823,9 +1818,8 @@ class TrunkSpec extends fixture.FlatSpec
                 expectedTrunk1Key,
                 outputDestructor)
             assert(serviceResult._status == Cell.ErrorCodes.Ok)
-//r = ReportTrunkPlants(f, expectedTrunk1Key)
-            assert(CountTrunkElements(f, expectedTrunk1Key, "smo") == 0)
-            assert(CountTrunkElements(f, expectedTrunk1Key) == 9)
+            assert(CountTrunkElements(f, expectedTrunk1Key, "smo")._1 == 0)
+            assert(CountTrunkElements(f, expectedTrunk1Key)._1 == 8)
 
             // Get output report:
             query = Json.obj(

@@ -183,7 +183,7 @@ object Field
             {
                 case JsSuccess(value, _) => Some(value.toDouble)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val acoustic_rOpt: Option[Real] =
@@ -191,7 +191,7 @@ object Field
             {
                 case JsSuccess(value, _) => Some(value.toDouble)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val antipodeDistanceOpt: Option[Real] =
@@ -200,7 +200,7 @@ object Field
             {
                 case JsSuccess(value, _) => Some(value.toDouble)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val geometryOpt: Option[String] =
@@ -209,7 +209,7 @@ object Field
             {
                 case JsSuccess(value, _) => Some(value)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val patchDefOpt: Option[JsObject] =
@@ -217,7 +217,7 @@ object Field
             {
                 case JsSuccess(value, _) => Some(value)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val modulatorKeyOpt: Option[SignalModulator.Key] =
@@ -225,7 +225,7 @@ object Field
             {
                 case JsSuccess(value, _) => Some(TrunkElement.DecodeKey[SignalModulator.Key](value))
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val trunkKeyOpt: Option[Trunk.Key] =
@@ -233,10 +233,10 @@ object Field
             {
                 case JsSuccess(value, _) => Some(TrunkElement.DecodeKey[Trunk.Key](value))
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
-        new Constructor(
+        Constructor(
             commonMeta._tag,
             commonMeta._badgeOpt,
             commonMeta._nameOpt,
@@ -257,7 +257,7 @@ object Field
         val commonMeta = new CommonDestructorMetaDecoder[Field.Key](
             destructor, Cell.ErrorCodes.FieldDestructorInvalid)
 
-        new Destructor(commonMeta._key, commonMeta._scope)
+        Destructor(commonMeta._key, commonMeta._scope)
     }
 
     def DecodeQuery (encoded: String): Query =
@@ -266,7 +266,7 @@ object Field
 
         val commonQuery = new CommonQueryDecoder[Field.Key](query)
 
-        new Query(commonQuery._keysOpt.get, commonQuery._sectionsOpt)
+        Query(commonQuery._keysOpt.get, commonQuery._sectionsOpt)
     }
 
     def DecodeUpdate (encoded: String): Update =
@@ -292,12 +292,12 @@ object Field
                                 val probeUpdate = Probe.DecodeUpdate(probeUpdateEncoded)
                                 probeUpdates += probeUpdate
 
-                            case JsError(errors) => None
+                            case JsError(_) => None
                         }
                     }
                     if (probeUpdates.nonEmpty) Some(probeUpdates) else None
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val subjectUpdatesOpt: Option[Seq[Subject.Update]] =
@@ -314,15 +314,15 @@ object Field
                                 val subjectUpdate = Subject.DecodeUpdate(subjectUpdateEncoded)
                                 subjectUpdates += subjectUpdate
 
-                            case JsError(errors) => None
+                            case JsError(_) => None
                         }
                     }
                     if (subjectUpdates.nonEmpty) Some(subjectUpdates) else None
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
-        new Update(
+        Update(
             commonMeta._key,
             commonMeta._nameOpt,
             commonMeta._descriptionOpt,
@@ -364,7 +364,7 @@ class Field (
     protected
     val _refs = refs
 
-    def BindEmitter (emitterKey: FieldEmitter.Key) =
+    def BindEmitter (emitterKey: FieldEmitter.Key): Unit =
     {
         // First emitter becomes the default emitter:
         if (_refs._emitterKeys.isEmpty)
@@ -372,17 +372,23 @@ class Field (
         _refs._emitterKeys += emitterKey.asInstanceOf[FieldEmitter.Key]
     }
 
-    def BindProbe (probeKey: Probe.Key) = _refs._probeKeys += probeKey
+    def BindProbe (probeKey: Probe.Key): Unit =
+        _refs._probeKeys += probeKey
 
-    def BindSubject (subjectKey: Subject.Key) = _refs._subjectKeys += subjectKey
+    def BindSubject (subjectKey: Subject.Key): Unit =
+        _refs._subjectKeys += subjectKey
 
-    def GetEmitterKeys = _refs._emitterKeys.toSet
+    def GetEmitterKeys: Set[Emitter.Key] =
+        _refs._emitterKeys.toSet
 
-    def GetProbeKeys = _refs._probeKeys.toSet
+    def GetProbeKeys: Set[Probe.Key] =
+        _refs._probeKeys.toSet
 
-    def GetSubjectKeys  = _refs._subjectKeys.toSet
+    def GetSubjectKeys: Set[Subject.Key] =
+        _refs._subjectKeys.toSet
 
-    def GetTrunkKey = _refs._trunkKey
+    def GetTrunkKey: Trunk.Key =
+        _refs._trunkKey
 
     def UnbindEmitter (
         emitterKey: Emitter.Key,
@@ -399,9 +405,11 @@ class Field (
         isUnbound
     }
 
-    def UnbindProbe (probeKey: Probe.Key) = _refs._probeKeys -= probeKey
+    def UnbindProbe (probeKey: Probe.Key):Unit =
+        _refs._probeKeys -= probeKey
 
-    def UnbindSubject (subjectKey: Subject.Key) = _refs._subjectKeys -= subjectKey
+    def UnbindSubject (subjectKey: Subject.Key): Unit =
+        _refs._subjectKeys -= subjectKey
 
     //
     // State:
@@ -437,19 +445,19 @@ class Field (
             report ++=
                 Json.obj(FieldModel.Glossary.kRFieldEmitters -> _fieldModel.ReportFieldEmitters(
                     GetKey,
-                    new FieldEmitter.Query(_refs._emitterKeys.toVector, sectionsOpt)))
+                    FieldEmitter.Query(_refs._emitterKeys.toVector, sectionsOpt)))
 
             // Add subject reports:
             report ++=
                 Json.obj(FieldModel.Glossary.kRSubjects -> _fieldModel.ReportSubjects(
                     GetKey,
-                    new Subject.Query(_refs._subjectKeys.toVector, sectionsOpt)))
+                    Subject.Query(_refs._subjectKeys.toVector, sectionsOpt)))
 
             // Add probe reports:
             report ++=
                 Json.obj(FieldModel.Glossary.kRProbes -> _fieldModel.ReportProbes(
                     GetKey,
-                    new Probe.Query(_refs._probeKeys.toVector, sectionsOpt)))
+                    Probe.Query(_refs._probeKeys.toVector, sectionsOpt)))
         }
 
         report

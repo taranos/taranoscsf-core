@@ -31,7 +31,8 @@ object FieldElement
         _uniqueKey: UniqueKey,
         _symbol: Symbol)
     {
-        def apply = (_uniqueKey, _symbol)
+        def apply: (UniqueKey, Symbol) =
+            (_uniqueKey, _symbol)
     }
 
     abstract
@@ -119,7 +120,7 @@ object FieldElement
             {
                 case JsSuccess(value, _) => FieldElement.DecodeKey[KeyType](value)
 
-                case JsError(errors) => throw new FieldException(errorCode, "missing element key property")
+                case JsError(_) => throw FieldException(errorCode, "missing element key property")
             }
 
         val _macro: JsObject =
@@ -127,7 +128,7 @@ object FieldElement
             {
                 case JsSuccess(value, _) => value
 
-                case JsError(errors) => throw new FieldException(errorCode, "missing macro property")
+                case JsError(_) => throw FieldException(errorCode, "missing macro property")
             }
     }
 
@@ -140,7 +141,7 @@ object FieldElement
             {
                 case JsSuccess(value, _) => Some(value)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val _descriptionOpt: Option[String] =
@@ -148,7 +149,7 @@ object FieldElement
             {
                 case JsSuccess(value, _) => Some(value)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val _nameOpt: Option[String] =
@@ -156,7 +157,7 @@ object FieldElement
             {
                 case JsSuccess(value, _) => Some(value)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val _tag: String =
@@ -164,7 +165,7 @@ object FieldElement
             {
                 case JsSuccess(value, _) => value
 
-                case JsError(errors) => throw new FieldException(errorCode, "missing tag property")
+                case JsError(_) => throw FieldException(errorCode, "missing tag property")
             }
     }
 
@@ -177,7 +178,7 @@ object FieldElement
             {
                 case JsSuccess(value, _) => FieldElement.DecodeKey[KeyType](value)
 
-                case JsError(errors) => throw new FieldException(errorCode, "missing key property")
+                case JsError(_) => throw FieldException(errorCode, "missing key property")
             }
 
         val _scope: Symbol =
@@ -189,10 +190,10 @@ object FieldElement
 
                     case FieldModel.Glossary.`kPDestructorScopeDeep` => 'ScopeDeep
 
-                    case _ => throw new FieldException(errorCode, "invalid scope element")
+                    case _ => throw FieldException(errorCode, "invalid scope element")
                 }
 
-                case JsError(errors) => 'ScopeDeep
+                case JsError(_) => 'ScopeDeep
             }
     }
 
@@ -214,7 +215,7 @@ object FieldElement
                         {
                             case "error.expected.jsarray" => Some(Vector.empty[KeyType])
 
-                            case _ => throw new FieldException(Cell.ErrorCodes.KeysInvalid)
+                            case _ => throw FieldException(Cell.ErrorCodes.KeysInvalid)
                         }
                 }
             }
@@ -226,7 +227,7 @@ object FieldElement
             {
                 case JsSuccess(value, _) => Some(value.head)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
     }
 
@@ -239,7 +240,7 @@ object FieldElement
             {
                 case JsSuccess(value, _) => FieldElement.DecodeKey[KeyType](value)
 
-                case JsError(errors) => throw new FieldException(errorCode, "missing key property")
+                case JsError(_) => throw FieldException(errorCode, "missing key property")
             }
 
         val _nameOpt: Option[String] =
@@ -247,7 +248,7 @@ object FieldElement
             {
                 case JsSuccess(value, _) => Some(value)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val _descriptionOpt: Option[String] =
@@ -255,7 +256,7 @@ object FieldElement
             {
                 case JsSuccess(value, _) => Some(value)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
     }
 
@@ -263,7 +264,7 @@ object FieldElement
     {
         val parts = encoded.split(FieldModel.Glossary.kPartSeparator)
         if (parts.length < 2)
-            throw new FieldException(Cell.ErrorCodes.KeyInvalid)
+            throw FieldException(Cell.ErrorCodes.KeyInvalid)
 
         val uniqueKey =
         // If known special case:
@@ -301,7 +302,7 @@ object FieldElement
 
             case FieldModel.Glossary.kEProbeOscillator => new ProbeOscillator.Key(uniqueKey)
 
-            case _ => throw new FieldException(Cell.ErrorCodes.KeyInvalid)
+            case _ => throw FieldException(Cell.ErrorCodes.KeyInvalid)
         }
 
         key.asInstanceOf[KeyType]
@@ -333,7 +334,7 @@ object FieldElement
 
             case 'ProbeOscillator => FieldModel.Glossary.kEProbeOscillator
 
-            case _ => throw new FieldException(Cell.ErrorCodes.KeyInvalid)
+            case _ => throw FieldException(Cell.ErrorCodes.KeyInvalid)
         }
 
         uniqueKey + FieldModel.Glossary.kPartSeparator + symbol
@@ -366,16 +367,20 @@ trait FieldElement[KeyType <: FieldElement.Key]
 
     def GetKey: KeyType = _meta._key
 
-    def GetTag = _meta._tag
+    def GetTag: String =
+        _meta._tag
 
-    def SetNameOpt (nameOpt: Option[String]) = _meta._nameOpt = nameOpt
+    def SetNameOpt (nameOpt: Option[String]): Unit =
+        _meta._nameOpt = nameOpt
 
-    def SetDescriptionOpt (descriptionOpt: Option[String]) = _meta._descriptionOpt = descriptionOpt
+    def SetDescriptionOpt (descriptionOpt: Option[String]): Unit =
+        _meta._descriptionOpt = descriptionOpt
 
     protected
     val _refs: FieldElement.Refs
 
-    def GetFieldKey = _refs._fieldKey
+    def GetFieldKey: Field.Key =
+        _refs._fieldKey
 
     protected
     val _state: FieldElement.State
@@ -395,7 +400,7 @@ object AliasedElement
                     val (_, debangedAlias) = FieldElement.DebangTag(value)
                     Some(debangedAlias)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
     }
 
@@ -408,7 +413,7 @@ object AliasedElement
                     val (_, debangedAlias) = FieldElement.DebangTag(value)
                     Some(debangedAlias)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
     }
 }
@@ -429,6 +434,6 @@ trait CallableElement
      */
     def InvokeMacro (makro: JsObject): Unit =
     {
-        throw new FieldException(Cell.ErrorCodes.MacroUnsupported)
+        throw FieldException(Cell.ErrorCodes.MacroUnsupported)
     }
 }

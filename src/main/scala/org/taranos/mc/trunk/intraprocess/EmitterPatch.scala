@@ -173,13 +173,13 @@ object EmitterPatch
                         case fieldKey: Field.Key => fieldKey
 
                         case _ =>
-                            throw new TrunkException(
+                            throw TrunkException(
                                 Cell.ErrorCodes.EmitterPatchConstructorInvalid,
                                 "invalid emitter key property")
                     }
 
-                case JsError(errors) =>
-                    throw new TrunkException(
+                case JsError(_) =>
+                    throw TrunkException(
                         Cell.ErrorCodes.EmitterPatchConstructorInvalid,
                         "missing emitter key property")
             }
@@ -194,13 +194,13 @@ object EmitterPatch
                         case emitterKey: Emitter.Key => emitterKey
 
                         case _ =>
-                            throw new TrunkException(
+                            throw TrunkException(
                                 Cell.ErrorCodes.EmitterPatchConstructorInvalid,
                                 "invalid emitter key property")
                     }
 
-                case JsError(errors) =>
-                    throw new TrunkException(
+                case JsError(_) =>
+                    throw TrunkException(
                         Cell.ErrorCodes.EmitterPatchConstructorInvalid,
                         "missing emitter key property")
             }
@@ -215,13 +215,13 @@ object EmitterPatch
                         case modulatableElementKey: ModulatableElementKey => modulatableElementKey
 
                         case _ =>
-                            throw new TrunkException(
+                            throw TrunkException(
                                 Cell.ErrorCodes.EmitterPatchConstructorInvalid,
                                 "invalid modulatable key property")
                     }
 
-                case JsError(errors) =>
-                    throw new TrunkException(
+                case JsError(_) =>
+                    throw TrunkException(
                         Cell.ErrorCodes.EmitterPatchConstructorInvalid,
                         "missing modulatable key property")
             }
@@ -236,12 +236,12 @@ object EmitterPatch
                         case tappableElementKey: TappableElementKey => Some(tappableElementKey)
 
                         case _ =>
-                            throw new TrunkException(
+                            throw TrunkException(
                                 Cell.ErrorCodes.EmitterPatchConstructorInvalid,
                                 "invalid tappable key property")
                     }
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val patchDef: JsObject =
@@ -249,13 +249,13 @@ object EmitterPatch
             {
                 case JsSuccess(value, _) => value
 
-                case JsError(errors) =>
-                    throw new TrunkException(
+                case JsError(_) =>
+                    throw TrunkException(
                         Cell.ErrorCodes.OscillatorPatchConstructorInvalid,
                         "invalid emitter patch definition property")
             }
 
-        new Constructor(
+        Constructor(
             commonMeta._tag,
             commonMeta._badgeOpt,
             commonMeta._nameOpt,
@@ -274,7 +274,7 @@ object EmitterPatch
         val commonMeta = new CommonDestructorMetaDecoder[EmitterPatch.Key](
             destructor, Cell.ErrorCodes.EmitterPatchDestructorInvalid)
 
-        new Destructor(commonMeta._key)
+        Destructor(commonMeta._key)
     }
 
     def DecodeQuery (encoded: String, isKeysRequired: Boolean = true): Query =
@@ -283,7 +283,7 @@ object EmitterPatch
 
         val commonQuery = new CommonQueryDecoder[EmitterPatch.Key](query, isKeysRequired)
 
-        new Query(commonQuery._keysOpt.getOrElse(Vector.empty[EmitterPatch.Key]), commonQuery._sectionsOpt)
+        Query(commonQuery._keysOpt.getOrElse(Vector.empty[EmitterPatch.Key]), commonQuery._sectionsOpt)
     }
 
     def DecodeUpdate (encoded: String): Update =
@@ -298,12 +298,12 @@ object EmitterPatch
             {
                 case JsSuccess(value, _) => Some(value)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val testableState = new TestableUpdateStateDecoder(update)
 
-        new Update(
+        Update(
             commonMeta._key,
             commonMeta._nameOpt,
             commonMeta._descriptionOpt,
@@ -339,7 +339,7 @@ class EmitterPatch (
     (implicit
         protected val _trunkModel: TrunkModel,
         protected val _logger: CellLogger)
-    extends SignalModulator[EmitterPatch.Key]
+    extends Patch[EmitterPatch.Key]
 {
     import scala.collection.mutable
 
@@ -349,7 +349,8 @@ class EmitterPatch (
     protected
     val _meta = meta
 
-    def GetMode = _meta._mode
+    def GetMode: Signal.ModeEnum.Mode =
+        _meta._mode
 
     //
     // Attrs:
@@ -363,22 +364,29 @@ class EmitterPatch (
     protected
     val _refs = refs
 
-    def BindOscillatorPatch (channelTag: String, key: OscillatorPatch.Key) =
+    def BindOscillatorPatch (channelTag: String, key: OscillatorPatch.Key): Unit =
         _refs._oscillatorPatchKeys += channelTag -> key
 
-    def ClearOscillatorPatchKeysMap () = _refs._oscillatorPatchKeys.clear()
+    def ClearOscillatorPatchKeysMap (): Unit =
+        _refs._oscillatorPatchKeys.clear()
 
-    def GetEmitterKey: Emitter.Key = _refs._emitterKey
+    def GetEmitterKey: Emitter.Key =
+        _refs._emitterKey
 
-    def GetFieldKey: Field.Key = _refs._fieldKey
+    def GetFieldKey: Field.Key =
+        _refs._fieldKey
 
-    def GetOscillatorPatchKeysMap: mutable.HashMap[String, OscillatorPatch.Key] = _refs._oscillatorPatchKeys
+    def GetOscillatorPatchKeysMap: mutable.HashMap[String, OscillatorPatch.Key] =
+        _refs._oscillatorPatchKeys
 
-    def GetTapKey: SignalTap.Key = _refs._tapKey
+    def GetTapKey: SignalTap.Key =
+        _refs._tapKey
 
-    def IsTapParent = _refs._isTapParent
+    def IsTapParent: Boolean =
+        _refs._isTapParent
 
-    def UnbindOscillatorPatch (channelTag: String) = _refs._oscillatorPatchKeys -= channelTag
+    def UnbindOscillatorPatch (channelTag: String): Unit =
+        _refs._oscillatorPatchKeys -= channelTag
 
     //
     // State:
@@ -386,7 +394,8 @@ class EmitterPatch (
     protected
     val _state = new EmitterPatch.State
 
-    def GetChannelsMap: mutable.HashMap[String, EmitterPatch.Channel] = _state._channels
+    def GetChannelsMap: mutable.HashMap[String, EmitterPatch.Channel] =
+        _state._channels
 
     def ImportChannelDef (channelTag: String, channelDef: JsObject): Unit =
     {
@@ -397,7 +406,7 @@ class EmitterPatch (
             case JsSuccess (value, _) => value ++ Json.obj(channelTag -> channelDef)
 
             // If no channel defs exists then something is seriously wrong:
-            case JsError(errors) =>  throw new TrunkException(Cell.ErrorCodes.EmitterPatchInvalid)
+            case JsError(_) =>  throw TrunkException(Cell.ErrorCodes.EmitterPatchInvalid)
 
         }
         val newPatchDef = _attrs._patchDef ++ Json.obj(FieldModel.Glossary.kChannelDef -> newChannelDefs)
@@ -423,11 +432,11 @@ class EmitterPatch (
             {
                 case JsSuccess(value, _) =>
                     if (value.keys.size < 1)
-                        throw new TrunkException(Cell.ErrorCodes.EmitterPatchInvalid)
+                        throw TrunkException(Cell.ErrorCodes.EmitterPatchInvalid)
                     value
 
-                case JsError(errors) =>
-                    throw new TrunkException(Cell.ErrorCodes.EmitterPatchInvalid)
+                case JsError(_) =>
+                    throw TrunkException(Cell.ErrorCodes.EmitterPatchInvalid)
             }
 
         channelDefs.fields.foreach(pair =>
@@ -439,7 +448,7 @@ class EmitterPatch (
                 {
                     case JsSuccess(value, _) => value
 
-                    case JsError(errors) => throw new TrunkException(Cell.ErrorCodes.EmitterPatchInvalid)
+                    case JsError(_) => throw TrunkException(Cell.ErrorCodes.EmitterPatchInvalid)
                 }
             val channelEnvelope = Envelope.DecodeContinuousEnvelopeDef(channelEnvelopeDef)
 
@@ -448,7 +457,7 @@ class EmitterPatch (
                 {
                     case JsSuccess(value, _) => value
 
-                    case JsError(errors) => throw new TrunkException(Cell.ErrorCodes.EmitterPatchInvalid)
+                    case JsError(_) => throw TrunkException(Cell.ErrorCodes.EmitterPatchInvalid)
                 }
 
             _state._channels += channelTag -> new EmitterPatch.Channel(channelEnvelope, oscillatorPatchDef)
@@ -460,7 +469,7 @@ class EmitterPatch (
     def MacroCreateChannel (
         channelTag: String,
         envelopeDefOpt: Option[JsObject],
-        patchDefOpt: Option[JsObject]) =
+        patchDefOpt: Option[JsObject]): Unit =
     {
         val envelopeDef = envelopeDefOpt.getOrElse(Patch.kDefaultPatchEnvelopeDef)
         val oscillatorPatchDef = patchDefOpt.getOrElse(Patch.kDefaultOscillatorPatchDef)
@@ -474,7 +483,7 @@ class EmitterPatch (
         _trunkModel.UpdateEmitterPatches(_refs._trunkKey, Vector(update))
     }
 
-    def MacroDestroyChannel (channelTag: String) =
+    def MacroDestroyChannel (channelTag: String): Unit =
     {
         val newChannelDefs = (_attrs._patchDef \ FieldModel.Glossary.kChannelDef).as[JsObject] - channelTag
         val newEmitterPatchDef = _attrs._patchDef ++ Json.obj(FieldModel.Glossary.kChannelDef -> newChannelDefs)
@@ -482,13 +491,13 @@ class EmitterPatch (
         _trunkModel.UpdateEmitterPatches(_refs._trunkKey, Vector(update))
     }
 
-    def MacroSetChannelCeiling (channelTag: String, ceiling: String) =
+    def MacroSetChannelCeiling (channelTag: String, ceiling: String): Unit =
     {
         val channelDef = (_attrs._patchDef \ FieldModel.Glossary.kChannelDef \ channelTag).validate[JsObject] match
         {
             case JsSuccess (value, _) => value
 
-            case JsError(errors) => throw new TrunkException(Cell.ErrorCodes.MacroInvalid)
+            case JsError(_) => throw TrunkException(Cell.ErrorCodes.MacroInvalid)
         }
         val newEnvelopeDef = (channelDef \ FieldModel.Glossary.kEnvelopeDef).as[JsObject] ++
             Json.obj(FieldModel.Glossary.kEnvelopeCeiling -> ceiling)
@@ -496,13 +505,13 @@ class EmitterPatch (
         ImportChannelDef(channelTag, newChannelDef)
     }
 
-    def MacroSetChannelPoles (channelTag: String, polesPacked: String) =
+    def MacroSetChannelPoles (channelTag: String, polesPacked: String): Unit =
     {
         val channelDef = (_attrs._patchDef \ FieldModel.Glossary.kChannelDef \ channelTag).validate[JsObject] match
         {
             case JsSuccess (value, _) => value
 
-            case JsError(errors) => throw new TrunkException(Cell.ErrorCodes.MacroInvalid)
+            case JsError(_) => throw TrunkException(Cell.ErrorCodes.MacroInvalid)
         }
         val newEnvelopeDef = (channelDef \ FieldModel.Glossary.kEnvelopeDef).as[JsObject] ++
             Json.obj(FieldModel.Glossary.kEnvelopePolesPackedDef -> polesPacked) - FieldModel.Glossary.kEnvelopePolesDef
@@ -510,13 +519,13 @@ class EmitterPatch (
         ImportChannelDef(channelTag, newChannelDef)
     }
 
-    def MacroSetChannelFloor (channelTag: String, floor: String) =
+    def MacroSetChannelFloor (channelTag: String, floor: String): Unit =
     {
         val channelDef = (_attrs._patchDef \ FieldModel.Glossary.kChannelDef \ channelTag).validate[JsObject] match
         {
             case JsSuccess (value, _) => value
 
-            case JsError(errors) => throw new TrunkException(Cell.ErrorCodes.MacroInvalid)
+            case JsError(_) => throw TrunkException(Cell.ErrorCodes.MacroInvalid)
         }
         val newEnvelopeDef = (channelDef \ FieldModel.Glossary.kEnvelopeDef).as[JsObject] ++
             Json.obj(FieldModel.Glossary.kEnvelopeFloor -> floor)
@@ -525,7 +534,7 @@ class EmitterPatch (
     }
 
     override
-    def Modulate (signal: Signal[_ >: SignalTypes]): SignalModulator.ModulatedSignals =
+    def Modulate (signal: Signal[_ >: SignalTypes]): ModulatableElement.ModulatedSignals =
     {
         import scala.collection.mutable
 
@@ -542,7 +551,7 @@ class EmitterPatch (
             val modulatedScalar = Envelope.ModulateWithContinuousEnvelope(scalar, envelope)
             modulatedSignals += ((Some(channelTag), Signal[Continuous](ordinal, modulatedScalar, Some(GetKey))))
         })
-        SignalModulator.ModulatedSignals(modulatedSignals)
+        ModulatableElement.ModulatedSignals(modulatedSignals)
     }
 
     def Report (sectionsOpt: Option[String] = None): JsObject =
@@ -573,7 +582,7 @@ class EmitterPatch (
             report ++=
                 Json.obj(TrunkModel.Glossary.kRSignalTaps -> _trunkModel.ReportSignalTaps(
                     GetTrunkKey,
-                    new SignalTap.Query(Vector(_refs._tapKey), sectionsOpt)))
+                    SignalTap.Query(Vector(_refs._tapKey), sectionsOpt)))
         }
 
         // Add peer reports:
@@ -586,7 +595,7 @@ class EmitterPatch (
                 val report = _trunkModel.ReportOscillatorPatches(
                     GetTrunkKey,
                     GetKey,
-                    new OscillatorPatch.Query(Vector(patchKey), sectionsOpt))
+                    OscillatorPatch.Query(Vector(patchKey), sectionsOpt))
                 oscillatorReports += (channelTag -> report.head)
             })
             report ++=
@@ -596,24 +605,24 @@ class EmitterPatch (
         report
     }
 
-    def TestSignal (signal: Signal[_ >: SignalTypes]) =
+    def PropagateTest (signal: Signal[_ >: SignalTypes]): Unit =
     {
         _trunkModel.GetSignalTapOpt(GetTrunkKey, _refs._tapKey) match
         {
             case Some(tap) => tap.Propagate(Some(signal))
 
-            case None => throw new TrunkException(Cell.ErrorCodes.EmitterPatchTapless)
+            case None => throw TrunkException(Cell.ErrorCodes.EmitterPatchTapless)
         }
     }
 
     override
-    def Trigger () =
+    def Activate (): Unit =
     {
         _trunkModel.GetSignalTapOpt(GetTrunkKey, _refs._tapKey) match
         {
             case Some(tap) => tap.Propagate()
 
-            case None => throw new TrunkException(Cell.ErrorCodes.EmitterPatchTapless)
+            case None => throw TrunkException(Cell.ErrorCodes.EmitterPatchTapless)
         }
     }
 

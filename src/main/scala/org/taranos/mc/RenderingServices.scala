@@ -76,7 +76,7 @@ object RenderingServices
         val fieldKeys = fields.map(_.GetKey)
 
         // Report fields:
-        val query = new Field.Query(fieldKeys, Some(FieldModel.Glossary.kRStandardCreationSections))
+        val query = Field.Query(fieldKeys, Some(FieldModel.Glossary.kRStandardCreationSections))
         val fieldReports = _fieldModel.ReportFields(query)
 
         // Wrap reports:
@@ -183,7 +183,7 @@ object RenderingServices
         val fieldEmitterKeys = fieldEmitters.map(_.GetKey)
 
         // Report field emitters:
-        val query = new FieldEmitter.Query(fieldEmitterKeys, Some(FieldModel.Glossary.kRStandardCreationSections))
+        val query = FieldEmitter.Query(fieldEmitterKeys, Some(FieldModel.Glossary.kRStandardCreationSections))
         val fieldEmitterReports = _fieldModel.ReportFieldEmitters(fieldKey, query)
 
         // Wrap reports:
@@ -302,7 +302,7 @@ object RenderingServices
         val fieldOscillatorKeys = fieldOscillators.map(_.GetKey)
 
         // Report field oscillators:
-        val query = new FieldOscillator.Query(fieldOscillatorKeys, Some(FieldModel.Glossary.kRStandardCreationSections))
+        val query = FieldOscillator.Query(fieldOscillatorKeys, Some(FieldModel.Glossary.kRStandardCreationSections))
         val fieldOscillatorReports = _fieldModel.ReportFieldOscillators(fieldKey, fieldEmitterKey, query)
 
         // Wrap reports:
@@ -395,7 +395,7 @@ object RenderingServices
         val subjectKeys = subjects.map(_.GetKey)
 
         // Report subjects including state and children sections:
-        val query = new Subject.Query(subjectKeys, Some(FieldModel.Glossary.kRStandardCreationSections))
+        val query = Subject.Query(subjectKeys, Some(FieldModel.Glossary.kRStandardCreationSections))
         val subjectReports = _fieldModel.ReportSubjects(fieldKey, query)
 
         // Wrap reports:
@@ -633,7 +633,7 @@ object RenderingServices
         val subjectOscillatorKeys = subjectOscillators.map(_.GetKey)
 
         // Report subject oscillators:
-        val query = new SubjectOscillator.Query(subjectOscillatorKeys,
+        val query = SubjectOscillator.Query(subjectOscillatorKeys,
             Some(FieldModel.Glossary.kRStandardCreationSections))
         val subjectOscillatorReports = _fieldModel.ReportSubjectOscillators(fieldKey, subjectEmitterKey, query)
 
@@ -727,7 +727,7 @@ object RenderingServices
         val probeKeys = probes.map(_.GetKey)
 
         // Report probes including state and children sections:
-        val query = new Probe.Query(probeKeys, Some(FieldModel.Glossary.kRStandardCreationSections))
+        val query = Probe.Query(probeKeys, Some(FieldModel.Glossary.kRStandardCreationSections))
         val probeReports = _fieldModel.ReportProbes(fieldKey, query)
 
         // Wrap reports:
@@ -968,7 +968,7 @@ object RenderingServices
         val probeOscillatorKeys = probeOscillators.map(_.GetKey)
 
         // Report probe oscillators:
-        val query = new ProbeOscillator.Query(probeOscillatorKeys, Some(FieldModel.Glossary.kRStandardCreationSections))
+        val query = ProbeOscillator.Query(probeOscillatorKeys, Some(FieldModel.Glossary.kRStandardCreationSections))
         val probeOscillatorReports = _fieldModel.ReportProbeOscillators(fieldKey, probeEmitterKey, query)
 
         // Wrap reports:
@@ -1230,7 +1230,7 @@ object RenderingServices
         // Decode query:
         val queryEncoded = serviceArgs(2)
         val query = EmitterPatch.DecodeQuery(queryEncoded)
-        val newQuery = new EmitterPatch.Query(Vector(fieldEmitterOpt.get.GetPatchKey), query._sectionsOpt)
+        val newQuery = EmitterPatch.Query(Vector(fieldEmitterOpt.get.GetPatchKey), query._sectionsOpt)
 
         // Report emitter patches:
         val emitterPatchReports = _trunkModel.ReportEmitterPatches(trunkKey, newQuery)
@@ -1264,7 +1264,7 @@ object RenderingServices
         // Decode query:
         val queryEncoded = serviceArgs(2)
         val query = EmitterPatch.DecodeQuery(queryEncoded, isKeysRequired = false)
-        val newQuery = new EmitterPatch.Query(Vector(subjectEmitterOpt.get.GetPatchKey), query._sectionsOpt)
+        val newQuery = EmitterPatch.Query(Vector(subjectEmitterOpt.get.GetPatchKey), query._sectionsOpt)
 
         // Report emitter patches:
         val emitterPatchReports = _trunkModel.ReportEmitterPatches(trunkKey, newQuery)
@@ -1298,7 +1298,7 @@ object RenderingServices
         // Decode query:
         val queryEncoded = serviceArgs(2)
         val query = EmitterPatch.DecodeQuery(queryEncoded)
-        val newQuery = new EmitterPatch.Query(Vector(probeEmitterOpt.get.GetPatchKey), query._sectionsOpt)
+        val newQuery = EmitterPatch.Query(Vector(probeEmitterOpt.get.GetPatchKey), query._sectionsOpt)
 
         // Report emitter patches:
         val emitterPatchReports = _trunkModel.ReportEmitterPatches(trunkKey, newQuery)
@@ -1393,7 +1393,7 @@ object RenderingServices
         // Decode query:
         val queryEncoded = serviceArgs(2)
         val query = OscillatorPatch.DecodeQuery(queryEncoded)
-        val newQuery = new OscillatorPatch.Query(Vector(fieldOscillatorOpt.get.GetPatchKey), query._sectionsOpt)
+        val newQuery = OscillatorPatch.Query(Vector(fieldOscillatorOpt.get.GetPatchKey), query._sectionsOpt)
 
         // Report oscillator patches:
         val oscillatorPatchReports = _trunkModel.ReportOscillatorPatches(
@@ -1430,7 +1430,7 @@ object RenderingServices
         // Decode query:
         val queryEncoded = serviceArgs(2)
         val query = OscillatorPatch.DecodeQuery(queryEncoded)
-        val newQuery = new OscillatorPatch.Query(Vector(subjectOscillatorOpt.get.GetPatchKey), query._sectionsOpt)
+        val newQuery = OscillatorPatch.Query(Vector(subjectOscillatorOpt.get.GetPatchKey), query._sectionsOpt)
 
         // Report oscillator patches:
         val oscillatorPatchReports = _trunkModel.ReportOscillatorPatches(
@@ -1467,7 +1467,7 @@ object RenderingServices
         // Decode query:
         val queryEncoded = serviceArgs(2)
         val query = OscillatorPatch.DecodeQuery(queryEncoded)
-        val newQuery = new OscillatorPatch.Query(Vector(probeOscillatorOpt.get.GetPatchKey), query._sectionsOpt)
+        val newQuery = OscillatorPatch.Query(Vector(probeOscillatorOpt.get.GetPatchKey), query._sectionsOpt)
 
         // Report oscillator patches:
         val oscillatorPatchReports = _trunkModel.ReportOscillatorPatches(

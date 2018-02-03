@@ -59,7 +59,7 @@ class TrunkPlant
         // N/A
 
         // Create default interface:
-        val interfaceConstructor = new SignalInterface.Constructor(
+        val interfaceConstructor = SignalInterface.Constructor(
             _tag = constructor._tag + TrunkModel.Glossary.kTagSeparator + TrunkModel.Glossary.kEDefaultSignalInterface)
         _trunkModel.CreateSignalInterfaces(
             trunk.GetKey,
@@ -94,10 +94,10 @@ class TrunkPlant
                         // 6: Remove element from store:
                         _trunks -= trunk.GetKey
 
-                    case None => throw new TrunkException(Cell.ErrorCodes.TrunkUnknown)
+                    case None => throw TrunkException(Cell.ErrorCodes.TrunkUnknown)
                 }
 
-            case _ => throw new TrunkException(Cell.ErrorCodes.TrunkInvalid)
+            case _ => throw TrunkException(Cell.ErrorCodes.TrunkInvalid)
         }
     }
 
@@ -107,7 +107,7 @@ class TrunkPlant
         _trunks.foreach(trunkPair =>
         {
             val (trunkKey, _) = trunkPair
-            val trunkDestructor = new Trunk.Destructor(trunkKey)
+            val trunkDestructor = Trunk.Destructor(trunkKey)
             DestroyTrunk(trunkDestructor)
         })
     }
@@ -122,10 +122,10 @@ class TrunkPlant
             case _: Trunk.Key =>
                 val opt = _trunks.get(key)
                 if (isRequired && opt.isEmpty)
-                    throw new TrunkException(Cell.ErrorCodes.TrunkUnknown)
+                    throw TrunkException(Cell.ErrorCodes.TrunkUnknown)
                 opt
 
-            case _ => throw new TrunkException(Cell.ErrorCodes.TrunkKeyInvalid)
+            case _ => throw TrunkException(Cell.ErrorCodes.TrunkKeyInvalid)
         }
     }
 
@@ -135,5 +135,6 @@ class TrunkPlant
         _trunks.keys.toVector
     }
 
-    def GetElementCount (trunkKey: Trunk.Key): Int = _trunks.count(_._1 == trunkKey)
+    def GetElementCount (trunkKey: Trunk.Key): Int =
+        _trunks.count(_._1 == trunkKey)
 }

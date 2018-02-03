@@ -45,9 +45,9 @@ class EmitterPatchPlant
                 {
                     case Some(input) =>
                         _trunkModel.GetSignalTapOpt(trunk.GetKey, input.GetTapKey).getOrElse(
-                            throw new TrunkException(Cell.ErrorCodes.SignalInputTapless))
+                            throw TrunkException(Cell.ErrorCodes.SignalInputTapless))
 
-                    case None => throw new TrunkException(Cell.ErrorCodes.SignalInputUnknown)
+                    case None => throw TrunkException(Cell.ErrorCodes.SignalInputUnknown)
                 }
 
             case bridgeKey: SignalBridge.Key =>
@@ -55,9 +55,9 @@ class EmitterPatchPlant
                 {
                     case Some(bridge) =>
                         _trunkModel.GetSignalTapOpt(trunk.GetKey, bridge.GetTapKey).getOrElse(
-                            throw new TrunkException(Cell.ErrorCodes.SignalBridgeTapless))
+                            throw TrunkException(Cell.ErrorCodes.SignalBridgeTapless))
 
-                    case None => throw new TrunkException(Cell.ErrorCodes.SignalBridgeUnknown)
+                    case None => throw TrunkException(Cell.ErrorCodes.SignalBridgeUnknown)
                 }
         }
         
@@ -68,7 +68,7 @@ class EmitterPatchPlant
             // Get supplied tap:
             case Some(tapKey) if tapKey.isInstanceOf[SignalTap.Key] =>
                 _trunkModel.GetSignalTapOpt(trunk.GetKey, tapKey.asInstanceOf[SignalTap.Key]).getOrElse(
-                    throw new TrunkException(Cell.ErrorCodes.SignalTapInvalid))
+                    throw TrunkException(Cell.ErrorCodes.SignalTapInvalid))
 
             // Make a new tap:
             case None =>
@@ -76,21 +76,21 @@ class EmitterPatchPlant
                 _trunkModel.CreateSignalTaps(
                     trunk.GetKey,
                     Vector(
-                        new SignalTap.Constructor(
+                        SignalTap.Constructor(
                             _tag = constructor._tag + TrunkModel.Glossary.kTagSeparator +
                                 TrunkModel.Glossary.kESignalTap,
                             _mode = Signal.ModeEnum.Continuous))).head
 
             // Cannot bind with anything else:
             case _ =>
-                throw new TrunkException(Cell.ErrorCodes.EmitterPatchInvalid)
+                throw TrunkException(Cell.ErrorCodes.EmitterPatchInvalid)
         }
 
         // Create link from modulatable tap to routing tap:
         _trunkModel.CreateSignalLinks(
             trunk.GetKey,
             Vector(
-                new SignalLink.Constructor(
+                SignalLink.Constructor(
                     _tag = constructor._tag + TrunkModel.Glossary.kTagSeparator + TrunkModel.Glossary.kESignalLink,
                     _sourceKey = modulatableTap.GetSourceKey,
                     _sinkKey = routingTap.GetSinkKey)))
@@ -131,7 +131,7 @@ class EmitterPatchPlant
             case probeEmitterKey: ProbeEmitter.Key =>
                 fieldModel.GetProbeEmitterOpt(field.GetKey, probeEmitterKey).get
 
-            case _ => throw new TrunkException(Cell.ErrorCodes.EmitterPatchConstructorInvalid)
+            case _ => throw TrunkException(Cell.ErrorCodes.EmitterPatchConstructorInvalid)
         }
         emitter.BindPatch(patch.GetKey)
 
@@ -157,6 +157,7 @@ class EmitterPatchPlant
         {
             case Some(patch) =>
                 // 1: Unbind with children:
+                // Routing tap:
                 if (patch.IsTapParent)
                     _trunkModel.GetSignalTapOpt(trunk.GetKey, patch.GetTapKey) match
                     {
@@ -166,6 +167,7 @@ class EmitterPatchPlant
                     }
 
                 // 2: Unbind with peers:
+                // Routing tap:
                 if (!patch.IsTapParent)
                     _trunkModel.GetSignalTapOpt(trunk.GetKey, patch.GetTapKey) match
                     {
@@ -188,7 +190,7 @@ class EmitterPatchPlant
                     case probeEmitterKey: ProbeEmitter.Key =>
                         fieldModel.GetProbeEmitterOpt(field.GetKey, probeEmitterKey).get
 
-                    case _ => throw new TrunkException(Cell.ErrorCodes.EmitterPatchConstructorInvalid)
+                    case _ => throw TrunkException(Cell.ErrorCodes.EmitterPatchConstructorInvalid)
                 }
                 emitter.UnbindPatch()
 
@@ -196,16 +198,17 @@ class EmitterPatchPlant
                 trunk.UnbindEmitterPatch(patch.GetKey)
 
                 // 5: Destroy children:
+                // Routing tap:
                 if (patch.IsTapParent)
                 {
-                    val tapDestructor = new SignalTap.Destructor(patch.GetTapKey)
+                    val tapDestructor = SignalTap.Destructor(patch.GetTapKey)
                     _trunkModel.DestroySignalTaps(trunk.GetKey, Vector(tapDestructor))
                 }
 
                 // 6: Remove element from store:
                 _patches -= ((trunk.GetKey, patch.GetKey))
 
-            case None => throw new TrunkException(Cell.ErrorCodes.EmitterPatchUnknown)
+            case None => throw TrunkException(Cell.ErrorCodes.EmitterPatchUnknown)
         }
 
         // Return patch key:
@@ -220,7 +223,7 @@ class EmitterPatchPlant
         _patches.filter(_._1._1 == trunkKey).foreach(patchPair =>
         {
             val ((_, pairPatchKey), _) = patchPair
-            val patchDestructor = new EmitterPatch.Destructor(pairPatchKey)
+            val patchDestructor = EmitterPatch.Destructor(pairPatchKey)
             DestroyEmitterPatch(trunk, patchDestructor)
         })
     }
@@ -236,10 +239,10 @@ class EmitterPatchPlant
             case _: EmitterPatch.Key =>
                 val opt = _patches.get((trunk.GetKey, key))
                 if (isRequired && opt.isEmpty)
-                    throw new TrunkException(Cell.ErrorCodes.EmitterPatchUnknown)
+                    throw TrunkException(Cell.ErrorCodes.EmitterPatchUnknown)
                 opt
 
-            case _ => throw new TrunkException(Cell.ErrorCodes.EmitterPatchKeyInvalid)
+            case _ => throw TrunkException(Cell.ErrorCodes.EmitterPatchKeyInvalid)
         }
     }
 
@@ -259,5 +262,6 @@ class EmitterPatchPlant
         _patches.filter(_._1._1 == trunkKey).keys.map(_._2).toVector
     }
 
-    def GetElementCount (trunkKey: Trunk.Key): Int = _patches.count(_._1._1 == trunkKey)
+    def GetElementCount (trunkKey: Trunk.Key): Int =
+        _patches.count(_._1._1 == trunkKey)
 }

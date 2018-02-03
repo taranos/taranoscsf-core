@@ -46,7 +46,8 @@ object CellDirector
             extends SupervisionMessage
     }
 
-    def MakeProps = akka.actor.Props[CellDirector]
+    def MakeProps: akka.actor.Props =
+        akka.actor.Props[CellDirector]
 }
 
 class CellDirector
@@ -112,9 +113,9 @@ class CellDirector
         {
             case Some(cellKey) =>
                 val cellOpt = _cells.get(cellKey)
-                cellOpt.getOrElse(throw new CellException(Cell.ErrorCodes.CellUnknown))
+                cellOpt.getOrElse(throw CellException(Cell.ErrorCodes.CellUnknown))
 
-            case None => throw new CellException(Cell.ErrorCodes.CellKeyInvalid)
+            case None => throw CellException(Cell.ErrorCodes.CellKeyInvalid)
         }
 
         // Forward request to cell:
@@ -151,7 +152,7 @@ class CellDirector
         super.preStart()
     }
 
-    def receive =
+    def receive: Receive =
     {
         //
         // From supervisor:

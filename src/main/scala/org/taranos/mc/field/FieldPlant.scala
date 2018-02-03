@@ -57,10 +57,10 @@ class FieldPlant
 
         // 3: Bind with/create children:
         // Create default emitter:
-        val emitterConstructor = new FieldEmitter.Constructor(
+        val emitterConstructor = FieldEmitter.Constructor(
             _tag = constructor._tag + FieldModel.Glossary.kTagSeparator + FieldModel.Glossary.kEDefaultEmitter,
             _patchDefOpt = constructor._patchDefOpt,
-            _modulatorKeyOpt = constructor._modulatorKeyOpt)
+            _modulatableKeyOpt = constructor._modulatorKeyOpt)
         _fieldModel.CreateFieldEmitters(
             field.GetKey,
             Vector(emitterConstructor))
@@ -101,10 +101,10 @@ class FieldPlant
                         // 5: Remove element from store:
                         _fields -= field.GetKey
 
-                    case None => throw new FieldException(Cell.ErrorCodes.FieldUnknown)
+                    case None => throw FieldException(Cell.ErrorCodes.FieldUnknown)
                 }
 
-            case _ => throw new FieldException(Cell.ErrorCodes.FieldInvalid)
+            case _ => throw FieldException(Cell.ErrorCodes.FieldInvalid)
         }
     }
 
@@ -114,7 +114,7 @@ class FieldPlant
         _fields.foreach(fieldPair =>
         {
             val (fieldKey, _) = fieldPair
-            val fieldDestructor = new Field.Destructor(fieldKey, scope)
+            val fieldDestructor = Field.Destructor(fieldKey, scope)
             DestroyField(fieldDestructor)
         })
     }
@@ -129,10 +129,10 @@ class FieldPlant
             case _: Field.Key =>
                 val opt = _fields.get(key)
                 if (isRequired && opt.isEmpty)
-                    throw new FieldException(Cell.ErrorCodes.FieldUnknown)
+                    throw FieldException(Cell.ErrorCodes.FieldUnknown)
                 opt
 
-            case _ => throw new FieldException(Cell.ErrorCodes.FieldKeyInvalid)
+            case _ => throw FieldException(Cell.ErrorCodes.FieldKeyInvalid)
         }
     }
 
@@ -142,5 +142,6 @@ class FieldPlant
         _fields.keys.toVector
     }
 
-    def GetElementCount (fieldKey: Field.Key): Int = _fields.count(_._1 == fieldKey)
+    def GetElementCount (fieldKey: Field.Key): Int =
+        _fields.count(_._1 == fieldKey)
 }

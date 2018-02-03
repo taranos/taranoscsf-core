@@ -34,40 +34,29 @@ class SignalInputPlant
         trunk: Trunk,
         constructor: SignalInput.Constructor): SignalInput =
     {
-        // Get routing tappable to bind with:
+        // Get routing tap to bind with:
+        var isTapParent: Boolean = false
         val routingTap: SignalTap = constructor._tappableKeyOpt match
         {
-            // Get supplied port's tap:
-            case Some(portKey) if portKey.isInstanceOf[SignalPort.Key] =>
-                _trunkModel.GetSignalPortOpt(trunk.GetKey, portKey.asInstanceOf[SignalPort.Key]) match
-                {
-                    case Some(port) =>
-                        _trunkModel.GetSignalTapOpt(trunk.GetKey, port.GetTapKey).getOrElse(
-                            throw new TrunkException(Cell.ErrorCodes.SignalPortTapless))
-
-                    case None => throw new TrunkException(Cell.ErrorCodes.SignalPortUnknown)
-                }
-
             // Get supplied tap:
             case Some(tapKey) if tapKey.isInstanceOf[SignalTap.Key] =>
                 _trunkModel.GetSignalTapOpt(trunk.GetKey, tapKey.asInstanceOf[SignalTap.Key]).getOrElse(
-                    throw new TrunkException(Cell.ErrorCodes.SignalTapInvalid))
+                    throw TrunkException(Cell.ErrorCodes.SignalTapInvalid))
 
-            // Get tap of a new port on the default interface:
+            // Make a new tap (child):
             case None =>
-                val portConstructor = SignalPort.Constructor(
-                    _tag = constructor._tag + TrunkModel.Glossary.kTagSeparator + TrunkModel.Glossary.kESignalPort,
-                    _aliasOpt = Some(constructor._tag),
-                    _mode = constructor._mode)
-                val port = _trunkModel.CreateSignalPorts(
+                isTapParent = true
+                _trunkModel.CreateSignalTaps(
                     trunk.GetKey,
-                    SignalInterface.kAnyKey,
-                    Vector(portConstructor)).head
-                _trunkModel.GetSignalTapOpt(trunk.GetKey, port.GetTapKey).get
+                    Vector(
+                        SignalTap.Constructor(
+                            _tag = constructor._tag + TrunkModel.Glossary.kTagSeparator +
+                                TrunkModel.Glossary.kESignalTap,
+                            _mode = constructor._mode))).head
 
             // Cannot bind with anything else, including other modulators:
             case _ =>
-                throw new TrunkException(Cell.ErrorCodes.SignalInputInvalid)
+                throw TrunkException(Cell.ErrorCodes.SignalInputInvalid)
         }
 
         // Create input element:
@@ -83,7 +72,7 @@ class SignalInputPlant
             new SignalInput.Refs(
                 trunk.GetKey,
                 routingTap.GetKey,
-                isTapParent = false))
+                isTapParent))
 
         // 1: Add element to store:
         _inputs += (trunk.GetKey, input.GetKey) -> input
@@ -95,10 +84,11 @@ class SignalInputPlant
         // N/A
 
         // 4: Bind with peers:
-        routingTap.BindModulator(input.GetKey, isListener = false)
+        // Routing tap:
+        if (!input.IsTapParent)
+            routingTap.BindModulator(input.GetKey, isListener = false)
 
         // 5: Bind with children:
-        // N/A
 
         // Return input:
         input
@@ -118,15 +108,14 @@ class SignalInputPlant
                         // N/A
 
                         // 2: Unbind with peers:
-                        _trunkModel.GetSignalTapOpt(
-                            trunk.GetKey,
-                            input.GetTapKey,
-                            isRequired = false) match
-                        {
-                            case Some(tap) => tap.UnbindModulator()
+                        // Routing tap:
+                        if (!input.IsTapParent)
+                            _trunkModel.GetSignalTapOpt(trunk.GetKey, input.GetTapKey) match
+                            {
+                                case Some(tap) => tap.UnbindModulator()
 
-                            case None =>    // We don't care...
-                        }
+                                case None =>    // We don't care...
+                            }
 
                         // 3: Unbind with parent:
                         // N/A
@@ -135,15 +124,20 @@ class SignalInputPlant
                         trunk.UnbindSignalInput(input.GetKey)
 
                         // 5: Destroy children:
-                        // N/A
+                        // Routing tap:
+                        if (input.IsTapParent)
+                        {
+                            val tapDestructor = SignalTap.Destructor(input.GetTapKey)
+                            _trunkModel.DestroySignalTaps(trunk.GetKey, Vector(tapDestructor))
+                        }
 
                         // 6: Remove element from store:
                         _inputs -= ((trunk.GetKey, input.GetKey))
 
-                    case None => throw new TrunkException(Cell.ErrorCodes.SignalInputUnknown)
+                    case None => throw TrunkException(Cell.ErrorCodes.SignalInputUnknown)
                 }
 
-            case _ => throw new TrunkException(Cell.ErrorCodes.SignalInputInvalid)
+            case _ => throw TrunkException(Cell.ErrorCodes.SignalInputInvalid)
         }
 
         // Return input key:
@@ -158,7 +152,7 @@ class SignalInputPlant
         _inputs.filter(_._1._1 == trunkKey).foreach(inputPair =>
         {
             val ((_, pairInputKey), _) = inputPair
-            val inputDestructor = new SignalInput.Destructor(pairInputKey)
+            val inputDestructor = SignalInput.Destructor(pairInputKey)
             DestroySignalInput(trunk, inputDestructor)
         })
     }
@@ -174,10 +168,10 @@ class SignalInputPlant
             case _: SignalInput.Key =>
                 val opt = _inputs.get((trunk.GetKey, key))
                 if (isRequired && opt.isEmpty)
-                    throw new TrunkException(Cell.ErrorCodes.SignalInputUnknown)
+                    throw TrunkException(Cell.ErrorCodes.SignalInputUnknown)
                 opt
 
-            case _ => throw new TrunkException(Cell.ErrorCodes.SignalInputKeyInvalid)
+            case _ => throw TrunkException(Cell.ErrorCodes.SignalInputKeyInvalid)
         }
     }
 
@@ -197,5 +191,6 @@ class SignalInputPlant
         _inputs.filter(_._1._1 == trunkKey).keys.map(_._2).toVector
     }
 
-    def GetElementCount (trunkKey: Trunk.Key): Int = _inputs.count(_._1._1 == trunkKey)
+    def GetElementCount (trunkKey: Trunk.Key): Int =
+        _inputs.count(_._1._1 == trunkKey)
 }

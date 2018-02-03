@@ -89,7 +89,7 @@ object SignalEndpoint
 
 trait SignalEndpoint[KeyType <: SignalEndpoint.Key]
     extends BiasedElement[KeyType]
-        with PropagatorElement
+        with PropagatingElement
         with TestableElement
 {
     /**

@@ -23,7 +23,8 @@ import org.taranos.mc.Common.ReportSectionsParser
 import org.taranos.mc.trunk.intraprocess.BiasedElement.{BiasedConstructorMetaDecoder, BiasedUpdateMetaDecoder}
 import org.taranos.mc.trunk.intraprocess.Signal.SignalTypes
 import org.taranos.mc.trunk.intraprocess.TestableElement.TestableUpdateStateDecoder
-import org.taranos.mc.trunk.intraprocess.TrunkElement.{CommonConstructorMetaDecoder, CommonDestructorMetaDecoder, CommonQueryDecoder, CommonUpdateMetaDecoder}
+import org.taranos.mc.trunk.intraprocess.TrunkElement.{CommonConstructorMetaDecoder, CommonDestructorMetaDecoder,
+    CommonQueryDecoder, CommonUpdateMetaDecoder}
 import play.api.libs.json._
 
 
@@ -119,7 +120,7 @@ object SignalSink
         val biasedMeta = new BiasedConstructorMetaDecoder(constructor)
         val mode = biasedMeta._modeOpt.getOrElse(Signal.ModeEnum.Unbiased)
 
-        new Constructor(
+        Constructor(
             commonMeta._tag,
             commonMeta._badgeOpt,
             commonMeta._nameOpt,
@@ -134,7 +135,7 @@ object SignalSink
         val commonMeta = new CommonDestructorMetaDecoder[SignalSink.Key](
             destructor, Cell.ErrorCodes.SignalSinkDestructorInvalid)
 
-        new Destructor(commonMeta._key)
+        Destructor(commonMeta._key)
     }
 
     def DecodeQuery (encoded: String): Query =
@@ -143,7 +144,7 @@ object SignalSink
 
         val commonQuery = new CommonQueryDecoder[SignalSink.Key](query)
 
-        new Query(commonQuery._keysOpt.get, commonQuery._sectionsOpt)
+        Query(commonQuery._keysOpt.get, commonQuery._sectionsOpt)
     }
 
     def DecodeUpdate (encoded: String): Update =
@@ -173,7 +174,7 @@ object SignalSink
         
         val testableState = new TestableUpdateStateDecoder(update)
 
-        new Update(
+        Update(
             commonMeta._key,
             commonMeta._nameOpt,
             commonMeta._descriptionOpt,
@@ -202,7 +203,8 @@ class SignalSink (
     protected
     val _meta = meta
 
-    def GetMode = _meta._mode
+    def GetMode: Signal.ModeEnum.Mode =
+        _meta._mode
 
     //
     // Attrs:
@@ -229,7 +231,7 @@ class SignalSink (
             {
                 case Some(link) => link.BindSink(GetKey, isReciprocal = false)
 
-                case None => throw new TrunkException(Cell.ErrorCodes.SignalLinkInvalid)
+                case None => throw TrunkException(Cell.ErrorCodes.SignalLinkInvalid)
             }
 
         }
@@ -247,15 +249,17 @@ class SignalSink (
             {
                 case Some(tap) => tap.BindSink(GetKey, isReciprocal = false)
 
-                case None => throw new TrunkException(Cell.ErrorCodes.SignalTapInvalid)
+                case None => throw TrunkException(Cell.ErrorCodes.SignalTapInvalid)
             }
 
         }
     }
 
-    def GetLinkKeys: mutable.HashMap[String, SignalLink.Key] = _refs._linkKeys
+    def GetLinkKeys: mutable.HashMap[String, SignalLink.Key] =
+        _refs._linkKeys
 
-    def GetTapKeyOpt = _refs._tapKeyOpt
+    def GetTapKeyOpt: Option[SignalTap.Key] =
+        _refs._tapKeyOpt
 
     def UnbindLink (
         linkKeyOpt: Option[SignalLink.Key] = None,
@@ -303,7 +307,8 @@ class SignalSink (
     protected
     val _state = state
 
-    def GetLastTrappedSignalOpt: Option[Signal[_ >: SignalTypes]] = GetTrappedSignalsOrdered.lastOption
+    def GetLastTrappedSignalOpt: Option[Signal[_ >: SignalTypes]] =
+        GetTrappedSignalsOrdered.lastOption
 
     def GetTrappedSignalsOrdered: List[Signal[_ >: SignalTypes]] =
     {
@@ -311,9 +316,10 @@ class SignalSink (
         signalsList.sortWith(_._ordinal < _._ordinal)
     }
 
-    def GetTrappedSignals =_state._traps.values
+    def GetTrappedSignals: scala.collection.Iterable[Signal[_ >: Signal.SignalTypes]] =
+        _state._traps.values
 
-    def MarkAllLinks (signal: Signal[_ >: SignalTypes]) =
+    def MarkAllLinks (signal: Signal[_ >: SignalTypes]): Unit =
     {
         _refs._linkKeys.values.foreach(linkKey =>
         {
@@ -332,7 +338,7 @@ class SignalSink (
     {
         // Sink must be receiving a signal (sinks do not perform default propagation):
         val signal = signalOpt.getOrElse(
-            throw new TrunkException(Cell.ErrorCodes.SignalInvalid, "signal must be valid"))
+            throw TrunkException(Cell.ErrorCodes.SignalInvalid, "signal must be valid"))
 
         // If signal is virtual then accept its mark:
         if (signal._scalar.isInstanceOf[Signal.Virtual])
@@ -346,7 +352,7 @@ class SignalSink (
                 {
                     case Some(tap) => tap.Propagate(Some(signal))
 
-                    case None => throw new TrunkException(Cell.ErrorCodes.SignalSinkTapless)
+                    case None => throw TrunkException(Cell.ErrorCodes.SignalSinkTapless)
                 }
             }
         }
@@ -396,7 +402,7 @@ class SignalSink (
     }
 
     override
-    def SetMark (mark: Int) =
+    def SetMark (mark: Int): Unit =
     {
         import scala.util.control.Breaks._
 
@@ -424,7 +430,7 @@ class SignalSink (
             super.SetMark(mark)
     }
 
-    def TestSignal (signal: Signal[_ >: SignalTypes]) =
+    def PropagateTest (signal: Signal[_ >: SignalTypes]): Unit =
     {
         Propagate(Some(signal))
     }

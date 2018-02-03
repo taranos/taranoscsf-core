@@ -58,7 +58,7 @@ class ProbePlant
         // Create default collector:
         val tag = constructor._tag + FieldModel.Glossary.kTagSeparator + FieldModel.Glossary.kEDefaultCollector
         val (_, debangedAlias) = FieldElement.DebangTag(tag)
-        val collectorConstructor = new ProbeCollector.Constructor(
+        val collectorConstructor = ProbeCollector.Constructor(
             _tag = tag,
             _aliasOpt = Some(debangedAlias),
             _acoustic_aOpt = constructor._acoustic_aOpt,
@@ -103,19 +103,20 @@ class ProbePlant
                 // 4: Unbind with/destroy children:
                 // Unbind collectors:
                 val collectorDestructors =
-                    probe.GetCollectorKeys.map(new ProbeCollector.Destructor(_, destructor._scope))
+                    probe.GetCollectorKeys.map(ProbeCollector.Destructor(_, destructor._scope))
                 if (collectorDestructors.nonEmpty)
                     _fieldModel.DestroyProbeCollectors(field.GetKey, collectorDestructors.toVector)
                 // Unbind emitters:
                 val emitterDestructors =
-                    probe.GetEmitterKeys.map(new ProbeEmitter.Destructor(_, destructor._scope))
+                    probe.GetEmitterKeys.asInstanceOf[Set[ProbeEmitter.Key]].map(
+                        ProbeEmitter.Destructor(_, destructor._scope))
                 if (emitterDestructors.nonEmpty)
                     _fieldModel.DestroyProbeEmitters(field.GetKey, emitterDestructors.toVector)
 
                 // 5: Remove element from store:
                 _probes -= ((field.GetKey, destructor._key))
 
-            case None => throw new FieldException(Cell.ErrorCodes.ProbeUnknown)
+            case None => throw FieldException(Cell.ErrorCodes.ProbeUnknown)
         }
 
         // Return probe key:
@@ -131,7 +132,7 @@ class ProbePlant
         _probes.filter(_._1._1 == fieldKey).foreach(probePair =>
         {
             val ((_, pairProbeKey), _) = probePair
-            val probeDestructor = new Probe.Destructor(pairProbeKey, scope)
+            val probeDestructor = Probe.Destructor(pairProbeKey, scope)
             DestroyProbe(field, probeDestructor)
         })
     }
@@ -147,10 +148,10 @@ class ProbePlant
             case _: Probe.Key =>
                 val opt = _probes.get((field.GetKey, key))
                 if (isRequired && opt.isEmpty)
-                    throw new FieldException(Cell.ErrorCodes.ProbeUnknown)
+                    throw FieldException(Cell.ErrorCodes.ProbeUnknown)
                 opt
 
-            case _ => throw new FieldException(Cell.ErrorCodes.ProbeKeyInvalid)
+            case _ => throw FieldException(Cell.ErrorCodes.ProbeKeyInvalid)
         }
     }
 
@@ -162,5 +163,6 @@ class ProbePlant
         _probes.filter(_._1._1 == fieldKey).values.toVector
     }
 
-    def GetElementCount (fieldKey: Field.Key): Int = _probes.size
+    def GetElementCount (fieldKey: Field.Key): Int =
+        _probes.size
 }

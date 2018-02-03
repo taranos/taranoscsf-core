@@ -41,7 +41,7 @@ object FieldModel
 
         val commonQuery = new CommonQueryDecoder[FieldElement.Key](query, isKeysRequired = false)
 
-        new Query(commonQuery._sectionsOpt)
+        Query(commonQuery._sectionsOpt)
     }
 
     trait FieldModelReporter
@@ -214,7 +214,8 @@ class FieldModel (
     private
     val _fieldEmitterPlant = new FieldEmitterPlant
 
-    def GetFieldEmitterPlant = _fieldEmitterPlant
+    def GetFieldEmitterPlant: FieldEmitterPlant =
+        _fieldEmitterPlant
 
     private
     val _fieldOscillatorPlant = new FieldOscillatorPlant
@@ -225,7 +226,8 @@ class FieldModel (
     private
     val _subjectEmitterPlant = new SubjectEmitterPlant
 
-    def GetSubjectEmitterPlant = _subjectEmitterPlant
+    def GetSubjectEmitterPlant: SubjectEmitterPlant =
+        _subjectEmitterPlant
 
     private
     val _subjectOscillatorPlant = new SubjectOscillatorPlant
@@ -239,7 +241,8 @@ class FieldModel (
     private
     val _probeEmitterPlant = new ProbeEmitterPlant
 
-    def GetProbeEmitterPlant = _probeEmitterPlant
+    def GetProbeEmitterPlant: ProbeEmitterPlant =
+        _probeEmitterPlant
 
     private
     val _probeOscillatorPlant = new ProbeOscillatorPlant
@@ -346,7 +349,7 @@ class FieldModel (
     def DestroyFields (destructors: Vector[Field.Destructor]): Unit =
     {
         if (destructors.isEmpty)
-            throw new FieldException(Cell.ErrorCodes.FieldDestructorInvalid)
+            throw FieldException(Cell.ErrorCodes.FieldDestructorInvalid)
         else
         {
             // Iterate destructors:
@@ -423,7 +426,7 @@ class FieldModel (
         // Return field:
         _fieldPlant.GetFieldOpt(fieldKey).getOrElse{
            assert(true)
-           throw new FieldException(Cell.ErrorCodes.FieldUnknown)}
+           throw FieldException(Cell.ErrorCodes.FieldUnknown)}
     }
 
     def ReportFields (query: Field.Query): Vector[JsObject] =
@@ -488,7 +491,7 @@ class FieldModel (
         val field = GetField(fieldKey)
 
         if (destructors.isEmpty)
-            throw new FieldException(Cell.ErrorCodes.FieldEmitterDestructorInvalid)
+            throw FieldException(Cell.ErrorCodes.FieldEmitterDestructorInvalid)
         else
         {
             // Iterate destructors:
@@ -519,7 +522,7 @@ class FieldModel (
         val field = GetField(fieldKey)
 
         // Return field emitter:
-        _fieldEmitterPlant.GetFieldEmitterOpt(field, key, isRequired = true)
+        _fieldEmitterPlant.GetFieldEmitterOpt(field, key)
     }
 
     def ReportFieldEmitters (
@@ -532,7 +535,7 @@ class FieldModel (
         CommonReporter[FieldEmitter.Key](
             fieldKey,
             query,
-            field.GetEmitterKeys,
+            field.GetEmitterKeys.asInstanceOf[Set[FieldEmitter.Key]],
             GetFieldEmitterOpt)
     }
 
@@ -556,7 +559,7 @@ class FieldModel (
                     // Update description:
                     update._descriptionOpt.foreach(description => fieldEmitter.SetDescriptionOpt(Some(description)))
 
-                case None => throw new FieldException(Cell.ErrorCodes.FieldEmitterUnknown)
+                case None => throw FieldException(Cell.ErrorCodes.FieldEmitterUnknown)
             }
         })
     }
@@ -576,7 +579,7 @@ class FieldModel (
                 // If field emitter is known, invoke macro on it:
                 case Some(fieldEmitter) => fieldEmitter.InvokeMacro(call._macro)
 
-                case None => throw new FieldException(Cell.ErrorCodes.FieldEmitterUnknown)
+                case None => throw FieldException(Cell.ErrorCodes.FieldEmitterUnknown)
             }
         })
     }
@@ -615,7 +618,7 @@ class FieldModel (
         val field = GetField(fieldKey)
 
         if (destructors.isEmpty)
-            throw new FieldException(Cell.ErrorCodes.FieldOscillatorDestructorInvalid)
+            throw FieldException(Cell.ErrorCodes.FieldOscillatorDestructorInvalid)
         else
         {
             // Iterate destructors:
@@ -646,7 +649,7 @@ class FieldModel (
         val field = GetField(fieldKey)
 
         // Return field emitter:
-        _fieldOscillatorPlant.GetFieldOscillatorOpt(field, key, isRequired = true)
+        _fieldOscillatorPlant.GetFieldOscillatorOpt(field, key)
     }
 
     def ReportFieldOscillators (
@@ -666,7 +669,7 @@ class FieldModel (
                 else
                 {
                     val emitterOpt = GetFieldEmitterOpt(fieldKey, fieldEmitterKey)
-                    emitterOpt.get.GetOscillatorKeys
+                    emitterOpt.get.GetOscillatorKeys.asInstanceOf[Set[FieldOscillator.Key]]
                 }
             },
             GetFieldOscillatorOpt)
@@ -692,7 +695,7 @@ class FieldModel (
                     // Update description:
                     update._descriptionOpt.foreach(description => fieldOscillator.SetDescriptionOpt(Some(description)))
 
-                case None => throw new FieldException(Cell.ErrorCodes.FieldOscillatorUnknown)
+                case None => throw FieldException(Cell.ErrorCodes.FieldOscillatorUnknown)
             }
         })
     }
@@ -712,7 +715,7 @@ class FieldModel (
                 // If field oscillator is known, invoke macro on it:
                 case Some(fieldOscillator) => fieldOscillator.InvokeMacro(call._macro)
 
-                case None => throw new FieldException(Cell.ErrorCodes.FieldOscillatorUnknown)
+                case None => throw FieldException(Cell.ErrorCodes.FieldOscillatorUnknown)
             }
         })
     }
@@ -739,7 +742,7 @@ class FieldModel (
         val field = GetField(fieldKey)
 
         if (destructors.isEmpty)
-            throw new FieldException(Cell.ErrorCodes.SubjectDestructorInvalid)
+            throw FieldException(Cell.ErrorCodes.SubjectDestructorInvalid)
         else
         {
             // Iterate destructors:
@@ -770,7 +773,7 @@ class FieldModel (
         val field = GetField(fieldKey)
 
         // Return subject:
-        _subjectPlant.GetSubjectOpt(field, key, isRequired = true)
+        _subjectPlant.GetSubjectOpt(field, key)
     }
 
     def ReportSubjects (
@@ -813,7 +816,7 @@ class FieldModel (
                     // Update rotation:
                     update._rotationOpt.foreach(rotation => subject.SetRotation(rotation))
 
-                case None => throw new FieldException(Cell.ErrorCodes.SubjectUnknown)
+                case None => throw FieldException(Cell.ErrorCodes.SubjectUnknown)
             }
         })
     }
@@ -852,7 +855,7 @@ class FieldModel (
         val field = GetField(fieldKey)
 
         if (destructors.isEmpty)
-            throw new FieldException(Cell.ErrorCodes.SubjectEmitterDestructorInvalid)
+            throw FieldException(Cell.ErrorCodes.SubjectEmitterDestructorInvalid)
         else
         {
             // Iterate destructors:
@@ -883,7 +886,7 @@ class FieldModel (
         val field = GetField(fieldKey)
 
         // Return subject emitter:
-        _subjectEmitterPlant.GetSubjectEmitterOpt(field, key, isRequired = true)
+        _subjectEmitterPlant.GetSubjectEmitterOpt(field, key)
     }
 
     def ReportSubjectEmitters (
@@ -903,7 +906,7 @@ class FieldModel (
                 else
                 {
                     val subjectOpt = GetSubjectOpt(fieldKey, subjectKey)
-                    subjectOpt.get.GetEmitterKeys
+                    subjectOpt.get.GetEmitterKeys.asInstanceOf[Set[SubjectEmitter.Key]]
                 }
             },
             GetSubjectEmitterOpt)
@@ -929,7 +932,7 @@ class FieldModel (
                     // Update description:
                     update._descriptionOpt.foreach(description => subjectEmitter.SetDescriptionOpt(Some(description)))
 
-                case None => throw new FieldException(Cell.ErrorCodes.SubjectEmitterUnknown)
+                case None => throw FieldException(Cell.ErrorCodes.SubjectEmitterUnknown)
             }
         })
     }
@@ -949,7 +952,7 @@ class FieldModel (
                 // If subject emitter is known, invoke macro on it:
                 case Some(subjectEmitter) => subjectEmitter.InvokeMacro(call._macro)
 
-                case None => throw new FieldException(Cell.ErrorCodes.SubjectEmitterUnknown)
+                case None => throw FieldException(Cell.ErrorCodes.SubjectEmitterUnknown)
             }
         })
     }
@@ -988,7 +991,7 @@ class FieldModel (
         val field = GetField(fieldKey)
 
         if (destructors.isEmpty)
-            throw new FieldException(Cell.ErrorCodes.SubjectOscillatorDestructorInvalid)
+            throw FieldException(Cell.ErrorCodes.SubjectOscillatorDestructorInvalid)
         else
         {
             // Iterate destructors:
@@ -1019,7 +1022,7 @@ class FieldModel (
         val field = GetField(fieldKey)
 
         // Return subject emitter:
-        _subjectOscillatorPlant.GetSubjectOscillatorOpt(field, key, isRequired = true)
+        _subjectOscillatorPlant.GetSubjectOscillatorOpt(field, key)
     }
 
     def ReportSubjectOscillators (
@@ -1039,7 +1042,7 @@ class FieldModel (
                 else
                 {
                     val emitterOpt = GetSubjectEmitterOpt(fieldKey, subjectEmitterKey)
-                    emitterOpt.get.GetOscillatorKeys
+                    emitterOpt.get.GetOscillatorKeys.asInstanceOf[Set[SubjectOscillator.Key]]
                 }
             },
             GetSubjectOscillatorOpt)
@@ -1066,7 +1069,7 @@ class FieldModel (
                     update._descriptionOpt.foreach(description =>
                         subjectOscillator.SetDescriptionOpt(Some(description)))
 
-                case None => throw new FieldException(Cell.ErrorCodes.SubjectOscillatorUnknown)
+                case None => throw FieldException(Cell.ErrorCodes.SubjectOscillatorUnknown)
             }
         })
     }
@@ -1086,7 +1089,7 @@ class FieldModel (
                 // If field oscillator is known, invoke macro on it:
                 case Some(subjectOscillator) => subjectOscillator.InvokeMacro(call._macro)
 
-                case None => throw new FieldException(Cell.ErrorCodes.SubjectOscillatorUnknown)
+                case None => throw FieldException(Cell.ErrorCodes.SubjectOscillatorUnknown)
             }
         })
     }
@@ -1113,7 +1116,7 @@ class FieldModel (
         val field = GetField(fieldKey)
 
         if (destructors.isEmpty)
-            throw new FieldException(Cell.ErrorCodes.ProbeDestructorInvalid)
+            throw FieldException(Cell.ErrorCodes.ProbeDestructorInvalid)
         else
         {
             // Iterate destructors:
@@ -1144,7 +1147,7 @@ class FieldModel (
         val field = GetField(fieldKey)
 
         // Return probe:
-        _probePlant.GetProbeOpt(field, key, isRequired = true)
+        _probePlant.GetProbeOpt(field, key)
     }
 
     def ReportProbes (
@@ -1187,7 +1190,7 @@ class FieldModel (
                     // Update rotation:
                     update._rotationOpt.foreach(rotation => probe.SetRotation(rotation))
 
-                case None => throw new FieldException(Cell.ErrorCodes.ProbeUnknown)
+                case None => throw FieldException(Cell.ErrorCodes.ProbeUnknown)
             }
         })
     }
@@ -1207,7 +1210,7 @@ class FieldModel (
                 // If probe emitter is known, invoke macro on it:
                 case Some(probeEmitter) => probeEmitter.InvokeMacro(call._macro)
 
-                case None => throw new FieldException(Cell.ErrorCodes.ProbeEmitterUnknown)
+                case None => throw FieldException(Cell.ErrorCodes.ProbeEmitterUnknown)
             }
         })
     }
@@ -1245,7 +1248,7 @@ class FieldModel (
         val field = GetField(fieldKey)
 
         if (destructors.isEmpty)
-            throw new FieldException(Cell.ErrorCodes.ProbeCollectorDestructorInvalid)
+            throw FieldException(Cell.ErrorCodes.ProbeCollectorDestructorInvalid)
         else
         {
             // Iterate destructors:
@@ -1283,7 +1286,7 @@ class FieldModel (
                 // If field oscillator is known, invoke macro on it:
                 case Some(probeOscillator) => probeOscillator.InvokeMacro(call._macro)
 
-                case None => throw new FieldException(Cell.ErrorCodes.ProbeOscillatorUnknown)
+                case None => throw FieldException(Cell.ErrorCodes.ProbeOscillatorUnknown)
             }
         })
     }
@@ -1296,7 +1299,7 @@ class FieldModel (
         val field = GetField(fieldKey)
 
         // Return probe collector:
-        _probeCollectorPlant.GetProbeCollectorOpt(field, key, isRequired = true)
+        _probeCollectorPlant.GetProbeCollectorOpt(field, key)
     }
 
     def LookupProbeCollector(
@@ -1377,7 +1380,7 @@ class FieldModel (
                     update._lobeBearingPolesOpt.foreach(
                         lobeBearingPoles => probeCollector.SetLobeBearingPolesOpt(Some(lobeBearingPoles)))
 
-                case None => throw new FieldException(Cell.ErrorCodes.ProbeCollectorUnknown)
+                case None => throw FieldException(Cell.ErrorCodes.ProbeCollectorUnknown)
             }
         })
     }
@@ -1415,7 +1418,7 @@ class FieldModel (
         val field = GetField(fieldKey)
 
         if (destructors.isEmpty)
-            throw new FieldException(Cell.ErrorCodes.ProbeEmitterDestructorInvalid)
+            throw FieldException(Cell.ErrorCodes.ProbeEmitterDestructorInvalid)
         else
         {
             // Iterate destructors:
@@ -1446,7 +1449,7 @@ class FieldModel (
         val field = GetField(fieldKey)
 
         // Return probe emitter:
-        _probeEmitterPlant.GetProbeEmitterOpt(field, key, isRequired = true)
+        _probeEmitterPlant.GetProbeEmitterOpt(field, key)
     }
 
     def ReportProbeEmitters (
@@ -1466,7 +1469,7 @@ class FieldModel (
                 else
                 {
                     val probeOpt = GetProbeOpt(fieldKey, probeKey)
-                    probeOpt.get.GetEmitterKeys
+                    probeOpt.get.GetEmitterKeys.asInstanceOf[Set[ProbeEmitter.Key]]
                 }
             },
             GetProbeEmitterOpt)
@@ -1492,7 +1495,7 @@ class FieldModel (
                     // Update description:
                     update._descriptionOpt.foreach(description => probeEmitter.SetDescriptionOpt(Some(description)))
 
-                case None => throw new FieldException(Cell.ErrorCodes.ProbeEmitterUnknown)
+                case None => throw FieldException(Cell.ErrorCodes.ProbeEmitterUnknown)
             }
         })
     }
@@ -1531,7 +1534,7 @@ class FieldModel (
         val field = GetField(fieldKey)
 
         if (destructors.isEmpty)
-            throw new FieldException(Cell.ErrorCodes.ProbeOscillatorDestructorInvalid)
+            throw FieldException(Cell.ErrorCodes.ProbeOscillatorDestructorInvalid)
         else
         {
             // Iterate destructors:
@@ -1562,7 +1565,7 @@ class FieldModel (
         val field = GetField(fieldKey)
 
         // Return probe emitter:
-        _probeOscillatorPlant.GetProbeOscillatorOpt(field, key, isRequired = true)
+        _probeOscillatorPlant.GetProbeOscillatorOpt(field, key)
     }
 
     def ReportProbeOscillators (
@@ -1582,7 +1585,7 @@ class FieldModel (
                 else
                 {
                     val emitterOpt = GetProbeEmitterOpt(fieldKey, probeEmitterKey)
-                    emitterOpt.get.GetOscillatorKeys
+                    emitterOpt.get.GetOscillatorKeys.asInstanceOf[Set[ProbeOscillator.Key]]
                 }
             },
             GetProbeOscillatorOpt)
@@ -1608,7 +1611,7 @@ class FieldModel (
                     // Update description:
                     update._descriptionOpt.foreach(description => probeOscillator.SetDescriptionOpt(Some(description)))
 
-                case None => throw new FieldException(Cell.ErrorCodes.ProbeOscillatorUnknown)
+                case None => throw FieldException(Cell.ErrorCodes.ProbeOscillatorUnknown)
             }
         })
     }
@@ -1747,7 +1750,7 @@ class FieldModel (
         val loudnessQuality: Real =
         {
             val loudnessOutput = GetSignalOutputOpt(field.GetKey, oscillatorPatch.GetLoudnessOutputKey).getOrElse(
-                throw new FieldException(Cell.ErrorCodes.SignalOutputBroken))
+                throw FieldException(Cell.ErrorCodes.SignalOutputBroken))
             loudnessOutput.GetSignalOpt match
             {
                 case Some(signal) =>
@@ -1769,7 +1772,7 @@ class FieldModel (
         val pitchQuality: Real =
         {
             val pitchOutput = GetSignalOutputOpt(field.GetKey, oscillatorPatch.GetPitchOutputKey).getOrElse(
-                throw new FieldException(Cell.ErrorCodes.SignalOutputBroken))
+                throw FieldException(Cell.ErrorCodes.SignalOutputBroken))
             pitchOutput.GetSignalOpt match
             {
                 case Some(signal) =>
@@ -1783,7 +1786,7 @@ class FieldModel (
         val periodQuality: Integer =
         {
             val periodOutput = GetSignalOutputOpt(field.GetKey, oscillatorPatch.GetPeriodOutputKey).getOrElse(
-                throw new FieldException(Cell.ErrorCodes.SignalOutputBroken))
+                throw FieldException(Cell.ErrorCodes.SignalOutputBroken))
             periodOutput.GetSignalOpt match
             {
                 case Some(signal) =>
@@ -1797,7 +1800,7 @@ class FieldModel (
         val shapeQuality: Integer =
         {
             val shapeOutput = GetSignalOutputOpt(field.GetKey, oscillatorPatch.GetShapeOutputKey).getOrElse(
-                throw new FieldException(Cell.ErrorCodes.SignalOutputBroken))
+                throw FieldException(Cell.ErrorCodes.SignalOutputBroken))
             shapeOutput.GetSignalOpt match
             {
                 case Some(signal) =>
@@ -1811,7 +1814,7 @@ class FieldModel (
         val toneQuality: Integer =
         {
             val toneOutput = GetSignalOutputOpt(field.GetKey, oscillatorPatch.GetToneOutputKey).getOrElse(
-                throw new FieldException(Cell.ErrorCodes.SignalOutputBroken))
+                throw FieldException(Cell.ErrorCodes.SignalOutputBroken))
             toneOutput.GetSignalOpt match
             {
                 case Some(signal) =>
@@ -1927,7 +1930,7 @@ class FieldModel (
             GetProbeOpt(fieldKey, probeKey).get
         }
 
-        val samplerQuery = new Sampler.Query(
+        val samplerQuery = Sampler.Query(
             _fieldGeometryOpt = Some(field.GetGeometry),
             _antipodeDistanceOpt = Some(field.GetAntipodeDistance),
             _collectorPositionOpt = Some(probe.GetPosition),
@@ -2008,7 +2011,7 @@ class FieldModel (
             oscillators.foreach(oscillator =>
             {
                 val oscillatorPatch = GetOscillatorPatchOpt(field.GetKey, oscillator.GetPatchKey).getOrElse(
-                    throw new FieldException(Cell.ErrorCodes.OscillatorPatchBroken))
+                    throw FieldException(Cell.ErrorCodes.OscillatorPatchBroken))
 
                 val waveformQualities = CalculateOscillatorWaveformQualities(
                     field,
@@ -2062,7 +2065,7 @@ class FieldModel (
                 oscillators.foreach(oscillator =>
                 {
                     val oscillatorPatch = GetOscillatorPatchOpt(field.GetKey, oscillator.GetPatchKey).getOrElse(
-                        throw new FieldException(Cell.ErrorCodes.OscillatorPatchBroken))
+                        throw FieldException(Cell.ErrorCodes.OscillatorPatchBroken))
 
                     val waveformQualities = CalculateOscillatorWaveformQualities(
                         field,
@@ -2122,7 +2125,7 @@ class FieldModel (
                 oscillators.foreach(oscillator =>
                 {
                     val oscillatorPatch = GetOscillatorPatchOpt(field.GetKey, oscillator.GetPatchKey).getOrElse(
-                        throw new FieldException(Cell.ErrorCodes.OscillatorPatchBroken))
+                        throw FieldException(Cell.ErrorCodes.OscillatorPatchBroken))
 
                     val waveformQualities = CalculateOscillatorWaveformQualities(
                         field,
@@ -2220,7 +2223,7 @@ class FieldModel (
             oscillators.foreach(oscillator =>
             {
                 val oscillatorPatch = GetOscillatorPatchOpt(field.GetKey, oscillator.GetPatchKey).getOrElse(
-                    throw new FieldException(Cell.ErrorCodes.OscillatorPatchBroken))
+                    throw FieldException(Cell.ErrorCodes.OscillatorPatchBroken))
 
                 val waveformQualities = CalculateOscillatorWaveformQualities(
                     field,
@@ -2275,7 +2278,7 @@ class FieldModel (
                 oscillators.foreach(oscillator =>
                 {
                     val oscillatorPatch = GetOscillatorPatchOpt(field.GetKey, oscillator.GetPatchKey).getOrElse(
-                        throw new FieldException(Cell.ErrorCodes.OscillatorPatchBroken))
+                        throw FieldException(Cell.ErrorCodes.OscillatorPatchBroken))
 
                     val waveformQualities = CalculateOscillatorWaveformQualities(
                         field,
@@ -2336,7 +2339,7 @@ class FieldModel (
                 oscillators.foreach(oscillator =>
                 {
                     val oscillatorPatch = GetOscillatorPatchOpt(field.GetKey, oscillator.GetPatchKey).getOrElse(
-                        throw new FieldException(Cell.ErrorCodes.OscillatorPatchBroken))
+                        throw FieldException(Cell.ErrorCodes.OscillatorPatchBroken))
 
                     val waveformQualities = CalculateOscillatorWaveformQualities(
                         field,
@@ -2425,7 +2428,7 @@ class FieldModel (
         // Return emitter patch reports:
         _trunkModel.ReportEmitterPatches(
             field.GetTrunkKey,
-            new EmitterPatch.Query(keys, sectionsOpt))
+            EmitterPatch.Query(keys, sectionsOpt))
     }
 
     def UpdateEmitterPatches (

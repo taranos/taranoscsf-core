@@ -64,33 +64,44 @@ object Common
                 })
         }
 
-        def HasMetaPropertyset: Boolean = (flags & kBitHasMetaPropertyset) > 0
+        def HasMetaPropertyset: Boolean =
+            (flags & kBitHasMetaPropertyset) > 0
 
-        def HasAttrsPropertyset: Boolean = (flags & kBitHasAttrsPropertyset) > 0
+        def HasAttrsPropertyset: Boolean =
+            (flags & kBitHasAttrsPropertyset) > 0
 
-        def HasRefsPropertyset: Boolean = (flags & kBitHasRefsPropertyset) > 0
+        def HasRefsPropertyset: Boolean =
+            (flags & kBitHasRefsPropertyset) > 0
 
-        def HasStatePropertyset: Boolean = (flags & kBitHasStatePropertyset) > 0
+        def HasStatePropertyset: Boolean =
+            (flags & kBitHasStatePropertyset) > 0
 
-        def HasGeoPropertyset: Boolean = (flags & kBitHasGeoPropertyset) > 0
+        def HasGeoPropertyset: Boolean =
+            (flags & kBitHasGeoPropertyset) > 0
 
-        def HasChildReports: Boolean = (flags & kBitHasChildReports) > 0
+        def HasChildReports: Boolean =
+            (flags & kBitHasChildReports) > 0
 
-        def HasPeerReports: Boolean = (flags & kBitHasPeerReports) > 0
+        def HasPeerReports: Boolean =
+            (flags & kBitHasPeerReports) > 0
     }
 
     object Reportable
     {
-        def ReportInteger (integer: Integer) = "%d".format(integer)
+        def ReportInteger (integer: Integer): String =
+            "%d".format(integer)
 
-        def ReportReal1 (real: Real) = "%.1f".format(real)
+        def ReportReal1 (real: Real): String =
+            "%.1f".format(real)
 
-        def ReportReal3 (real: Real) = "%.3f".format(real)
+        def ReportReal3 (real: Real): String =
+            "%.3f".format(real)
     }
 
     trait Reportable
     {
-        def Report (sections: ReportSectionsParser): JsObject = Json.obj()
+        def Report (sections: ReportSectionsParser): JsObject =
+            Json.obj()
     }
 
     trait Reporter

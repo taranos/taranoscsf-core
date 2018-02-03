@@ -20,7 +20,8 @@ package org.taranos.mc.trunk.intraprocess
 
 import org.taranos.mc.Cell
 import org.taranos.mc.Common.ReportSectionsParser
-import org.taranos.mc.trunk.intraprocess.TrunkElement.{CommonConstructorMetaDecoder, CommonDestructorMetaDecoder, CommonQueryDecoder, CommonUpdateMetaDecoder}
+import org.taranos.mc.trunk.intraprocess.TrunkElement.{CommonConstructorMetaDecoder, CommonDestructorMetaDecoder,
+    CommonQueryDecoder, CommonUpdateMetaDecoder}
 import play.api.libs.json.{JsObject, Json}
 
 
@@ -167,7 +168,7 @@ object Trunk
 
         val commonMeta = new CommonConstructorMetaDecoder(constructor, Cell.ErrorCodes.TrunkConstructorInvalid)
 
-        new Constructor(
+        Constructor(
             commonMeta._tag,
             commonMeta._badgeOpt,
             commonMeta._nameOpt,
@@ -181,7 +182,7 @@ object Trunk
         val commonMeta = new CommonDestructorMetaDecoder[Trunk.Key](
             destructor, Cell.ErrorCodes.TrunkDestructorInvalid)
 
-        new Destructor(commonMeta._key)
+        Destructor(commonMeta._key)
     }
 
     def DecodeQuery (encoded: String): Query =
@@ -190,7 +191,7 @@ object Trunk
 
         val commonQuery = new CommonQueryDecoder[Trunk.Key](query)
 
-        new Query(commonQuery._keysOpt.get, commonQuery._sectionsOpt)
+        Query(commonQuery._keysOpt.get, commonQuery._sectionsOpt)
     }
 
     def DecodeUpdate (encoded: String): Update =
@@ -200,7 +201,7 @@ object Trunk
         val commonMeta = new CommonUpdateMetaDecoder[Trunk.Key](
             update, Cell.ErrorCodes.TrunkUpdateInvalid)
 
-        new Update(
+        Update(
             commonMeta._key,
             commonMeta._nameOpt,
             commonMeta._descriptionOpt)
@@ -232,7 +233,7 @@ class Trunk (
     protected
     val _refs = refs
 
-    def BindSignalInterface (key: SignalInterface.Key) =
+    def BindSignalInterface (key: SignalInterface.Key): Unit =
     {
         // First interface becomes the default interface:
         if (_refs._interfaceKeys.isEmpty)
@@ -240,71 +241,104 @@ class Trunk (
         _refs._interfaceKeys += key
     }
 
-    def GetDefaultSignalInterfaceKey = _refs._defaultInterfaceKey
+    def GetDefaultSignalInterfaceKey: SignalInterface.Key =
+        _refs._defaultInterfaceKey
 
-    def GetSignalInterfaceKeys = _refs._interfaceKeys.toSet
+    def GetSignalInterfaceKeys: Set[SignalInterface.Key] =
+        _refs._interfaceKeys.toSet
 
-    def UnbindSignalInterface (key: SignalInterface.Key) = _refs._interfaceKeys -= key
+    def UnbindSignalInterface (key: SignalInterface.Key): Unit =
+        _refs._interfaceKeys -= key
 
-    def BindSignalPort (key: SignalPort.Key) = _refs._portKeys += key
+    def BindSignalPort (key: SignalPort.Key): Unit =
+        _refs._portKeys += key
 
-    def GetSignalPortKeys = _refs._portKeys.toSet
+    def GetSignalPortKeys: Set[SignalPort.Key] =
+        _refs._portKeys.toSet
 
-    def UnbindSignalPort (key: SignalPort.Key) = _refs._portKeys -= key
+    def UnbindSignalPort (key: SignalPort.Key): Unit =
+        _refs._portKeys -= key
 
-    def BindSignalSource (key: SignalSource.Key) = _refs._sourceKeys += key
+    def BindSignalSource (key: SignalSource.Key): Unit =
+        _refs._sourceKeys += key
 
-    def GetSignalSourceKeys = _refs._sourceKeys.toSet
+    def GetSignalSourceKeys: Set[SignalSource.Key] =
+        _refs._sourceKeys.toSet
 
-    def UnbindSignalSource (key: SignalSource.Key) = _refs._sourceKeys -= key
+    def UnbindSignalSource (key: SignalSource.Key): Unit =
+        _refs._sourceKeys -= key
 
-    def BindSignalSink (key: SignalSink.Key) = _refs._sinkKeys += key
+    def BindSignalSink (key: SignalSink.Key): Unit =
+        _refs._sinkKeys += key
 
-    def GetSignalSinkKeys = _refs._sinkKeys.toSet
+    def GetSignalSinkKeys: Set[SignalSink.Key] =
+        _refs._sinkKeys.toSet
 
-    def UnbindSignalSink (key: SignalSink.Key) = _refs._sinkKeys -= key
+    def UnbindSignalSink (key: SignalSink.Key): Unit =
+        _refs._sinkKeys -= key
 
-    def BindSignalLink (key: SignalLink.Key) = _refs._linkKeys += key
+    def BindSignalLink (key: SignalLink.Key): Unit =
+        _refs._linkKeys += key
 
-    def GetSignalLinkKeys = _refs._linkKeys.toSet
+    def GetSignalLinkKeys: Set[SignalLink.Key] =
+        _refs._linkKeys.toSet
 
-    def UnbindSignalLink (key: SignalLink.Key) = _refs._linkKeys -= key
+    def UnbindSignalLink (key: SignalLink.Key): Unit =
+        _refs._linkKeys -= key
 
-    def BindSignalTap (key: SignalTap.Key) = _refs._tapKeys += key
+    def BindSignalTap (key: SignalTap.Key): Unit =
+        _refs._tapKeys += key
 
-    def GetSignalTapKeys = _refs._tapKeys.toSet
+    def GetSignalTapKeys: Set[SignalTap.Key] =
+        _refs._tapKeys.toSet
 
-    def UnbindSignalTap (key: SignalTap.Key) = _refs._tapKeys -= key
+    def UnbindSignalTap (key: SignalTap.Key): Unit =
+        _refs._tapKeys -= key
 
-    def BindSignalInput (key: SignalInput.Key) = _refs._inputKeys += key
+    def BindSignalInput (key: SignalInput.Key): Unit =
+        _refs._inputKeys += key
 
-    def GetSignalInputKeys = _refs._inputKeys.toSet
+    def GetSignalInputKeys: Set[SignalInput.Key] =
+        _refs._inputKeys.toSet
 
-    def UnbindSignalInput (key: SignalInput.Key) = _refs._inputKeys -= key
+    def UnbindSignalInput (key: SignalInput.Key): Unit =
+        _refs._inputKeys -= key
 
-    def BindSignalBridge (key: SignalBridge.Key) = _refs._bridgeKeys += key
+    def BindSignalBridge (key: SignalBridge.Key): Unit =
+        _refs._bridgeKeys += key
 
-    def GetSignalBridgeKeys = _refs._bridgeKeys.toSet
+    def GetSignalBridgeKeys: Set[SignalBridge.Key] =
+        _refs._bridgeKeys.toSet
 
-    def UnbindSignalBridge (key: SignalBridge.Key) = _refs._bridgeKeys -= key
+    def UnbindSignalBridge (key: SignalBridge.Key): Unit =
+        _refs._bridgeKeys -= key
 
-    def BindSignalOutput (key: SignalOutput.Key) = _refs._outputKeys += key
+    def BindSignalOutput (key: SignalOutput.Key): Unit =
+        _refs._outputKeys += key
 
-    def GetSignalOutputKeys = _refs._outputKeys.toSet
+    def GetSignalOutputKeys: Set[SignalOutput.Key] =
+        _refs._outputKeys.toSet
 
-    def UnbindSignalOutput (key: SignalOutput.Key) = _refs._outputKeys -= key
+    def UnbindSignalOutput (key: SignalOutput.Key): Unit =
+        _refs._outputKeys -= key
 
-    def BindEmitterPatch (key: EmitterPatch.Key) = _refs._emitterPatchKeys += key
+    def BindEmitterPatch (key: EmitterPatch.Key): Unit =
+        _refs._emitterPatchKeys += key
 
-    def GetEmitterPatchKeys = _refs._emitterPatchKeys.toSet
+    def GetEmitterPatchKeys: Set[EmitterPatch.Key] =
+        _refs._emitterPatchKeys.toSet
 
-    def UnbindEmitterPatch (key: EmitterPatch.Key) = _refs._emitterPatchKeys -= key
+    def UnbindEmitterPatch (key: EmitterPatch.Key): Unit =
+        _refs._emitterPatchKeys -= key
 
-    def BindOscillatorPatch (key: OscillatorPatch.Key) = _refs._oscillatorPatchKeys += key
+    def BindOscillatorPatch (key: OscillatorPatch.Key): Unit =
+        _refs._oscillatorPatchKeys += key
 
-    def GetOscillatorPatchKeys = _refs._oscillatorPatchKeys.toSet
+    def GetOscillatorPatchKeys: Set[OscillatorPatch.Key] =
+        _refs._oscillatorPatchKeys.toSet
 
-    def UnbindOscillatorPatch (key: OscillatorPatch.Key) = _refs._oscillatorPatchKeys -= key
+    def UnbindOscillatorPatch (key: OscillatorPatch.Key): Unit =
+        _refs._oscillatorPatchKeys -= key
 
     //
     // State:
@@ -346,7 +380,8 @@ class Trunk (
         markedKeys.toVector
     }
 
-    def GetTrunkModel = _trunkModel
+    def GetTrunkModel: TrunkModel =
+        _trunkModel
 
     def Report (sectionsOpt: Option[String] = None): JsObject =
     {
@@ -373,69 +408,69 @@ class Trunk (
                 report ++=
                     Json.obj(TrunkModel.Glossary.kRSignalInterfaces -> _trunkModel.ReportSignalInterfaces(
                         GetKey,
-                        new SignalInterface.Query(_refs._interfaceKeys.toVector, sectionsOpt)))
+                        SignalInterface.Query(_refs._interfaceKeys.toVector, sectionsOpt)))
 
             if (_refs._portKeys.nonEmpty)
                 report ++=
                     Json.obj(TrunkModel.Glossary.kRSignalPorts -> _trunkModel.ReportSignalPorts(
                         GetKey,
                         SignalInterface.kAnyKey,
-                        new SignalPort.Query(_refs._portKeys.toVector, sectionsOpt)))
+                        SignalPort.Query(_refs._portKeys.toVector, sectionsOpt)))
 
             if (_refs._sourceKeys.nonEmpty)
                 report ++=
                     Json.obj(TrunkModel.Glossary.kRSignalSources -> _trunkModel.ReportSignalSources(
                         GetKey,
-                        new SignalSource.Query(_refs._sourceKeys.toVector, sectionsOpt)))
+                        SignalSource.Query(_refs._sourceKeys.toVector, sectionsOpt)))
 
             if (_refs._sinkKeys.nonEmpty)
                 report ++=
                     Json.obj(TrunkModel.Glossary.kRSignalSinks -> _trunkModel.ReportSignalSinks(
                         GetKey,
-                        new SignalSink.Query(_refs._sinkKeys.toVector, sectionsOpt)))
+                        SignalSink.Query(_refs._sinkKeys.toVector, sectionsOpt)))
 
             if (_refs._linkKeys.nonEmpty)
                 report ++=
                     Json.obj(TrunkModel.Glossary.kRSignalLinks -> _trunkModel.ReportSignalLinks(
                         GetKey,
-                        new SignalLink.Query(_refs._linkKeys.toVector, sectionsOpt)))
+                        SignalLink.Query(_refs._linkKeys.toVector, sectionsOpt)))
 
             if (_refs._tapKeys.nonEmpty)
                 report ++=
                     Json.obj(TrunkModel.Glossary.kRSignalTaps -> _trunkModel.ReportSignalTaps(
                         GetKey,
-                        new SignalTap.Query(_refs._tapKeys.toVector, sectionsOpt)))
+                        SignalTap.Query(_refs._tapKeys.toVector, sectionsOpt)))
 
             if (_refs._inputKeys.nonEmpty)
                 report ++=
                     Json.obj(TrunkModel.Glossary.kRSignalInputs -> _trunkModel.ReportSignalInputs(
                         GetKey,
-                        new SignalInput.Query(_refs._inputKeys.toVector, sectionsOpt)))
+                        SignalInput.Query(_refs._inputKeys.toVector, sectionsOpt)))
 
             if (_refs._bridgeKeys.nonEmpty)
                 report ++=
                     Json.obj(TrunkModel.Glossary.kRSignalBridges -> _trunkModel.ReportSignalBridges(
                         GetKey,
-                        new SignalBridge.Query(_refs._bridgeKeys.toVector, sectionsOpt)))
+                        SignalBridge.Query(_refs._bridgeKeys.toVector, sectionsOpt)))
 
             if (_refs._outputKeys.nonEmpty)
                 report ++=
                     Json.obj(TrunkModel.Glossary.kRSignalOutputs -> _trunkModel.ReportSignalOutputs(
                         GetKey,
-                        new SignalOutput.Query(_refs._outputKeys.toVector, sectionsOpt)))
+                        SignalOutput.Query(_refs._outputKeys.toVector, sectionsOpt)))
 
             if (_refs._emitterPatchKeys.nonEmpty)
                 report ++=
                     Json.obj(TrunkModel.Glossary.kREmitterPatches -> _trunkModel.ReportEmitterPatches(
                         GetKey,
-                        new EmitterPatch.Query(_refs._emitterPatchKeys.toVector, sectionsOpt)))
+                        EmitterPatch.Query(_refs._emitterPatchKeys.toVector, sectionsOpt)))
 
             if (_refs._oscillatorPatchKeys.nonEmpty)
                 report ++=
                     Json.obj(TrunkModel.Glossary.kROscillatorPatches -> _trunkModel.ReportOscillatorPatches(
                         GetKey,
                         EmitterPatch.kAnyKey,
-                        new OscillatorPatch.Query(_refs._oscillatorPatchKeys.toVector, sectionsOpt)))
+                        OscillatorPatch.Query(_refs._oscillatorPatchKeys.toVector, sectionsOpt)))
         }
 
         report

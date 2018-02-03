@@ -23,7 +23,8 @@ import org.taranos.mc.Common.ReportSectionsParser
 import org.taranos.mc.trunk.intraprocess.BiasedElement.BiasedConstructorMetaDecoder
 import org.taranos.mc.trunk.intraprocess.Signal.SignalTypes
 import org.taranos.mc.trunk.intraprocess.TestableElement.TestableUpdateStateDecoder
-import org.taranos.mc.trunk.intraprocess.TrunkElement.{CommonConstructorMetaDecoder, CommonDestructorMetaDecoder, CommonQueryDecoder, CommonUpdateMetaDecoder}
+import org.taranos.mc.trunk.intraprocess.TrunkElement.{CommonConstructorMetaDecoder, CommonDestructorMetaDecoder,
+    CommonQueryDecoder, CommonUpdateMetaDecoder}
 import play.api.libs.json.{JsError, JsObject, JsSuccess, Json}
 
 
@@ -112,12 +113,12 @@ object SignalOutput
                         case _: TappableElementKey => Some(key.asInstanceOf[TappableElementKey])
 
                         case _ =>
-                            throw new TrunkException(
+                            throw TrunkException(
                                 Cell.ErrorCodes.SignalOutputConstructorInvalid,
                                 "invalid tappable key property")
                     }
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val modulatableKey: ModulatableElementKey =
@@ -131,13 +132,13 @@ object SignalOutput
                         case _: ModulatableElementKey => key.asInstanceOf[ModulatableElementKey]
 
                         case _ =>
-                            throw new TrunkException(
+                            throw TrunkException(
                                 Cell.ErrorCodes.SignalOutputConstructorInvalid,
                                 "invalid modulatable key property")
                     }
 
-                case JsError(errors) =>
-                    throw new TrunkException(
+                case JsError(_) =>
+                    throw TrunkException(
                         Cell.ErrorCodes.SignalOutputConstructorInvalid,
                         "missing modulatable key property")
             }
@@ -147,10 +148,10 @@ object SignalOutput
             {
                 case JsSuccess(value, _) => Some(value)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
-        new Constructor(
+        Constructor(
             commonMeta._tag,
             commonMeta._badgeOpt,
             commonMeta._nameOpt,
@@ -168,7 +169,7 @@ object SignalOutput
         val commonMeta = new CommonDestructorMetaDecoder[SignalOutput.Key](
             destructor, Cell.ErrorCodes.SignalOutputDestructorInvalid)
 
-        new Destructor(commonMeta._key)
+        Destructor(commonMeta._key)
     }
 
     def DecodeQuery (encoded: String): Query =
@@ -177,7 +178,7 @@ object SignalOutput
 
         val commonQuery = new CommonQueryDecoder[SignalOutput.Key](query)
 
-        new Query(commonQuery._keysOpt.get, commonQuery._sectionsOpt)
+        Query(commonQuery._keysOpt.get, commonQuery._sectionsOpt)
     }
 
     def DecodeUpdate (encoded: String): Update =
@@ -189,7 +190,7 @@ object SignalOutput
 
         val testableState = new TestableUpdateStateDecoder(update)
 
-        new Update(
+        Update(
             commonMeta._key,
             commonMeta._nameOpt,
             commonMeta._descriptionOpt,
@@ -211,7 +212,8 @@ class SignalOutput (
     protected
     val _meta = meta
 
-    def GetMode = _meta._mode
+    def GetMode: Signal.ModeEnum.Mode =
+        _meta._mode
 
     //
     // Attrs:
@@ -225,7 +227,8 @@ class SignalOutput (
     protected
     val _refs = refs
 
-    def GetTapKey: SignalTap.Key = _refs._tapKey
+    def GetTapKey: SignalTap.Key =
+        _refs._tapKey
 
     //
     // State:
@@ -239,11 +242,12 @@ class SignalOutput (
         {
             case Some(tap) => tap.GetLastSignalOpt
 
-            case None => throw new TrunkException(Cell.ErrorCodes.SignalOutputTapless)
+            case None => throw TrunkException(Cell.ErrorCodes.SignalOutputTapless)
         }
     }
 
-    def IsTapParent = _refs._isTapParent
+    def IsTapParent: Boolean =
+        _refs._isTapParent
 
     def Report (sectionsOpt: Option[String] = None): JsObject =
     {
@@ -282,19 +286,19 @@ class SignalOutput (
             report ++=
                 Json.obj(TrunkModel.Glossary.kRSignalTaps -> _trunkModel.ReportSignalTaps(
                     GetTrunkKey,
-                    new SignalTap.Query(Vector(_refs._tapKey), sectionsOpt)))
+                    SignalTap.Query(Vector(_refs._tapKey), sectionsOpt)))
         }
 
         report
     }
 
-    def TestSignal (signal: Signal[_ >: SignalTypes]) =
+    def PropagateTest (signal: Signal[_ >: SignalTypes]): Unit =
     {
         _trunkModel.GetSignalTapOpt(GetTrunkKey, _refs._tapKey) match
         {
             case Some(tap) => tap.Propagate(Some(signal))
 
-            case None => throw new TrunkException(Cell.ErrorCodes.SignalOutputTapless)
+            case None => throw TrunkException(Cell.ErrorCodes.SignalOutputTapless)
         }
     }
 }

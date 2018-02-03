@@ -55,10 +55,10 @@ class SubjectPlant
 
         // 3: Bind with/create children:
         // Create default emitter:
-        val emitterConstructor = new SubjectEmitter.Constructor(
+        val emitterConstructor = SubjectEmitter.Constructor(
             _tag = constructor._tag + FieldModel.Glossary.kTagSeparator + FieldModel.Glossary.kEDefaultEmitter,
             _patchDefOpt = constructor._patchDefOpt,
-            _modulatorKeyOpt = constructor._modulatorKeyOpt)
+            _modulatableKeyOpt = constructor._modulatorKeyOpt)
         _fieldModel.CreateSubjectEmitters(
             field.GetKey,
             subject.GetKey,
@@ -95,7 +95,8 @@ class SubjectPlant
 
                 // 4: Unbind with/destroy children:
                 val subjectEmitterDestructors =
-                    subject.GetEmitterKeys.map(new SubjectEmitter.Destructor(_, destructor._scope))
+                    subject.GetEmitterKeys.asInstanceOf[Set[SubjectEmitter.Key]].map(
+                        SubjectEmitter.Destructor(_, destructor._scope))
                 if (subjectEmitterDestructors.nonEmpty)
                     _fieldModel.DestroySubjectEmitters(
                         field.GetKey,
@@ -105,7 +106,7 @@ class SubjectPlant
                 // 5: Remove element from store:
                 _subjects -= ((field.GetKey, destructor._key))
 
-            case None => throw new FieldException(Cell.ErrorCodes.SubjectUnknown)
+            case None => throw FieldException(Cell.ErrorCodes.SubjectUnknown)
         }
 
         // Return subject key:
@@ -121,7 +122,7 @@ class SubjectPlant
         _subjects.filter(_._1._1 == fieldKey).foreach(subjectPair =>
         {
             val ((_, pairSubjectKey), _) = subjectPair
-            val subjectDestructor = new Subject.Destructor(pairSubjectKey, scope)
+            val subjectDestructor = Subject.Destructor(pairSubjectKey, scope)
             DestroySubject(field, subjectDestructor)
         })
     }
@@ -137,10 +138,10 @@ class SubjectPlant
             case _: Subject.Key =>
                 val opt = _subjects.get((field.GetKey, key))
                 if (isRequired && opt.isEmpty)
-                    throw new FieldException(Cell.ErrorCodes.SubjectUnknown)
+                    throw FieldException(Cell.ErrorCodes.SubjectUnknown)
                 opt
 
-            case _ => throw new FieldException(Cell.ErrorCodes.SubjectKeyInvalid)
+            case _ => throw FieldException(Cell.ErrorCodes.SubjectKeyInvalid)
         }
     }
 
@@ -152,5 +153,6 @@ class SubjectPlant
         _subjects.filter(_._1._1 == fieldKey).values.toVector
     }
 
-    def GetElementCount (fieldKey: Field.Key): Int = _subjects.size
+    def GetElementCount (fieldKey: Field.Key): Int =
+        _subjects.size
 }

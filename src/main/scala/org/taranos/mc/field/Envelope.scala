@@ -243,12 +243,12 @@ object Envelope
                             case _ =>
                                 val value = validated.toInt
                                 if (value < 0 || value > 15)
-                                    throw new FieldException(Cell.ErrorCodes.EnvelopeDefinitionInvalid)
+                                    throw FieldException(Cell.ErrorCodes.EnvelopeDefinitionInvalid)
                                 value
                         }
 
-                    case JsError(errors) =>
-                        throw new FieldException(Cell.ErrorCodes.EnvelopeDefinitionInvalid)
+                    case JsError(_) =>
+                        throw FieldException(Cell.ErrorCodes.EnvelopeDefinitionInvalid)
                 }
 
             val y: Int =
@@ -262,12 +262,12 @@ object Envelope
                             case _ =>
                                 val value = validated.toInt
                                 if (value < 0 || value > 15)
-                                    throw new FieldException(Cell.ErrorCodes.EnvelopeDefinitionInvalid)
+                                    throw FieldException(Cell.ErrorCodes.EnvelopeDefinitionInvalid)
                                 value
                         }
 
-                    case JsError(errors) =>
-                        throw new FieldException(Cell.ErrorCodes.EnvelopeDefinitionInvalid)
+                    case JsError(_) =>
+                        throw FieldException(Cell.ErrorCodes.EnvelopeDefinitionInvalid)
                 }
 
             (x, y)
@@ -285,7 +285,7 @@ object Envelope
 
         // Test validity:
         if (polesPacked.isEmpty || polesPacked.length > 8 || !IsHex(polesPacked))
-            throw new FieldException(Cell.ErrorCodes.PoleDefinitionInvalid)
+            throw FieldException(Cell.ErrorCodes.PoleDefinitionInvalid)
 
         // Parse reverse of packed poles and yield a vector of JsObjects:
         var longPoles = java.lang.Long.parseLong(polesPacked.reverse, 16)
@@ -323,7 +323,7 @@ object Envelope
                 else
                     newEnvelope._ceiling
 
-            case JsError(errors) => newEnvelope._ceiling
+            case JsError(_) => newEnvelope._ceiling
         }
 
         // Determine new floor:
@@ -337,7 +337,7 @@ object Envelope
                 else
                     newEnvelope._floor
 
-            case JsError(errors) => newEnvelope._floor
+            case JsError(_) => newEnvelope._floor
         }
 
         // Override default ceiling and floor values with new ones only if they are reasonable:
@@ -352,7 +352,7 @@ object Envelope
             FieldModel.Glossary.kEnvelopePolesDef,
             FieldModel.Glossary.kEnvelopePolesPackedDef))
         if (extractedPoleDefKeys.size != 1)
-            throw new FieldException(Cell.ErrorCodes.EnvelopeDefinitionInvalid)
+            throw FieldException(Cell.ErrorCodes.EnvelopeDefinitionInvalid)
 
         val extractedPoleVals: Vector[(Int, Int)] = extractedPoleDefKeys.head match
         {
@@ -361,7 +361,7 @@ object Envelope
                 {
                     case JsSuccess(value, _) => ExtractPolesDef(value)
 
-                    case JsError(errors) => throw new FieldException(Cell.ErrorCodes.EnvelopeDefinitionInvalid)
+                    case JsError(_) => throw FieldException(Cell.ErrorCodes.EnvelopeDefinitionInvalid)
                 }
 
             case FieldModel.Glossary.kEnvelopePolesPackedDef =>
@@ -369,11 +369,11 @@ object Envelope
                 {
                     case JsSuccess(value, _) => UnpackPoles(value)
 
-                    case JsError(errors) => throw new FieldException(Cell.ErrorCodes.EnvelopeDefinitionInvalid)
+                    case JsError(_) => throw FieldException(Cell.ErrorCodes.EnvelopeDefinitionInvalid)
                 }
         }
         if (extractedPoleVals.size > 5)
-            throw new FieldException(Cell.ErrorCodes.EnvelopeDefinitionInvalid)
+            throw FieldException(Cell.ErrorCodes.EnvelopeDefinitionInvalid)
 
         // Ensure optimized pole values configuration:
         val optimumPoleVals: mutable.ArrayBuffer[(Int, Int)] = mutable.ArrayBuffer.empty[(Int, Int)]
@@ -426,7 +426,7 @@ object Envelope
         val extractedPoleDefKeys = envelopeDef.keys.intersect(Set(FieldModel.Glossary.kEnvelopePolesDef,
             FieldModel.Glossary.kEnvelopePolesPackedDef))
         if (extractedPoleDefKeys.size != 1)
-            throw new FieldException(Cell.ErrorCodes.EnvelopeDefinitionInvalid)
+            throw FieldException(Cell.ErrorCodes.EnvelopeDefinitionInvalid)
 
         val extractedPoleVals: Vector[(Int, Int)] = extractedPoleDefKeys.head match
         {
@@ -435,7 +435,7 @@ object Envelope
                 {
                     case JsSuccess(value, _) => ExtractPolesDef(value)
 
-                    case JsError(errors) => throw new FieldException(Cell.ErrorCodes.EnvelopeDefinitionInvalid)
+                    case JsError(_) => throw FieldException(Cell.ErrorCodes.EnvelopeDefinitionInvalid)
                 }
 
             case FieldModel.Glossary.kEnvelopePolesPackedDef =>
@@ -443,11 +443,11 @@ object Envelope
                 {
                     case JsSuccess(value, _) => UnpackPoles(value)
 
-                    case JsError(errors) => throw new FieldException(Cell.ErrorCodes.EnvelopeDefinitionInvalid)
+                    case JsError(_) => throw FieldException(Cell.ErrorCodes.EnvelopeDefinitionInvalid)
                 }
         }
         if (extractedPoleVals.size > 5)
-            throw new FieldException(Cell.ErrorCodes.EnvelopeDefinitionInvalid)
+            throw FieldException(Cell.ErrorCodes.EnvelopeDefinitionInvalid)
 
         // Ensure optimized pole values configuration:
         val optimumPoleVals: mutable.ArrayBuffer[(Int, Int)] = mutable.ArrayBuffer.empty[(Int, Int)]

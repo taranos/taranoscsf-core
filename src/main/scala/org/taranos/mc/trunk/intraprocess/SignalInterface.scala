@@ -99,7 +99,7 @@ object SignalInterface
 
         val commonMeta = new CommonConstructorMetaDecoder(constructor, Cell.ErrorCodes.SignalLinkConstructorInvalid)
 
-        new Constructor(
+        Constructor(
             commonMeta._tag,
             commonMeta._badgeOpt,
             commonMeta._nameOpt,
@@ -113,7 +113,7 @@ object SignalInterface
         val commonMeta = new CommonDestructorMetaDecoder[SignalInterface.Key](
             destructor, Cell.ErrorCodes.SignalInterfaceDestructorInvalid)
 
-        new Destructor(commonMeta._key)
+        Destructor(commonMeta._key)
     }
 
     def DecodeQuery (encoded: String): Query =
@@ -122,7 +122,7 @@ object SignalInterface
 
         val commonQuery = new CommonQueryDecoder[SignalInterface.Key](query)
 
-        new Query(commonQuery._keysOpt.get, commonQuery._sectionsOpt)
+        Query(commonQuery._keysOpt.get, commonQuery._sectionsOpt)
     }
 
     def DecodeUpdate (encoded: String): Update =
@@ -132,7 +132,7 @@ object SignalInterface
         val commonMeta = new CommonUpdateMetaDecoder[SignalInterface.Key](
             update, Cell.ErrorCodes.SignalInterfaceUpdateInvalid)
 
-        new Update(
+        Update(
             commonMeta._key,
             commonMeta._nameOpt,
             commonMeta._descriptionOpt)
@@ -146,6 +146,8 @@ class SignalInterface (
     (implicit protected val _trunkModel: TrunkModel)
     extends TrunkElement[SignalInterface.Key]
 {
+    import scala.collection.mutable
+
     //
     // Meta:
     //
@@ -164,11 +166,14 @@ class SignalInterface (
     protected
     val _refs = refs
 
-    def BindPort (key: SignalPort.Key) = _refs._portKeys += key
+    def BindPort (key: SignalPort.Key): Unit =
+        _refs._portKeys += key
 
-    def GetPortKeys = _refs._portKeys
+    def GetPortKeys: mutable.Set[SignalPort.Key] =
+        _refs._portKeys
 
-    def UnbindPort (key: SignalPort.Key) = _refs._portKeys -= key
+    def UnbindPort (key: SignalPort.Key): Unit =
+        _refs._portKeys -= key
 
     //
     // State:
@@ -205,7 +210,7 @@ class SignalInterface (
                     Json.obj(TrunkModel.Glossary.kRSignalPorts -> _trunkModel.ReportSignalPorts(
                         GetTrunkKey,
                         GetKey,
-                        new SignalPort.Query(_refs._portKeys.toVector, sectionsOpt)))
+                        SignalPort.Query(_refs._portKeys.toVector, sectionsOpt)))
         }
 
         report

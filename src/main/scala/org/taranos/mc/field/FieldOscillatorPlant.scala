@@ -47,7 +47,7 @@ class FieldOscillatorPlant
         _trunkModel.CreateOscillatorPatches(
             trunkKey,
             Vector(
-                new OscillatorPatch.Constructor(
+                OscillatorPatch.Constructor(
                     _tag = tag,
                     _fieldKey = field.GetKey,
                     _emitterPatchKey = emitter.GetPatchKey,
@@ -63,7 +63,7 @@ class FieldOscillatorPlant
     {
         _trunkModel.DestroyOscillatorPatches(
             field.GetTrunkKey,
-            Vector(new OscillatorPatch.Destructor(oscillator.GetPatchKey)))
+            Vector(OscillatorPatch.Destructor(oscillator.GetPatchKey)))
     }
 
     def CreateFieldOscillator (
@@ -76,16 +76,16 @@ class FieldOscillatorPlant
         {
             case JsSuccess(value, _) => value
 
-            case JsError(errors) =>
-                throw new FieldException(Cell.ErrorCodes.ChannelDefinitionInvalid)
+            case JsError(_) =>
+                throw FieldException(Cell.ErrorCodes.ChannelDefinitionInvalid)
         }
         val oscillatorPatchDef = (constructor._channelDef \
             FieldModel.Glossary.kOscillatorPatchDef).validate[JsObject] match
         {
             case JsSuccess(value, _) => value
 
-            case JsError(errors) =>
-                throw new FieldException(Cell.ErrorCodes.ChannelDefinitionInvalid)
+            case JsError(_) =>
+                throw FieldException(Cell.ErrorCodes.ChannelDefinitionInvalid)
         }
         val oscillatorPatch = CreateOscillatorPatch(
             field,
@@ -157,7 +157,7 @@ class FieldOscillatorPlant
                     _fieldOscillators -= ((field.GetKey, oscillator.GetKey))
                 }
 
-            case None => throw new FieldException(Cell.ErrorCodes.FieldOscillatorUnknown)
+            case None => throw FieldException(Cell.ErrorCodes.FieldOscillatorUnknown)
         }
 
         // Return field oscillator key:
@@ -174,7 +174,7 @@ class FieldOscillatorPlant
         _fieldOscillators.filter(_._1._1 == fieldKey).foreach(oscillatorPair =>
         {
             val ((_, pairOscillatorKey), _) = oscillatorPair
-            val oscillatorDestructor = new FieldOscillator.Destructor(pairOscillatorKey, scope)
+            val oscillatorDestructor = FieldOscillator.Destructor(pairOscillatorKey, scope)
             DestroyFieldOscillator(field, oscillatorDestructor, isForcedDestroy = true)
         })
     }
@@ -190,10 +190,10 @@ class FieldOscillatorPlant
             case _: FieldOscillator.Key =>
                 val opt = _fieldOscillators.get((field.GetKey, key))
                 if (isRequired && opt.isEmpty)
-                    throw new FieldException(Cell.ErrorCodes.FieldOscillatorUnknown)
+                    throw FieldException(Cell.ErrorCodes.FieldOscillatorUnknown)
                 opt
 
-            case _ => throw new FieldException(Cell.ErrorCodes.FieldOscillatorKeyInvalid)
+            case _ => throw FieldException(Cell.ErrorCodes.FieldOscillatorKeyInvalid)
         }
     }
 
@@ -245,5 +245,6 @@ class FieldOscillatorPlant
             }).keys.map(pair => pair._2).toVector
     }
 
-    def GetElementCount (fieldKey: Field.Key): Int = _fieldOscillators.count(_._1._1 == fieldKey)
+    def GetElementCount (fieldKey: Field.Key): Int =
+        _fieldOscillators.count(_._1._1 == fieldKey)
 }

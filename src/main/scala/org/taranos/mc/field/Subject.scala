@@ -104,7 +104,7 @@ object Subject
                         value(1).toDouble,
                         0f)
 
-                case JsError(errors) =>
+                case JsError(_) =>
                     new Body.Position
             }
 
@@ -119,7 +119,7 @@ object Subject
                         0f,
                         0f)
 
-                case JsError(errors) =>
+                case JsError(_) =>
                     new Body.Rotation
             }
 
@@ -128,7 +128,7 @@ object Subject
             {
                 case JsSuccess(value, _) => Some(value)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val modulatorKeyOpt: Option[SignalModulator.Key] =
@@ -136,10 +136,10 @@ object Subject
             {
                 case JsSuccess(value, _) => Some(TrunkElement.DecodeKey[SignalModulator.Key](value))
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
-        new Constructor(
+        Constructor(
             commonMeta._tag,
             commonMeta._badgeOpt,
             commonMeta._nameOpt,
@@ -157,7 +157,7 @@ object Subject
         val commonMeta = new CommonDestructorMetaDecoder[Subject.Key](
             destructor, Cell.ErrorCodes.SubjectDestructorInvalid)
 
-        new Destructor(commonMeta._key, commonMeta._scope)
+        Destructor(commonMeta._key, commonMeta._scope)
     }
 
     def DecodeQuery (encoded: String): Query =
@@ -166,7 +166,7 @@ object Subject
 
         val commonQuery = new CommonQueryDecoder[Subject.Key](query)
 
-        new Query(commonQuery._keysOpt.get, commonQuery._sectionsOpt)
+        Query(commonQuery._keysOpt.get, commonQuery._sectionsOpt)
     }
 
     def DecodeUpdate (encoded: String): Update =
@@ -184,7 +184,7 @@ object Subject
                         value(1).toDouble,
                         0f))
 
-                case JsError(errors) =>
+                case JsError(_) =>
                     None
             }
 
@@ -198,11 +198,11 @@ object Subject
                         0f,
                         0f))
 
-                case JsError(errors) =>
+                case JsError(_) =>
                     None
             }
 
-        new Update(
+        Update(
             commonMeta._key,
             commonMeta._nameOpt,
             commonMeta._descriptionOpt,
@@ -236,7 +236,7 @@ class Subject (
     protected
     val _refs = refs
 
-    def BindEmitter (emitterKey: Emitter.Key) =
+    def BindEmitter (emitterKey: Emitter.Key): Unit =
     {
         // First emitter becomes the default emitter:
         if (_refs._emitterKeys.isEmpty)
@@ -244,9 +244,11 @@ class Subject (
         _refs._emitterKeys += emitterKey.asInstanceOf[SubjectEmitter.Key]
     }
 
-    def GetDefaultEmitterKey = _refs._defaultEmitterKey
+    def GetDefaultEmitterKey: Emitter.Key =
+        _refs._defaultEmitterKey
 
-    def GetEmitterKeys = _refs._emitterKeys.toSet
+    def GetEmitterKeys: Set[Emitter.Key] =
+        _refs._emitterKeys.toSet
 
     def UnbindEmitter (
         emitterKey: Emitter.Key,
@@ -269,13 +271,17 @@ class Subject (
     protected
     val _state = state
 
-    def GetPosition = _state._position
+    def GetPosition: Body.Position =
+        _state._position
 
-    def GetRotation = _state._rotation
+    def GetRotation: Body.Rotation =
+        _state._rotation
 
-    def SetPosition (position: Body.Position) = _state._position = position
+    def SetPosition (position: Body.Position): Unit =
+        _state._position = position
 
-    def SetRotation (rotation: Body.Rotation) = _state._rotation = rotation
+    def SetRotation (rotation: Body.Rotation): Unit =
+        _state._rotation = rotation
 
     //
     // Reports:
@@ -306,7 +312,7 @@ class Subject (
                 Json.obj(FieldModel.Glossary.kRSubjectEmitters -> _fieldModel.ReportSubjectEmitters(
                     GetFieldKey,
                     GetKey,
-                    new SubjectEmitter.Query(_refs._emitterKeys.toVector, sectionsOpt)))
+                    SubjectEmitter.Query(_refs._emitterKeys.toVector, sectionsOpt)))
         }
 
         report

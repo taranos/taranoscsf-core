@@ -5,7 +5,8 @@ import org.taranos.mc.Cell
 import org.taranos.mc.Common.ReportSectionsParser
 import org.taranos.mc.trunk.intraprocess.Signal.SignalTypes
 import org.taranos.mc.trunk.intraprocess.TestableElement.TestableUpdateStateDecoder
-import org.taranos.mc.trunk.intraprocess.TrunkElement.{CommonConstructorMetaDecoder, CommonDestructorMetaDecoder, CommonQueryDecoder, CommonUpdateMetaDecoder}
+import org.taranos.mc.trunk.intraprocess.TrunkElement.{CommonConstructorMetaDecoder, CommonDestructorMetaDecoder,
+    CommonQueryDecoder, CommonUpdateMetaDecoder}
 import play.api.libs.json._
 
 
@@ -71,7 +72,7 @@ object SignalSource
 
         val commonMeta = new CommonConstructorMetaDecoder(constructor, Cell.ErrorCodes.SignalSourceConstructorInvalid)
 
-        new Constructor(
+        Constructor(
             commonMeta._tag,
             commonMeta._badgeOpt,
             commonMeta._nameOpt,
@@ -85,7 +86,7 @@ object SignalSource
         val commonMeta = new CommonDestructorMetaDecoder[SignalSource.Key](
             destructor, Cell.ErrorCodes.SignalSourceDestructorInvalid)
 
-        new Destructor(commonMeta._key)
+        Destructor(commonMeta._key)
     }
 
     def DecodeQuery (encoded: String): Query =
@@ -94,7 +95,7 @@ object SignalSource
 
         val commonQuery = new CommonQueryDecoder[SignalSource.Key](query)
 
-        new Query(commonQuery._keysOpt.get, commonQuery._sectionsOpt)
+        Query(commonQuery._keysOpt.get, commonQuery._sectionsOpt)
     }
 
     def DecodeUpdate (encoded: String): Update =
@@ -122,7 +123,7 @@ object SignalSource
 
         val testableState = new TestableUpdateStateDecoder(update)
 
-        new Update(
+        Update(
             commonMeta._key,
             commonMeta._nameOpt,
             commonMeta._descriptionOpt,
@@ -147,7 +148,8 @@ class SignalSource (
     protected
     val _meta = meta
 
-    def GetMode = _meta._mode
+    def GetMode: Signal.ModeEnum.Mode =
+        _meta._mode
 
     //
     // Attrs:
@@ -174,7 +176,7 @@ class SignalSource (
             {
                 case Some(link) => link.BindSource(GetKey, isReciprocal = false)
 
-                case None => throw new TrunkException(Cell.ErrorCodes.SignalLinkInvalid)
+                case None => throw TrunkException(Cell.ErrorCodes.SignalLinkInvalid)
             }
         }
     }
@@ -191,14 +193,16 @@ class SignalSource (
             {
                 case Some(tap) => tap.BindSource(GetKey, isReciprocal = false)
 
-                case None => throw new TrunkException(Cell.ErrorCodes.SignalTapInvalid)
+                case None => throw TrunkException(Cell.ErrorCodes.SignalTapInvalid)
             }
         }
     }
 
-    def GetLinkKeys: mutable.HashMap[String, SignalLink.Key] = _refs._linkKeys
+    def GetLinkKeys: mutable.HashMap[String, SignalLink.Key] =
+        _refs._linkKeys
 
-    def GetTapKeyOpt = _refs._tapKeyOpt
+    def GetTapKeyOpt: Option[SignalTap.Key] =
+        _refs._tapKeyOpt
 
     def UnbindLink (
         linkKeyOpt: Option[SignalLink.Key] = None,
@@ -252,7 +256,7 @@ class SignalSource (
     {
         // Source must be injecting a signal (sources do not perform default propagation):
         val signal = signalOpt.getOrElse(
-            throw new TrunkException(Cell.ErrorCodes.SignalInvalid, "signal must be valid"))
+            throw TrunkException(Cell.ErrorCodes.SignalInvalid, "signal must be valid"))
 
         // If signal is virtual then accept its mark:
         if (signal._scalar.isInstanceOf[Signal.Virtual])
@@ -335,7 +339,7 @@ class SignalSource (
         report
     }
 
-    def TestSignal (signal: Signal[_ >: SignalTypes]) =
+    def PropagateTest (signal: Signal[_ >: SignalTypes]): Unit =
     {
         Propagate(Some(signal))
     }

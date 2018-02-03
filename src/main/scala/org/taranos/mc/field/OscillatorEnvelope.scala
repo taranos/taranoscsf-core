@@ -55,7 +55,7 @@ object OscillatorEnvelope
                     {
                         case "error.expected.jsarray" => Vector.empty[OscillatorEnvelope.Key]
 
-                        case _ => throw new FieldException(Cell.ErrorCodes.KeysInvalid)
+                        case _ => throw FieldException(Cell.ErrorCodes.KeysInvalid)
                     }
             }
 
@@ -64,10 +64,10 @@ object OscillatorEnvelope
             {
                 case JsSuccess(value, _) => Some(value.head)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
-        new Query(keys, sectionsOpt)
+        Query(keys, sectionsOpt)
     }
 
     def DecodeUpdate (encoded: String): Update =
@@ -79,7 +79,7 @@ object OscillatorEnvelope
             {
                 case JsSuccess(value, _) => new Key(value)
 
-                case JsError(errors) => throw new FieldException(
+                case JsError(_) => throw FieldException(
                     Cell.ErrorCodes.OscillatorPatchUpdateInvalid, "missing key property")
             }
 
@@ -88,11 +88,11 @@ object OscillatorEnvelope
             {
                 case JsSuccess(value, _) => value
 
-                case JsError(errors) => throw new FieldException(
+                case JsError(_) => throw FieldException(
                     Cell.ErrorCodes.OscillatorPatchUpdateInvalid, "missing envelope def property")
             }
 
-        new Update(
+        Update(
             key,
             envelopeDef)
     }

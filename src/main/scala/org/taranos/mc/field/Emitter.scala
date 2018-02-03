@@ -130,9 +130,9 @@ trait Emitter[KeyType <: Emitter.Key]
     extends FieldElement[KeyType]
         with CallableElement
 {
-    def BindOscillator (oscillatorKey: Oscillator.Key)
+    def BindOscillator (oscillatorKey: Oscillator.Key): Unit
 
-    def BindPatch (emitterPatchKey: EmitterPatch.Key)
+    def BindPatch (emitterPatchKey: EmitterPatch.Key): Unit
 
     def Emit (): Unit
 
@@ -145,14 +145,16 @@ trait Emitter[KeyType <: Emitter.Key]
     def GetPatchKey: EmitterPatch.Key
 
     override
-    def InvokeMacro (makro: JsObject) =
+    def InvokeMacro (makro: JsObject): Unit =
     {
         def CheckArgsCount (
             args: Vector[String],
             minCount: Int,
-            maxCount: Int) =
+            maxCount: Int): Unit =
+        {
             if (args.length < minCount || args.length > maxCount)
-                throw new FieldException(Cell.ErrorCodes.MacroInvalid)
+                throw FieldException(Cell.ErrorCodes.MacroInvalid)
+        }
 
         makro.fields.foreach(field =>
         {
@@ -162,7 +164,7 @@ trait Emitter[KeyType <: Emitter.Key]
             {
                 case JsSuccess(value, _) => value
 
-                case JsError(errors) => throw new FieldException(Cell.ErrorCodes.MacroInvalid)
+                case JsError(_) => throw FieldException(Cell.ErrorCodes.MacroInvalid)
             }
 
             fieldName match
@@ -176,7 +178,7 @@ trait Emitter[KeyType <: Emitter.Key]
                             {
                                 case JsSuccess(value, _) => Some(value)
 
-                                case JsError(errors) => throw new FieldException(Cell.ErrorCodes.MacroInvalid)
+                                case JsError(_) => throw FieldException(Cell.ErrorCodes.MacroInvalid)
                             }
                         else
                             None
@@ -186,7 +188,7 @@ trait Emitter[KeyType <: Emitter.Key]
                             {
                                 case JsSuccess(value, _) => Some(value)
 
-                                case JsError(errors) => throw new FieldException(Cell.ErrorCodes.MacroInvalid)
+                                case JsError(_) => throw FieldException(Cell.ErrorCodes.MacroInvalid)
                             }
                         else
                             None
@@ -216,7 +218,7 @@ trait Emitter[KeyType <: Emitter.Key]
                     val floor = args(1)
                     MacroSetChannelFloor(channelTag, floor)
 
-                case _ => throw new FieldException(Cell.ErrorCodes.MacroInvalid)
+                case _ => throw FieldException(Cell.ErrorCodes.MacroInvalid)
             }
         })
     }
@@ -224,19 +226,19 @@ trait Emitter[KeyType <: Emitter.Key]
     def MacroCreateChannel (
         channelTag: String,
         envelopeDefOpt: Option[JsObject],
-        patchDefOpt: Option[JsObject])
+        patchDefOpt: Option[JsObject]): Unit
 
-    def MacroDestroyChannel (channelTag: String)
+    def MacroDestroyChannel (channelTag: String): Unit
 
-    def MacroSetChannelCeiling (channelTag: String, ceiling: String)
+    def MacroSetChannelCeiling (channelTag: String, ceiling: String): Unit
 
-    def MacroSetChannelPoles (channelTag: String, polesPacked: String)
+    def MacroSetChannelPoles (channelTag: String, polesPacked: String): Unit
 
-    def MacroSetChannelFloor (channelTag: String, floor: String)
+    def MacroSetChannelFloor (channelTag: String, floor: String): Unit
 
     def UnbindOscillator (
         oscillatorKey: Oscillator.Key,
         isForcedUnbind: Boolean): Boolean
 
-    def UnbindPatch ()
+    def UnbindPatch (): Unit
 }

@@ -45,14 +45,6 @@ class SignalPortPlant
         interface: SignalInterface,
         constructor: SignalPort.Constructor): SignalPort =
     {
-        // Create tap (child):
-        val tap = _trunkModel.CreateSignalTaps(
-            trunk.GetKey,
-            Vector(
-                new SignalTap.Constructor(
-                    _tag = constructor._tag + TrunkModel.Glossary.kTagSeparator + TrunkModel.Glossary.kESignalTap,
-                    _mode = constructor._mode))).head
-
         // Create port element:
         val port = new SignalPort(
             new SignalPort.Meta(
@@ -67,7 +59,7 @@ class SignalPortPlant
             new SignalPort.Refs(
                 trunk.GetKey,
                 interface.GetKey,
-                tap.GetKey))
+                constructor._inputKeyOpt))
 
         // 1: Add element to store:
         _ports += (trunk.GetKey, port.GetKey) -> port
@@ -119,16 +111,14 @@ class SignalPortPlant
                         trunk.UnbindSignalPort(port.GetKey)
 
                         // 5: Destroy children:
-                        val tapDestructor = new SignalTap.Destructor(port.GetTapKey)
-                        _trunkModel.DestroySignalTaps(trunk.GetKey, Vector(tapDestructor))
 
                         // 6: Remove element from store:
                         _ports -= ((trunk.GetKey, port.GetKey))
 
-                    case None => throw new TrunkException(Cell.ErrorCodes.SignalPortUnknown)
+                    case None => throw TrunkException(Cell.ErrorCodes.SignalPortUnknown)
                 }
 
-            case _ => throw new TrunkException(Cell.ErrorCodes.SignalPortInvalid)
+            case _ => throw TrunkException(Cell.ErrorCodes.SignalPortInvalid)
         }
 
         // Return port key:
@@ -143,7 +133,7 @@ class SignalPortPlant
         _ports.filter(_._1._1 == trunkKey).foreach(portPair =>
         {
             val ((_, pairPortKey), _) = portPair
-            val portDestructor = new SignalPort.Destructor(pairPortKey)
+            val portDestructor = SignalPort.Destructor(pairPortKey)
             DestroySignalPort(trunk, portDestructor)
         })
     }
@@ -159,10 +149,10 @@ class SignalPortPlant
             case _: SignalPort.Key =>
                 val opt = _ports.get((trunk.GetKey, key))
                 if (isRequired && opt.isEmpty)
-                    throw new TrunkException(Cell.ErrorCodes.SignalPortUnknown)
+                    throw TrunkException(Cell.ErrorCodes.SignalPortUnknown)
                 opt
 
-            case _ => throw new TrunkException(Cell.ErrorCodes.SignalPortKeyInvalid)
+            case _ => throw TrunkException(Cell.ErrorCodes.SignalPortKeyInvalid)
         }
     }
 
@@ -182,7 +172,8 @@ class SignalPortPlant
         _ports.filter(_._1._1 == trunkKey).keys.map(_._2).toVector
     }
 
-    def GetElementCount (trunkKey: Trunk.Key): Int = _ports.count(_._1._1 == trunkKey)
+    def GetElementCount (trunkKey: Trunk.Key): Int =
+        _ports.count(_._1._1 == trunkKey)
 
     def LookupSignalPort (trunk: Trunk, lookupAlias: String): Option[SignalPort.Key] =
     {
@@ -212,5 +203,4 @@ class SignalPortPlant
 
         portKeyOpt
     }
-
 }

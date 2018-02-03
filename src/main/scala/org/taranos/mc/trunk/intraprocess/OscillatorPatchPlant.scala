@@ -39,11 +39,11 @@ class OscillatorPatchPlant
     {
         // Get parent emitter patch:
         val emitterPatch: EmitterPatch = _trunkModel.GetEmitterPatchOpt(trunk.GetKey, constructor._emitterPatchKey)
-            .getOrElse(throw new TrunkException(Cell.ErrorCodes.EmitterPatchUnknown))
+            .getOrElse(throw TrunkException(Cell.ErrorCodes.EmitterPatchUnknown))
 
         // Get modulatable (emitter patch) tap to bind with:
         val modulatableTap: SignalTap = _trunkModel.GetSignalTapOpt(trunk.GetKey, emitterPatch.GetTapKey).getOrElse(
-            throw new TrunkException(Cell.ErrorCodes.EmitterPatchTapless))
+            throw TrunkException(Cell.ErrorCodes.EmitterPatchTapless))
 
         // Get routing tap to bind with:
         var isTapParent: Boolean = false
@@ -52,7 +52,7 @@ class OscillatorPatchPlant
             // Get supplied tap:
             case Some(tapKey) if tapKey.isInstanceOf[SignalTap.Key] =>
                 _trunkModel.GetSignalTapOpt(trunk.GetKey, tapKey.asInstanceOf[SignalTap.Key]).getOrElse(
-                    throw new TrunkException(Cell.ErrorCodes.SignalTapInvalid))
+                    throw TrunkException(Cell.ErrorCodes.SignalTapInvalid))
 
             // Make a new tap:
             case None =>
@@ -60,21 +60,21 @@ class OscillatorPatchPlant
                 _trunkModel.CreateSignalTaps(
                     trunk.GetKey,
                     Vector(
-                        new SignalTap.Constructor(
+                        SignalTap.Constructor(
                             _tag = constructor._tag + TrunkModel.Glossary.kTagSeparator +
                                 TrunkModel.Glossary.kESignalTap,
                             _mode = Signal.ModeEnum.Continuous))).head
 
             // Cannot bind with anything else:
             case _ =>
-                throw new TrunkException(Cell.ErrorCodes.OscillatorPatchInvalid)
+                throw TrunkException(Cell.ErrorCodes.OscillatorPatchInvalid)
         }
 
         // Create link from modulatable tap to routing tap:
         _trunkModel.CreateSignalLinks(
             trunk.GetKey,
             Vector(
-                new SignalLink.Constructor(
+                SignalLink.Constructor(
                     _tag = constructor._tag + TrunkModel.Glossary.kTagSeparator + TrunkModel.Glossary.kESignalLink,
                     _sourceKey = modulatableTap.GetSourceKey,
                     _sinkKey = routingTap.GetSinkKey,
@@ -120,7 +120,7 @@ class OscillatorPatchPlant
         val loudnessOutput = _trunkModel.CreateSignalOutputs(
             trunk.GetKey,
             Vector(
-                new SignalOutput.Constructor(
+                SignalOutput.Constructor(
                     _tag = constructor._tag + TrunkModel.Glossary.kTagSeparator + TrunkModel.Glossary.kESignalOutput +
                         TrunkModel.Glossary.kTagSubSeparator + FieldModel.Glossary.kQLoudness,
                     _mode = Signal.ModeEnum.Continuous,
@@ -132,7 +132,7 @@ class OscillatorPatchPlant
         val periodOutput = _trunkModel.CreateSignalOutputs(
             trunk.GetKey,
             Vector(
-                new SignalOutput.Constructor(
+                SignalOutput.Constructor(
                     _tag = constructor._tag + TrunkModel.Glossary.kTagSeparator + TrunkModel.Glossary.kESignalOutput +
                         TrunkModel.Glossary.kTagSubSeparator + FieldModel.Glossary.kQPeriod,
                     _mode = Signal.ModeEnum.Continuous,
@@ -144,7 +144,7 @@ class OscillatorPatchPlant
         val pitchOutput = _trunkModel.CreateSignalOutputs(
             trunk.GetKey,
             Vector(
-                new SignalOutput.Constructor(
+                SignalOutput.Constructor(
                     _tag = constructor._tag + TrunkModel.Glossary.kTagSeparator + TrunkModel.Glossary.kESignalOutput +
                         TrunkModel.Glossary.kTagSubSeparator + FieldModel.Glossary.kQPitch,
                     _mode = Signal.ModeEnum.Continuous,
@@ -156,7 +156,7 @@ class OscillatorPatchPlant
         val shapeOutput = _trunkModel.CreateSignalOutputs(
             trunk.GetKey,
             Vector(
-                new SignalOutput.Constructor(
+                SignalOutput.Constructor(
                     _tag = constructor._tag + TrunkModel.Glossary.kTagSeparator + TrunkModel.Glossary.kESignalOutput +
                         TrunkModel.Glossary.kTagSubSeparator + FieldModel.Glossary.kQShape,
                     _mode = Signal.ModeEnum.Continuous,
@@ -168,7 +168,7 @@ class OscillatorPatchPlant
         val toneOutput = _trunkModel.CreateSignalOutputs(
             trunk.GetKey,
             Vector(
-                new SignalOutput.Constructor(
+                SignalOutput.Constructor(
                     _tag = constructor._tag + TrunkModel.Glossary.kTagSeparator + TrunkModel.Glossary.kESignalOutput +
                         TrunkModel.Glossary.kTagSubSeparator + FieldModel.Glossary.kQTone,
                     _mode = Signal.ModeEnum.Continuous,
@@ -189,6 +189,7 @@ class OscillatorPatchPlant
         {
             case Some(patch) =>
                 // 1: Unbind with children:
+                // Routing tap:
                 if (patch.IsTapParent)
                     _trunkModel.GetSignalTapOpt(trunk.GetKey, patch.GetTapKey) match
                     {
@@ -231,7 +232,7 @@ class OscillatorPatchPlant
                     case probeOscillatorKey: ProbeOscillator.Key =>
                         fieldModel.GetProbeOscillatorOpt(field.GetKey, probeOscillatorKey)
 
-                    case _ => throw new TrunkException(Cell.ErrorCodes.OscillatorPatchConstructorInvalid)
+                    case _ => throw TrunkException(Cell.ErrorCodes.OscillatorPatchConstructorInvalid)
                 }
                 oscillatorOpt.get.UnbindPatch()
 
@@ -241,23 +242,23 @@ class OscillatorPatchPlant
                 // 5: Destroy children:
                 // Outputs:
                 val outputDestructors = Vector(
-                    new SignalOutput.Destructor(patch.GetLoudnessOutputKey),
-                    new SignalOutput.Destructor(patch.GetPeriodOutputKey),
-                    new SignalOutput.Destructor(patch.GetPitchOutputKey),
-                    new SignalOutput.Destructor(patch.GetShapeOutputKey),
-                    new SignalOutput.Destructor(patch.GetToneOutputKey))
+                    SignalOutput.Destructor(patch.GetLoudnessOutputKey),
+                    SignalOutput.Destructor(patch.GetPeriodOutputKey),
+                    SignalOutput.Destructor(patch.GetPitchOutputKey),
+                    SignalOutput.Destructor(patch.GetShapeOutputKey),
+                    SignalOutput.Destructor(patch.GetToneOutputKey))
                 _trunkModel.DestroySignalOutputs(trunk.GetKey, outputDestructors)
                 // Routing tap:
                 if (patch.IsTapParent)
                 {
-                    val tapDestructor = new SignalTap.Destructor(patch.GetTapKey)
+                    val tapDestructor = SignalTap.Destructor(patch.GetTapKey)
                     _trunkModel.DestroySignalTaps(trunk.GetKey, Vector(tapDestructor))
                 }
 
                 // 6: Remove element from store:
                 _patches -= ((trunk.GetKey, patch.GetKey))
 
-            case None => throw new TrunkException(Cell.ErrorCodes.OscillatorPatchUnknown)
+            case None => throw TrunkException(Cell.ErrorCodes.OscillatorPatchUnknown)
         }
 
         // Return patch key:
@@ -272,7 +273,7 @@ class OscillatorPatchPlant
         _patches.filter(_._1._1 == trunkKey).foreach(patchPair =>
         {
             val ((_, pairPatchKey), _) = patchPair
-            val patchDestructor = new OscillatorPatch.Destructor(pairPatchKey)
+            val patchDestructor = OscillatorPatch.Destructor(pairPatchKey)
             DestroyOscillatorPatch(trunk, patchDestructor)
         })
     }
@@ -288,10 +289,10 @@ class OscillatorPatchPlant
             case _: OscillatorPatch.Key =>
                 val opt = _patches.get((trunk.GetKey, key))
                 if (isRequired && opt.isEmpty)
-                    throw new TrunkException(Cell.ErrorCodes.OscillatorPatchUnknown)
+                    throw TrunkException(Cell.ErrorCodes.OscillatorPatchUnknown)
                 opt
 
-            case _ => throw new TrunkException(Cell.ErrorCodes.OscillatorPatchKeyInvalid)
+            case _ => throw TrunkException(Cell.ErrorCodes.OscillatorPatchKeyInvalid)
         }
     }
 
@@ -311,5 +312,6 @@ class OscillatorPatchPlant
         _patches.filter(_._1._1 == trunkKey).keys.map(_._2).toVector
     }
 
-    def GetElementCount (trunkKey: Trunk.Key): Int = _patches.count(_._1._1 == trunkKey)
+    def GetElementCount (trunkKey: Trunk.Key): Int =
+        _patches.count(_._1._1 == trunkKey)
 }

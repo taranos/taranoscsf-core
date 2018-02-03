@@ -111,10 +111,10 @@ class SignalSourcePlant
                         // 6: Remove element from store:
                         _sources -= ((trunk.GetKey, key))
 
-                    case None => throw new TrunkException(Cell.ErrorCodes.SignalSourceUnknown)
+                    case None => throw TrunkException(Cell.ErrorCodes.SignalSourceUnknown)
                 }
 
-            case _ => throw new TrunkException(Cell.ErrorCodes.SignalSourceInvalid)
+            case _ => throw TrunkException(Cell.ErrorCodes.SignalSourceInvalid)
         }
 
         // Return source key:
@@ -129,7 +129,7 @@ class SignalSourcePlant
         _sources.filter(_._1._1 == trunkKey).foreach(sourcePair =>
         {
             val ((_, pairSourceKey), _) = sourcePair
-            val sourceDestructor = new SignalSource.Destructor(pairSourceKey)
+            val sourceDestructor = SignalSource.Destructor(pairSourceKey)
             DestroySignalSource(trunk, sourceDestructor)
         })
     }
@@ -145,10 +145,10 @@ class SignalSourcePlant
             case _: SignalSource.Key =>
                 val opt = _sources.get((trunk.GetKey, key))
                 if (isRequired && opt.isEmpty)
-                    throw new TrunkException(Cell.ErrorCodes.SignalSourceUnknown)
+                    throw TrunkException(Cell.ErrorCodes.SignalSourceUnknown)
                 opt
 
-            case _ => throw new TrunkException(Cell.ErrorCodes.SignalSourceKeyInvalid)
+            case _ => throw TrunkException(Cell.ErrorCodes.SignalSourceKeyInvalid)
         }
     }
 
@@ -168,5 +168,6 @@ class SignalSourcePlant
         _sources.filter(_._1._1 == trunkKey).keys.map(_._2).toVector
     }
 
-    def GetElementCount (trunkKey: Trunk.Key): Int = _sources.count(_._1._1 == trunkKey)
+    def GetElementCount (trunkKey: Trunk.Key): Int =
+        _sources.count(_._1._1 == trunkKey)
 }

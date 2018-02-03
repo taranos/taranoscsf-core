@@ -42,9 +42,9 @@ class SignalOutputPlant
                 {
                     case Some(input) =>
                         _trunkModel.GetSignalTapOpt(trunk.GetKey, input.GetTapKey).getOrElse(
-                            throw new TrunkException(Cell.ErrorCodes.SignalInputTapless))
+                            throw TrunkException(Cell.ErrorCodes.SignalInputTapless))
 
-                    case None => throw new TrunkException(Cell.ErrorCodes.SignalInputUnknown)
+                    case None => throw TrunkException(Cell.ErrorCodes.SignalInputUnknown)
                 }
 
             case oscillatorPatchKey: OscillatorPatch.Key =>
@@ -52,9 +52,9 @@ class SignalOutputPlant
                 {
                     case Some(oscillatorPatch) =>
                         _trunkModel.GetSignalTapOpt(trunk.GetKey, oscillatorPatch.GetTapKey).getOrElse(
-                            throw new TrunkException(Cell.ErrorCodes.OscillatorPatchTapless))
+                            throw TrunkException(Cell.ErrorCodes.OscillatorPatchTapless))
 
-                    case None => throw new TrunkException(Cell.ErrorCodes.OscillatorPatchUnknown)
+                    case None => throw TrunkException(Cell.ErrorCodes.OscillatorPatchUnknown)
                 }
 
             case bridgeKey: SignalBridge.Key =>
@@ -62,9 +62,9 @@ class SignalOutputPlant
                 {
                     case Some(bridge) =>
                         _trunkModel.GetSignalTapOpt(trunk.GetKey, bridge.GetTapKey).getOrElse(
-                            throw new TrunkException(Cell.ErrorCodes.SignalBridgeTapless))
+                            throw TrunkException(Cell.ErrorCodes.SignalBridgeTapless))
 
-                    case None => throw new TrunkException(Cell.ErrorCodes.SignalBridgeUnknown)
+                    case None => throw TrunkException(Cell.ErrorCodes.SignalBridgeUnknown)
                 }
         }
 
@@ -75,7 +75,7 @@ class SignalOutputPlant
             // Get supplied tap:
             case Some(tapKey) if tapKey.isInstanceOf[SignalTap.Key] =>
                 _trunkModel.GetSignalTapOpt(trunk.GetKey, tapKey.asInstanceOf[SignalTap.Key]).getOrElse(
-                    throw new TrunkException(Cell.ErrorCodes.SignalTapInvalid))
+                    throw TrunkException(Cell.ErrorCodes.SignalTapInvalid))
 
             // Make a new tap:
             case None =>
@@ -83,21 +83,21 @@ class SignalOutputPlant
                 _trunkModel.CreateSignalTaps(
                     trunk.GetKey,
                     Vector(
-                        new SignalTap.Constructor(
+                        SignalTap.Constructor(
                             _tag = constructor._tag + TrunkModel.Glossary.kTagSeparator +
                                 TrunkModel.Glossary.kESignalTap,
                             _mode = constructor._mode))).head
 
             // Cannot bind with anything else:
             case _ =>
-                throw new TrunkException(Cell.ErrorCodes.SignalOutputInvalid)
+                throw TrunkException(Cell.ErrorCodes.SignalOutputInvalid)
         }
 
         // Create link from modulatable tap to routing tap:
         _trunkModel.CreateSignalLinks(
             trunk.GetKey,
             Vector(
-                new SignalLink.Constructor(
+                SignalLink.Constructor(
                     _tag = constructor._tag + TrunkModel.Glossary.kTagSeparator + TrunkModel.Glossary.kRSignalLinks,
                     _sourceKey = modulatableTap.GetSourceKey,
                     _sinkKey = routingTap.GetSinkKey,
@@ -170,17 +170,17 @@ class SignalOutputPlant
                         // Routing tap:
                         if (output.IsTapParent)
                         {
-                            val tapDestructor = new SignalTap.Destructor(output.GetTapKey)
+                            val tapDestructor = SignalTap.Destructor(output.GetTapKey)
                             _trunkModel.DestroySignalTaps(trunk.GetKey, Vector(tapDestructor))
                         }
 
                         // 6: Remove element from store:
                         _outputs -= ((trunk.GetKey, output.GetKey))
 
-                    case None => throw new TrunkException(Cell.ErrorCodes.SignalOutputUnknown)
+                    case None => throw TrunkException(Cell.ErrorCodes.SignalOutputUnknown)
                 }
 
-            case _ => throw new TrunkException(Cell.ErrorCodes.SignalOutputInvalid)
+            case _ => throw TrunkException(Cell.ErrorCodes.SignalOutputInvalid)
         }
 
         // Return output key:
@@ -195,7 +195,7 @@ class SignalOutputPlant
         _outputs.filter(pair => pair._1._1 == trunkKey).foreach(outputPair =>
         {
             val ((_, pairOutputKey), _) = outputPair
-            val outputDestructor = new SignalOutput.Destructor(pairOutputKey)
+            val outputDestructor = SignalOutput.Destructor(pairOutputKey)
             DestroySignalOutput(trunk, outputDestructor)
         })
     }
@@ -211,10 +211,10 @@ class SignalOutputPlant
             case _: SignalOutput.Key =>
                 val opt = _outputs.get((trunk.GetKey, key))
                 if (isRequired && opt.isEmpty)
-                    throw new TrunkException(Cell.ErrorCodes.SignalOutputUnknown)
+                    throw TrunkException(Cell.ErrorCodes.SignalOutputUnknown)
                 opt
 
-            case _ => throw new TrunkException(Cell.ErrorCodes.SignalOutputKeyInvalid)
+            case _ => throw TrunkException(Cell.ErrorCodes.SignalOutputKeyInvalid)
         }
     }
 
@@ -234,5 +234,6 @@ class SignalOutputPlant
         _outputs.filter(_._1._1 == trunkKey).keys.map(_._2).toVector
     }
 
-    def GetElementCount (trunkKey: Trunk.Key): Int = _outputs.count(_._1._1 == trunkKey)
+    def GetElementCount (trunkKey: Trunk.Key): Int =
+        _outputs.count(_._1._1 == trunkKey)
 }

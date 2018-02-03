@@ -128,7 +128,7 @@ object Probe
                         value(1).toDouble,
                         0f)
 
-                case JsError(errors) =>
+                case JsError(_) =>
                     new Body.Position
             }
 
@@ -143,7 +143,7 @@ object Probe
                         0f,
                         0f)
 
-                case JsError(errors) =>
+                case JsError(_) =>
                     new Body.Rotation
             }
 
@@ -152,7 +152,7 @@ object Probe
             {
                 case JsSuccess(value, _) => Some(value.toDouble)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val squelchThresholdOpt: Option[Real] =
@@ -161,7 +161,7 @@ object Probe
             {
                 case JsSuccess(value, _) => Some(value.toDouble)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val lobeRangeOpt: Option[Real] =
@@ -169,7 +169,7 @@ object Probe
             {
                 case JsSuccess(value, _) => Some(value.toDouble)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val lobeRangePolesOpt: Option[String] =
@@ -178,7 +178,7 @@ object Probe
             {
                 case JsSuccess(value, _) => Some(value)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val lobeBearingPolesOpt: Option[String] =
@@ -187,10 +187,10 @@ object Probe
             {
                 case JsSuccess(value, _) => Some(value)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
-        new Constructor(
+        Constructor(
             commonMeta._tag,
             commonMeta._badgeOpt,
             commonMeta._nameOpt,
@@ -211,7 +211,7 @@ object Probe
         val commonMeta = new CommonDestructorMetaDecoder[Probe.Key](
             destructor, Cell.ErrorCodes.ProbeDestructorInvalid)
 
-        new Destructor(commonMeta._key, commonMeta._scope)
+        Destructor(commonMeta._key, commonMeta._scope)
     }
 
     def DecodeQuery (encoded: String): Query =
@@ -220,7 +220,7 @@ object Probe
 
         val commonQuery = new CommonQueryDecoder[Probe.Key](query)
 
-        new Query(commonQuery._keysOpt.get, commonQuery._sectionsOpt)
+        Query(commonQuery._keysOpt.get, commonQuery._sectionsOpt)
     }
 
     def DecodeUpdate (encoded: String): Update =
@@ -238,7 +238,7 @@ object Probe
                         value(1).toDouble,
                         0f))
 
-                case JsError(errors) =>
+                case JsError(_) =>
                     None
             }
 
@@ -252,11 +252,11 @@ object Probe
                         0f,
                         0f))
 
-                case JsError(errors) =>
+                case JsError(_) =>
                     None
             }
 
-        new Update(
+        Update(
             commonMeta._key,
             commonMeta._nameOpt,
             commonMeta._descriptionOpt,
@@ -273,6 +273,8 @@ class Probe (
     (implicit protected val _fieldModel: FieldModel)
     extends Body[Probe.Key]
 {
+    import scala.collection.mutable
+
     //
     // Meta:
     //
@@ -291,7 +293,7 @@ class Probe (
     protected
     val _refs = refs
 
-    def BindCollector (key: ProbeCollector.Key) =
+    def BindCollector (key: ProbeCollector.Key): Unit =
     {
         // First collector becomes the default collector:
         if (_refs._collectorKeys.isEmpty)
@@ -299,15 +301,20 @@ class Probe (
         _refs._collectorKeys += key
     }
 
-    def BindEmitter (emitterKey: Emitter.Key) = _refs._emitterKeys += emitterKey.asInstanceOf[ProbeEmitter.Key]
+    def BindEmitter (emitterKey: Emitter.Key): Unit =
+        _refs._emitterKeys += emitterKey.asInstanceOf[ProbeEmitter.Key]
 
-    def GetCollectorKeys = _refs._collectorKeys
+    def GetCollectorKeys: mutable.Set[ProbeCollector.Key] =
+        _refs._collectorKeys
 
-    def GetDefaultCollectorKey = _refs._defaultCollectorKey
+    def GetDefaultCollectorKey: ProbeCollector.Key =
+        _refs._defaultCollectorKey
 
-    def GetDefaultEmitterKey = Emitter.kNoneKey
+    def GetDefaultEmitterKey: Emitter.Key =
+        Emitter.kNoneKey
 
-    def GetEmitterKeys = _refs._emitterKeys.toSet
+    def GetEmitterKeys: Set[Emitter.Key] =
+        _refs._emitterKeys.toSet
 
     def UnbindCollector (
         key: ProbeCollector.Key,
@@ -326,7 +333,7 @@ class Probe (
 
     def UnbindEmitter (
         emitterKey: Emitter.Key,
-        isForcedUnbind: Boolean = true) =
+        isForcedUnbind: Boolean = true): Boolean =
     {
         _refs._emitterKeys -= emitterKey.asInstanceOf[ProbeEmitter.Key]
         true
@@ -338,13 +345,17 @@ class Probe (
     protected
     val _state = state
 
-    def GetPosition = _state._position
+    def GetPosition: Body.Position =
+        _state._position
 
-    def GetRotation = _state._rotation
+    def GetRotation: Body.Rotation =
+        _state._rotation
 
-    def SetPosition (position: Body.Position) = _state._position = position
+    def SetPosition (position: Body.Position): Unit =
+        _state._position = position
 
-    def SetRotation (rotation: Body.Rotation) = _state._rotation = rotation
+    def SetRotation (rotation: Body.Rotation): Unit =
+        _state._rotation = rotation
 
     //
     // Reports:
@@ -379,14 +390,14 @@ class Probe (
                 Json.obj(FieldModel.Glossary.kRProbeCollectors -> _fieldModel.ReportProbeCollectors(
                     GetFieldKey,
                     GetKey,
-                    new ProbeCollector.Query(_refs._collectorKeys.toVector, sectionsOpt)))
+                    ProbeCollector.Query(_refs._collectorKeys.toVector, sectionsOpt)))
 
             // Add probe emitter reports:
             report ++=
                 Json.obj(FieldModel.Glossary.kRProbeEmitters -> _fieldModel.ReportProbeEmitters(
                     GetFieldKey,
                     GetKey,
-                    new ProbeEmitter.Query(_refs._emitterKeys.toVector, sectionsOpt)))
+                    ProbeEmitter.Query(_refs._emitterKeys.toVector, sectionsOpt)))
         }
 
         report

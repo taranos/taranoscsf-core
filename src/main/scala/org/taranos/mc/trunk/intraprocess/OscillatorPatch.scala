@@ -22,7 +22,8 @@ import org.taranos.mc.Common.{ReportSectionsParser, Reporter}
 import org.taranos.mc.field._
 import org.taranos.mc.trunk.intraprocess.Signal.{Continuous, Discrete, SignalTypes}
 import org.taranos.mc.trunk.intraprocess.TestableElement.TestableUpdateStateDecoder
-import org.taranos.mc.trunk.intraprocess.TrunkElement.{CommonConstructorMetaDecoder, CommonDestructorMetaDecoder, CommonQueryDecoder, CommonUpdateMetaDecoder}
+import org.taranos.mc.trunk.intraprocess.TrunkElement.{CommonConstructorMetaDecoder, CommonDestructorMetaDecoder,
+    CommonQueryDecoder, CommonUpdateMetaDecoder}
 import org.taranos.mc.{Cell, CellLogger}
 import play.api.libs.json.{JsError, JsObject, JsSuccess, Json}
 
@@ -174,15 +175,13 @@ object OscillatorPatch
         {
             var report = Json.obj()
 
-//            val sections = new ReportSectionsParser(sectionsOpt)
-
             report ++=
                 ((patchDef \ FieldModel.Glossary.kEnvelopeDef \
                     oscillatorEnvelopeKey._uniqueKey).validate[JsObject] match
                 {
                     case JsSuccess(value, _) => value
 
-                    case JsError(errors) => Json.obj()  // Not sure what to do with this...
+                    case JsError(_) => Json.obj()  // Not sure what to do with this...
                 })
 
             report
@@ -205,8 +204,8 @@ object OscillatorPatch
             {
                 case JsSuccess(value, _) => value
 
-                case JsError(errors) =>
-                    throw new TrunkException(
+                case JsError(_) =>
+                    throw TrunkException(
                         Cell.ErrorCodes.OscillatorPatchConstructorInvalid,
                         "missing emitter channel tag property")
             }
@@ -221,13 +220,13 @@ object OscillatorPatch
                         case fieldKey: Field.Key => fieldKey
 
                         case _ =>
-                            throw new TrunkException(
+                            throw TrunkException(
                                 Cell.ErrorCodes.EmitterPatchConstructorInvalid,
                                 "invalid emitter key property")
                     }
 
-                case JsError(errors) =>
-                    throw new TrunkException(
+                case JsError(_) =>
+                    throw TrunkException(
                         Cell.ErrorCodes.EmitterPatchConstructorInvalid,
                         "missing emitter key property")
             }
@@ -238,8 +237,8 @@ object OscillatorPatch
                 case JsSuccess(value, _) =>
                     TrunkElement.DecodeKey[EmitterPatch.Key](value)
 
-                case JsError(errors) =>
-                    throw new TrunkException(
+                case JsError(_) =>
+                    throw TrunkException(
                         Cell.ErrorCodes.OscillatorPatchConstructorInvalid,
                         "missing modulatable key property")
             }
@@ -255,12 +254,12 @@ object OscillatorPatch
                         case _: TappableElementKey => Some(key.asInstanceOf[TappableElementKey])
 
                         case _ =>
-                            throw new TrunkException(
+                            throw TrunkException(
                                 Cell.ErrorCodes.OscillatorPatchConstructorInvalid,
                                 "invalid tappable key property")
                     }
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val patchDef: JsObject =
@@ -269,13 +268,13 @@ object OscillatorPatch
             {
                 case JsSuccess(value, _) => value
 
-                case JsError(errors) =>
-                    throw new TrunkException(
+                case JsError(_) =>
+                    throw TrunkException(
                         Cell.ErrorCodes.OscillatorPatchConstructorInvalid,
                         "invalid oscillator patch definition property")
             }
 
-        new Constructor(
+        Constructor(
             commonMeta._tag,
             commonMeta._badgeOpt,
             commonMeta._nameOpt,
@@ -294,7 +293,7 @@ object OscillatorPatch
         val commonMeta = new CommonDestructorMetaDecoder[OscillatorPatch.Key](
             destructor, Cell.ErrorCodes.OscillatorPatchDestructorInvalid)
 
-        new Destructor(commonMeta._key)
+        Destructor(commonMeta._key)
     }
 
     def DecodeQuery (encoded: String): Query =
@@ -303,7 +302,7 @@ object OscillatorPatch
 
         val commonQuery = new CommonQueryDecoder[OscillatorPatch.Key](query)
 
-        new Query(commonQuery._keysOpt.get, commonQuery._sectionsOpt)
+        Query(commonQuery._keysOpt.get, commonQuery._sectionsOpt)
     }
 
     def DecodeUpdate (encoded: String): Update =
@@ -318,12 +317,12 @@ object OscillatorPatch
             {
                 case JsSuccess(value, _) => Some(value)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val testableState = new TestableUpdateStateDecoder(update)
 
-        new Update(
+        Update(
             commonMeta._key,
             commonMeta._nameOpt,
             commonMeta._descriptionOpt,
@@ -339,7 +338,7 @@ class OscillatorPatch (
     (implicit
         protected val _trunkModel: TrunkModel,
         protected val _logger: CellLogger)
-    extends SignalModulator[OscillatorPatch.Key]
+    extends Patch[OscillatorPatch.Key]
 {
     //
     // Meta:
@@ -347,7 +346,8 @@ class OscillatorPatch (
     protected
     val _meta = meta
 
-    def GetMode = _meta._mode
+    def GetMode: Signal.ModeEnum.Mode =
+        _meta._mode
 
     //
     // Attrs:
@@ -355,7 +355,8 @@ class OscillatorPatch (
     protected
     val _attrs = attrs
 
-    def GetChannelTag = _attrs._channelTag
+    def GetChannelTag: String =
+        _attrs._channelTag
 
     //
     // Refs:
@@ -363,49 +364,71 @@ class OscillatorPatch (
     protected
     val _refs = refs
 
-    def GetEmitterPatchKey: EmitterPatch.Key = _refs._emitterPatchKey
+    def GetEmitterPatchKey: EmitterPatch.Key =
+        _refs._emitterPatchKey
 
-    def GetFieldKey: Field.Key = _refs._fieldKey
+    def GetFieldKey: Field.Key =
+        _refs._fieldKey
 
-    def GetTapKey: SignalTap.Key = _refs._tapKey
+    def GetTapKey: SignalTap.Key =
+        _refs._tapKey
 
-    def BindLoudnessOutput(outputKey: SignalOutput.Key) = _refs._loudnessOutputKey = outputKey
+    def BindLoudnessOutput(outputKey: SignalOutput.Key): Unit =
+        _refs._loudnessOutputKey = outputKey
 
-    def GetLoudnessOutputKey = _refs._loudnessOutputKey
+    def GetLoudnessOutputKey: SignalOutput.Key =
+        _refs._loudnessOutputKey
 
-    def UnbindLoudnessOutput() = _refs._loudnessOutputKey = SignalOutput.kNoneKey
+    def UnbindLoudnessOutput(): Unit =
+        _refs._loudnessOutputKey = SignalOutput.kNoneKey
 
-    def BindOscillator (oscillatorKey: Oscillator.Key) = _refs._oscillatorKey = oscillatorKey
+    def BindOscillator (oscillatorKey: Oscillator.Key): Unit =
+        _refs._oscillatorKey = oscillatorKey
 
-    def GetOscillatorKey = _refs._oscillatorKey
+    def GetOscillatorKey: Oscillator.Key =
+        _refs._oscillatorKey
 
-    def UnbindOscillator() = _refs._oscillatorKey = Oscillator.kNoneKey
+    def UnbindOscillator(): Unit =
+        _refs._oscillatorKey = Oscillator.kNoneKey
 
-    def BindPeriodOutput(outputKey: SignalOutput.Key) = _refs._periodOutputKey = outputKey
+    def BindPeriodOutput(outputKey: SignalOutput.Key): Unit =
+        _refs._periodOutputKey = outputKey
 
-    def GetPeriodOutputKey = _refs._periodOutputKey
+    def GetPeriodOutputKey: SignalOutput.Key =
+        _refs._periodOutputKey
 
-    def UnbindPeriodOutput() = _refs._periodOutputKey = SignalOutput.kNoneKey
+    def UnbindPeriodOutput(): Unit =
+        _refs._periodOutputKey = SignalOutput.kNoneKey
 
-    def BindPitchOutput(outputKey: SignalOutput.Key) = _refs._pitchOutputKey = outputKey
+    def BindPitchOutput(outputKey: SignalOutput.Key): Unit =
+        _refs._pitchOutputKey = outputKey
 
-    def GetPitchOutputKey = _refs._pitchOutputKey
+    def GetPitchOutputKey: SignalOutput.Key =
+        _refs._pitchOutputKey
 
-    def UnbindPitchOutput() = _refs._pitchOutputKey = SignalOutput.kNoneKey
+    def UnbindPitchOutput(): Unit =
+        _refs._pitchOutputKey = SignalOutput.kNoneKey
 
-    def BindShapeOutput(outputKey: SignalOutput.Key) = _refs._shapeOutputKey = outputKey
+    def BindShapeOutput(outputKey: SignalOutput.Key): Unit =
+        _refs._shapeOutputKey = outputKey
 
-    def GetShapeOutputKey = _refs._shapeOutputKey
+    def GetShapeOutputKey: SignalOutput.Key =
+        _refs._shapeOutputKey
 
-    def UnbindShapeOutput() = _refs._shapeOutputKey = SignalOutput.kNoneKey
+    def UnbindShapeOutput(): Unit =
+        _refs._shapeOutputKey = SignalOutput.kNoneKey
 
-    def BindToneOutput(outputKey: SignalOutput.Key) = _refs._toneOutputKey = outputKey
+    def BindToneOutput(outputKey: SignalOutput.Key): Unit =
+        _refs._toneOutputKey = outputKey
 
-    def GetToneOutputKey = _refs._toneOutputKey
+    def GetToneOutputKey: SignalOutput.Key =
+        _refs._toneOutputKey
 
-    def UnbindToneOutput() = _refs._toneOutputKey = SignalOutput.kNoneKey
+    def UnbindToneOutput(): Unit =
+        _refs._toneOutputKey = SignalOutput.kNoneKey
 
-    def IsTapParent = _refs._isTapParent
+    def IsTapParent: Boolean =
+        _refs._isTapParent
 
     //
     // State:
@@ -416,7 +439,8 @@ class OscillatorPatch (
     def GetEnvelopeReporter (envelopeKey: OscillatorEnvelope.Key): OscillatorPatch.EnvelopeReporter =
         new OscillatorPatch.EnvelopeReporter(_attrs._patchDef, envelopeKey)
 
-    def GetWavesetId = _state._wavesetId
+    def GetWavesetId: String =
+        _state._wavesetId
 
     def ImportEnvelopeDef (envelopeKey: OscillatorEnvelope.Key, envelopeDef: JsObject): Unit =
     {
@@ -427,14 +451,14 @@ class OscillatorPatch (
             case JsSuccess (value, _) => value ++ Json.obj(envelopeKey._uniqueKey -> envelopeDef)
 
             // If no envelope defs yet exists then this will be the first:
-            case JsError(errors) => Json.obj(envelopeKey._uniqueKey -> envelopeDef)
+            case JsError(_) => Json.obj(envelopeKey._uniqueKey -> envelopeDef)
 
         }
         val newPatchDef = _attrs._patchDef ++ Json.obj(FieldModel.Glossary.kEnvelopeDef -> newEnvelopeDefs)
         ImportOscillatorPatchDef(Some(newPatchDef))
     }
 
-    def ImportOscillatorPatchDef (patchDefOpt: Option[JsObject]) =
+    def ImportOscillatorPatchDef (patchDefOpt: Option[JsObject]): Unit =
     {
         val patchDef =
         {
@@ -449,8 +473,8 @@ class OscillatorPatch (
             {
                 case JsSuccess(value, _) => value
 
-                case JsError(errors) =>
-                    throw new TrunkException(Cell.ErrorCodes.OscillatorPatchInvalid)
+                case JsError(_) =>
+                    throw TrunkException(Cell.ErrorCodes.OscillatorPatchInvalid)
             }
 
         val loudnessEnvelope: Envelope.ContinuousEnvelope =
@@ -458,7 +482,7 @@ class OscillatorPatch (
             {
                 case JsSuccess(value, _) => Envelope.DecodeContinuousEnvelopeDef(value)
 
-                case JsError(errors) =>
+                case JsError(_) =>
                     Envelope.DecodeContinuousEnvelopeDef(Envelope.kTwoThirdsGainWithDeadZoneEnvelopeDef)
             }
 
@@ -467,7 +491,7 @@ class OscillatorPatch (
             {
                 case JsSuccess(value, _) => Envelope.DecodeContinuousEnvelopeDef(value)
 
-                case JsError(errors) => Envelope.DecodeContinuousEnvelopeDef(Envelope.kUnityGainEnvelopeDef)
+                case JsError(_) => Envelope.DecodeContinuousEnvelopeDef(Envelope.kUnityGainEnvelopeDef)
             }
 
         val periodEnvelope: Envelope.DiscreteEnvelope =
@@ -475,7 +499,7 @@ class OscillatorPatch (
             {
                 case JsSuccess(value, _) => Envelope.DecodeDiscreteEnvelopeDef(value)
 
-                case JsError(errors) => Envelope.DecodeDiscreteEnvelopeDef(Envelope.kZeroEnvelopeDef)
+                case JsError(_) => Envelope.DecodeDiscreteEnvelopeDef(Envelope.kZeroEnvelopeDef)
             }
 
         val shapeEnvelope: Envelope.DiscreteEnvelope =
@@ -483,7 +507,7 @@ class OscillatorPatch (
             {
                 case JsSuccess(value, _) => Envelope.DecodeDiscreteEnvelopeDef(value)
 
-                case JsError(errors) => Envelope.DecodeDiscreteEnvelopeDef(Envelope.kZeroEnvelopeDef)
+                case JsError(_) => Envelope.DecodeDiscreteEnvelopeDef(Envelope.kZeroEnvelopeDef)
             }
 
         val toneEnvelope: Envelope.DiscreteEnvelope =
@@ -491,7 +515,7 @@ class OscillatorPatch (
             {
                 case JsSuccess(value, _) => Envelope.DecodeDiscreteEnvelopeDef(value)
 
-                case JsError(errors) => Envelope.DecodeDiscreteEnvelopeDef(Envelope.kZeroEnvelopeDef)
+                case JsError(_) => Envelope.DecodeDiscreteEnvelopeDef(Envelope.kZeroEnvelopeDef)
             }
 
         // Commit changes to state propertyset:
@@ -503,7 +527,7 @@ class OscillatorPatch (
         _state._toneEnvelope = toneEnvelope
     }
 
-    def MacroSetLoudnessCeiling (ceiling: String) =
+    def MacroSetLoudnessCeiling (ceiling: String): Unit =
     {
         val newEnvelopeDef = (_attrs._patchDef \ FieldModel.Glossary.kEnvelopeDef \
             FieldModel.Glossary.kQLoudness).as[JsObject] ++ Json.obj(FieldModel.Glossary.kEnvelopeCeiling -> ceiling)
@@ -520,27 +544,27 @@ class OscillatorPatch (
         ImportEnvelopeDef(new OscillatorEnvelope.Key(FieldModel.Glossary.kQLoudness), newEnvelopeDef)
     }
 
-    def MacroSetLoudnessFloor (floor: String)
+    def MacroSetLoudnessFloor (floor: String): Unit =
     {
         val newEnvelopeDef = (_attrs._patchDef \ FieldModel.Glossary.kEnvelopeDef \
             FieldModel.Glossary.kQLoudness).as[JsObject] ++ Json.obj(FieldModel.Glossary.kEnvelopeFloor -> floor)
         ImportEnvelopeDef(new OscillatorEnvelope.Key(FieldModel.Glossary.kQLoudness), newEnvelopeDef)
     }
 
-    def MacroSetPeriodPoles (polesPacked: String)
+    def MacroSetPeriodPoles (polesPacked: String): Unit =
     {
         val newEnvelopeDef = Json.obj(FieldModel.Glossary.kEnvelopePolesPackedDef -> polesPacked)
         ImportEnvelopeDef(new OscillatorEnvelope.Key(FieldModel.Glossary.kQPeriod), newEnvelopeDef)
     }
 
-    def MacroSetPitchCeiling (ceiling: String)
+    def MacroSetPitchCeiling (ceiling: String): Unit =
     {
         val newEnvelopeDef = (_attrs._patchDef \ FieldModel.Glossary.kEnvelopeDef \
             FieldModel.Glossary.kQPitch).as[JsObject] ++ Json.obj(FieldModel.Glossary.kEnvelopeCeiling -> ceiling)
         ImportEnvelopeDef(new OscillatorEnvelope.Key(FieldModel.Glossary.kQPitch), newEnvelopeDef)
     }
 
-    def MacroSetPitchPoles (polesPacked: String)
+    def MacroSetPitchPoles (polesPacked: String): Unit =
     {
         val currentEnvelope = _state._pitchEnvelope
         val newEnvelopeDef = Json.obj(
@@ -550,33 +574,33 @@ class OscillatorPatch (
         ImportEnvelopeDef(new OscillatorEnvelope.Key(FieldModel.Glossary.kQPitch), newEnvelopeDef)
     }
 
-    def MacroSetPitchFloor (floor: String)
+    def MacroSetPitchFloor (floor: String): Unit =
     {
         val newEnvelopeDef = (_attrs._patchDef \ FieldModel.Glossary.kEnvelopeDef \
             FieldModel.Glossary.kQPitch).as[JsObject] ++ Json.obj(FieldModel.Glossary.kEnvelopeFloor -> floor)
         ImportEnvelopeDef(new OscillatorEnvelope.Key(FieldModel.Glossary.kQPitch), newEnvelopeDef)
     }
 
-    def MacroSetShapePoles (polesPacked: String)
+    def MacroSetShapePoles (polesPacked: String): Unit =
     {
         val newEnvelopeDef = Json.obj(FieldModel.Glossary.kEnvelopePolesPackedDef -> polesPacked)
         ImportEnvelopeDef(new OscillatorEnvelope.Key(FieldModel.Glossary.kQShape), newEnvelopeDef)
     }
 
-    def MacroSetTonePoles (polesPacked: String)
+    def MacroSetTonePoles (polesPacked: String): Unit =
     {
         val newEnvelopeDef = Json.obj(FieldModel.Glossary.kEnvelopePolesPackedDef -> polesPacked)
         ImportEnvelopeDef(new OscillatorEnvelope.Key(FieldModel.Glossary.kQTone), newEnvelopeDef)
     }
 
-    def MacroSetWavesetId (wavesetId: String)
+    def MacroSetWavesetId (wavesetId: String): Unit =
     {
         val newPatchDef = _attrs._patchDef.as[JsObject] ++ Json.obj(FieldModel.Glossary.kQWavesetId -> wavesetId)
         ImportOscillatorPatchDef(Some(newPatchDef))
     }
 
     override
-    def Modulate (signal: Signal[_ >: SignalTypes]): SignalModulator.ModulatedSignals =
+    def Modulate (signal: Signal[_ >: SignalTypes]): ModulatableElement.ModulatedSignals =
     {
         val ordinal = signal._ordinal
         val scalar = signal.asInstanceOf[Signal[Continuous]]._scalar
@@ -586,7 +610,7 @@ class OscillatorPatch (
         val modulatedPeriod = Envelope.ModulateWithDiscreteEnvelope(scalar, _state._periodEnvelope)
         val modulatedShape = Envelope.ModulateWithDiscreteEnvelope(scalar, _state._shapeEnvelope)
         val modulatedTone = Envelope.ModulateWithDiscreteEnvelope(scalar, _state._toneEnvelope)
-        SignalModulator.ModulatedSignals(
+        ModulatableElement.ModulatedSignals(
             List(
                 (Some(FieldModel.Glossary.kQLoudness), Signal[Continuous](ordinal, modulatedLoudness, Some(GetKey))),
                 (Some(FieldModel.Glossary.kQPitch), Signal[Continuous](ordinal, modulatedPitch, Some(GetKey))),
@@ -623,7 +647,7 @@ class OscillatorPatch (
             report ++=
                 Json.obj(TrunkModel.Glossary.kRSignalTaps -> _trunkModel.ReportSignalTaps(
                     GetTrunkKey,
-                    new SignalTap.Query(Vector(_refs._tapKey), sectionsOpt)))
+                    SignalTap.Query(Vector(_refs._tapKey), sectionsOpt)))
         }
         if (sections.HasChildReports)
             report ++=
@@ -631,41 +655,41 @@ class OscillatorPatch (
                     Json.obj(
                         FieldModel.Glossary.kQLoudness -> _trunkModel.ReportSignalOutputs(
                             GetTrunkKey,
-                            new SignalOutput.Query(Vector(_refs._loudnessOutputKey), sectionsOpt)).head,
+                            SignalOutput.Query(Vector(_refs._loudnessOutputKey), sectionsOpt)).head,
                         FieldModel.Glossary.kQPitch -> _trunkModel.ReportSignalOutputs(
                             GetTrunkKey,
-                            new SignalOutput.Query(Vector(_refs._pitchOutputKey), sectionsOpt)).head,
+                            SignalOutput.Query(Vector(_refs._pitchOutputKey), sectionsOpt)).head,
                         FieldModel.Glossary.kQPeriod -> _trunkModel.ReportSignalOutputs(
                             GetTrunkKey,
-                            new SignalOutput.Query(Vector(_refs._periodOutputKey), sectionsOpt)).head,
+                            SignalOutput.Query(Vector(_refs._periodOutputKey), sectionsOpt)).head,
                         FieldModel.Glossary.kQShape -> _trunkModel.ReportSignalOutputs(
                             GetTrunkKey,
-                            new SignalOutput.Query(Vector(_refs._shapeOutputKey), sectionsOpt)).head,
+                            SignalOutput.Query(Vector(_refs._shapeOutputKey), sectionsOpt)).head,
                         FieldModel.Glossary.kQTone -> _trunkModel.ReportSignalOutputs(
                             GetTrunkKey,
-                            new SignalOutput.Query(Vector(_refs._toneOutputKey), sectionsOpt)).head))
+                            SignalOutput.Query(Vector(_refs._toneOutputKey), sectionsOpt)).head))
 
         report
     }
 
-    def TestSignal (signal: Signal[_ >: SignalTypes]) =
+    def PropagateTest (signal: Signal[_ >: SignalTypes]): Unit =
     {
         _trunkModel.GetSignalTapOpt(GetTrunkKey, _refs._tapKey) match
         {
             case Some(tap) => tap.Propagate(Some(signal))
 
-            case None => throw new TrunkException(Cell.ErrorCodes.OscillatorPatchTapless)
+            case None => throw TrunkException(Cell.ErrorCodes.OscillatorPatchTapless)
         }
     }
 
     override
-    def Trigger () =
+    def Activate (): Unit =
     {
         _trunkModel.GetSignalTapOpt(GetTrunkKey, _refs._tapKey) match
         {
             case Some(tap) => tap.Propagate()
 
-            case None => throw new TrunkException(Cell.ErrorCodes.OscillatorPatchTapless)
+            case None => throw TrunkException(Cell.ErrorCodes.OscillatorPatchTapless)
         }
     }
 

@@ -273,9 +273,11 @@ object Cell
         def Report (sectionsOpt: Option[String]): JsObject = Json.obj()
     }
 
-    def MakeActorName (uniqueKey: UniqueKey) = "Cell" + ''' + uniqueKey
+    def MakeActorName (uniqueKey: UniqueKey): String =
+        "Cell" + ''' + uniqueKey
 
-    def MakeActorProps (uniqueKey: UniqueKey) = akka.actor.Props(classOf[Cell], uniqueKey)
+    def MakeActorProps (uniqueKey: UniqueKey) =
+        akka.actor.Props(classOf[Cell], uniqueKey)
 
     def DebangTag (tag: String): (Boolean, String) =
     {
@@ -320,12 +322,12 @@ object Cell
         val isTesting: Boolean =
             (destructor \ Cell.Glossary.kIsTesting).validate[String] match
             {
-                case JsSuccess(value, _) => true
+                case JsSuccess(_, _) => true
 
-                case JsError(errors) => false
+                case JsError(_) => false
             }
 
-        new Destructor(isTesting)
+        Destructor(isTesting)
     }
 }
 
@@ -351,22 +353,23 @@ class Cell (
     val _logger = this
 
     private implicit
-    var _trunkModel: TrunkModel = null  // needs to be Reset()!
+    var _trunkModel: TrunkModel = _ // needs to be Reset()!
 
     private implicit
-    var _fieldModel: FieldModel = null  // needs to be Reset()!
+    var _fieldModel: FieldModel = _ // needs to be Reset()!
 
     private
     var _cycleOrdinal: Int = 0
 
-    def GetCycleOrdinal = _cycleOrdinal
+    def GetCycleOrdinal: Int = _cycleOrdinal
 
     private
-    var _killOrders: mutable.ArrayBuffer[KillOrder] = null  // needs to be Reset()!
+    var _killOrders: mutable.ArrayBuffer[KillOrder] = _ // needs to be Reset()!
 
-    def AddKillOrder (killOrder: KillOrder) = _killOrders += killOrder
+    def AddKillOrder (killOrder: KillOrder): mutable.ArrayBuffer[KillOrder] =
+        _killOrders += killOrder
 
-    def Reset (isTesting: Boolean = false) =
+    def Reset (isTesting: Boolean = false): Unit =
     {
         // Allocate new trunk model:
         _trunkModel = new TrunkModel(this)
@@ -680,15 +683,17 @@ class Cell (
     private
     def HandleMessage_Start (): Unit =
     {
-        Reset(isTesting = false)
+        Reset(/*isTesting = true*/)
 
         // Tell supervisor we've started:
         context.parent ! Cell.ResponseMessages.Started
     }
 
-    def LogDebug (text: String): Unit = _log.debug(text)
+    def LogDebug (text: String): Unit =
+        _log.debug(text)
 
-    def LogInfo (text: String): Unit = _log.info(text)
+    def LogInfo (text: String): Unit =
+        _log.info(text)
 
     override
     def Report (sectionsOpt: Option[String] = None): JsObject =
@@ -735,7 +740,7 @@ class Cell (
         super.preStart()
     }
 
-    def receive =
+    def receive: Receive =
     {
         //
         // From supervisor:

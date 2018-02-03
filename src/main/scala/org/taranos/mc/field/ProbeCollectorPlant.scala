@@ -103,7 +103,7 @@ class ProbeCollectorPlant
                     _probeCollectors -= ((field.GetKey, collector.GetKey))
                 }
 
-            case None => throw new FieldException(Cell.ErrorCodes.ProbeCollectorUnknown)
+            case None => throw FieldException(Cell.ErrorCodes.ProbeCollectorUnknown)
         }
 
         // Return probe collector key:
@@ -120,7 +120,7 @@ class ProbeCollectorPlant
         _probeCollectors.filter(_._1._1 == fieldKey).foreach(collectorPair =>
         {
             val ((_, collectorKey), _) = collectorPair
-            val probeCollectorDestructor = new ProbeCollector.Destructor(collectorKey, scope)
+            val probeCollectorDestructor = ProbeCollector.Destructor(collectorKey, scope)
             DestroyProbeCollector(field, probeCollectorDestructor)
         })
     }
@@ -136,10 +136,10 @@ class ProbeCollectorPlant
             case _: ProbeCollector.Key =>
                 val opt = _probeCollectors.get((field.GetKey, key))
                 if (isRequired && opt.isEmpty)
-                    throw new FieldException(Cell.ErrorCodes.ProbeCollectorUnknown)
+                    throw FieldException(Cell.ErrorCodes.ProbeCollectorUnknown)
                 opt
 
-            case _ => throw new FieldException(Cell.ErrorCodes.ProbeCollectorKeyInvalid)
+            case _ => throw FieldException(Cell.ErrorCodes.ProbeCollectorKeyInvalid)
         }
     }
 
@@ -191,7 +191,8 @@ class ProbeCollectorPlant
             }).keys.map(pair => pair._2).toVector
     }
 
-    def GetElementCount (fieldKey: Field.Key): Int = _probeCollectors.count(_._1._1 == fieldKey)
+    def GetElementCount (fieldKey: Field.Key): Int =
+        _probeCollectors.count(_._1._1 == fieldKey)
 
     def LookupProbeCollector (field: Field, lookupAlias: String): Option[ProbeCollector.Key] =
     {

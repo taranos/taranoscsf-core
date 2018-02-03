@@ -64,7 +64,7 @@ object ProbeEmitter
         _nameOpt: Option[String] = None,
         _descriptionOpt: Option[String] = None,
         _patchDefOpt: Option[JsObject] = None,
-        _modulatorKeyOpt: Option[SignalModulator.Key] = None)
+        _modulatableKeyOpt: Option[SignalModulator.Key] = None)
 
     case class Destructor (
         _key: ProbeEmitter.Key,
@@ -91,7 +91,7 @@ object ProbeEmitter
         val commonCall = new CommonCallDecoder[ProbeEmitter.Key](
             call, Cell.ErrorCodes.ProbeEmitterCallInvalid)
 
-        new Call(commonCall._elementKey, commonCall._macro)
+        Call(commonCall._elementKey, commonCall._macro)
     }
 
     def DecodeConstructor (encoded: String): Constructor =
@@ -105,7 +105,7 @@ object ProbeEmitter
             {
                 case JsSuccess(value, _) => Some(value)
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
         val modulatorKeyOpt: Option[SignalModulator.Key] =
@@ -113,10 +113,10 @@ object ProbeEmitter
             {
                 case JsSuccess(value, _) => Some(TrunkElement.DecodeKey[SignalModulator.Key](value))
 
-                case JsError(errors) => None
+                case JsError(_) => None
             }
 
-        new Constructor(
+        Constructor(
             commonMeta._tag,
             commonMeta._badgeOpt,
             commonMeta._nameOpt,
@@ -132,7 +132,7 @@ object ProbeEmitter
         val commonMeta = new CommonDestructorMetaDecoder[ProbeEmitter.Key](
             destructor, Cell.ErrorCodes.ProbeEmitterDestructorInvalid)
 
-        new Destructor(commonMeta._key, commonMeta._scope)
+        Destructor(commonMeta._key, commonMeta._scope)
     }
 
     def DecodeQuery (encoded: String): Query =
@@ -141,7 +141,7 @@ object ProbeEmitter
 
         val commonQuery = new CommonQueryDecoder[ProbeEmitter.Key](query)
 
-        new Query(commonQuery._keysOpt.get, commonQuery._sectionsOpt)
+        Query(commonQuery._keysOpt.get, commonQuery._sectionsOpt)
     }
 
     def DecodeUpdate (encoded: String): Update =
@@ -151,7 +151,7 @@ object ProbeEmitter
         val commonMeta = new CommonUpdateMetaDecoder[ProbeEmitter.Key](
             update, Cell.ErrorCodes.ProbeEmitterUpdateInvalid)
 
-        new Update(
+        Update(
             commonMeta._key,
             commonMeta._nameOpt,
             commonMeta._descriptionOpt)
@@ -184,7 +184,7 @@ class ProbeEmitter (
     protected
     val _refs = refs
 
-    def BindOscillator (oscillatorKey: Oscillator.Key) =
+    def BindOscillator (oscillatorKey: Oscillator.Key): Unit =
     {
         // First oscillator becomes the default oscillator:
         if (_refs._oscillatorKeys.isEmpty)
@@ -192,54 +192,59 @@ class ProbeEmitter (
         _refs._oscillatorKeys += oscillatorKey.asInstanceOf[ProbeOscillator.Key]
     }
 
-    def BindPatch (emitterPatchKey: EmitterPatch.Key) = _refs._emitterPatchKey = emitterPatchKey
+    def BindPatch (emitterPatchKey: EmitterPatch.Key): Unit =
+        _refs._emitterPatchKey = emitterPatchKey
 
-    def GetDefaultOscillatorKey = _refs._defaultOscillatorKey
+    def GetDefaultOscillatorKey: Oscillator.Key =
+        _refs._defaultOscillatorKey
 
-    def GetOscillatorKeys = _refs._oscillatorKeys.toSet
+    def GetOscillatorKeys: Set[_ <: Oscillator.Key] =
+        _refs._oscillatorKeys.toSet
 
-    def GetParentKey = _refs._parentKey
+    def GetParentKey: FieldElement.Key =
+        _refs._parentKey
 
-    def GetPatchKey = _refs._emitterPatchKey
+    def GetPatchKey: EmitterPatch.Key =
+        _refs._emitterPatchKey
 
     def MacroCreateChannel (
         channelTag: String,
         envelopeDefOpt: Option[JsObject],
-        patchDefOpt: Option[JsObject]) =
+        patchDefOpt: Option[JsObject]): Unit =
     {
         val patch = _fieldModel.GetEmitterPatchOpt(_refs._fieldKey, _refs._emitterPatchKey).getOrElse(
-            throw new FieldException(Cell.ErrorCodes.ProbeEmitterPatchless))
+            throw FieldException(Cell.ErrorCodes.ProbeEmitterPatchless))
         patch.MacroCreateChannel(
             channelTag,
             envelopeDefOpt,
             patchDefOpt)
     }
 
-    def MacroDestroyChannel (channelTag: String) =
+    def MacroDestroyChannel (channelTag: String): Unit =
     {
         val patch = _fieldModel.GetEmitterPatchOpt(_refs._fieldKey, _refs._emitterPatchKey).getOrElse(
-            throw new FieldException(Cell.ErrorCodes.ProbeEmitterPatchless))
+            throw FieldException(Cell.ErrorCodes.ProbeEmitterPatchless))
         patch.MacroDestroyChannel(channelTag)
     }
 
-    def MacroSetChannelCeiling (channelTag: String, ceiling: String) =
+    def MacroSetChannelCeiling (channelTag: String, ceiling: String): Unit =
     {
         val patch = _fieldModel.GetEmitterPatchOpt(_refs._fieldKey, _refs._emitterPatchKey).getOrElse(
-            throw new FieldException(Cell.ErrorCodes.ProbeEmitterPatchless))
+            throw FieldException(Cell.ErrorCodes.ProbeEmitterPatchless))
         patch.MacroSetChannelCeiling(channelTag, ceiling)
     }
 
-    def MacroSetChannelPoles (channelTag: String, polesPacked: String) =
+    def MacroSetChannelPoles (channelTag: String, polesPacked: String): Unit =
     {
         val patch = _fieldModel.GetEmitterPatchOpt(_refs._fieldKey, _refs._emitterPatchKey).getOrElse(
-            throw new FieldException(Cell.ErrorCodes.ProbeEmitterPatchless))
+            throw FieldException(Cell.ErrorCodes.ProbeEmitterPatchless))
         patch.MacroSetChannelPoles(channelTag, polesPacked)
     }
 
-    def MacroSetChannelFloor (channelTag: String, floor: String) =
+    def MacroSetChannelFloor (channelTag: String, floor: String): Unit =
     {
         val patch = _fieldModel.GetEmitterPatchOpt(_refs._fieldKey, _refs._emitterPatchKey).getOrElse(
-            throw new FieldException(Cell.ErrorCodes.ProbeEmitterPatchless))
+            throw FieldException(Cell.ErrorCodes.ProbeEmitterPatchless))
         patch.MacroSetChannelFloor(channelTag, floor)
     }
 
@@ -258,7 +263,8 @@ class ProbeEmitter (
         isUnbound
     }
 
-    def UnbindPatch () = _refs._emitterPatchKey = EmitterPatch.kNoneKey
+    def UnbindPatch (): Unit =
+        _refs._emitterPatchKey = EmitterPatch.kNoneKey
 
     //
     // State:
@@ -312,9 +318,9 @@ class ProbeEmitter (
 
         _trunkModel.GetEmitterPatchOpt(field.GetTrunkKey, _refs._emitterPatchKey) match
         {
-            case Some(patch) => patch.Trigger()
+            case Some(patch) => patch.Activate()
 
-            case None => throw new FieldException(Cell.ErrorCodes.ProbeEmitterPatchless)
+            case None => throw FieldException(Cell.ErrorCodes.ProbeEmitterPatchless)
         }
     }
 }

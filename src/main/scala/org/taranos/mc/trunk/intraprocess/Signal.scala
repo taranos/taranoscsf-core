@@ -112,7 +112,7 @@ object Signal
                         trunkModel.CreateSignal[Discrete](scalar)
 
                     case _ =>
-                        throw new TrunkException(Cell.ErrorCodes.SignalModeIndeterminate)
+                        throw TrunkException(Cell.ErrorCodes.SignalModeIndeterminate)
                 }
 
             // Two-part format = "<scalar>~<scalar type>"
@@ -129,11 +129,11 @@ object Signal
                         trunkModel.CreateSignal[Discrete](scalar)
 
                     case _ =>
-                        throw new TrunkException(Cell.ErrorCodes.SignalModeIndeterminate)
+                        throw TrunkException(Cell.ErrorCodes.SignalModeIndeterminate)
                 }
 
             case _ =>
-                throw new TrunkException(Cell.ErrorCodes.SignalInvalid)
+                throw TrunkException(Cell.ErrorCodes.SignalInvalid)
         }
 
         // Return signal:
@@ -180,5 +180,6 @@ case class Signal[Mode >: Signal.SignalTypes] (
             report
     }
 
-    def ToFriendly: String = s"{${_ordinal},${_scalar}"
+    def ToFriendly: String =
+        s"{${_ordinal},${_scalar}"
 }

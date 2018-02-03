@@ -75,10 +75,6 @@ object SignalModulator
     class State
         extends TrunkElement.State
 
-    case class ModulatedSignals (
-        _signals: Iterable[(Option[String], Signal[_ >: SignalTypes])] =
-            Iterable.empty[(Option[String], Signal[_ >: SignalTypes])])
-
     def GetModulator (
         model: TrunkModel,
         trunkKey: Trunk.Key,
@@ -88,23 +84,23 @@ object SignalModulator
         {
             case key: EmitterPatch.Key =>
                 model.GetEmitterPatchOpt(trunkKey, key).getOrElse(
-                    throw new TrunkException(Cell.ErrorCodes.EmitterPatchInvalid))
+                    throw TrunkException(Cell.ErrorCodes.EmitterPatchInvalid))
 
             case key: OscillatorPatch.Key =>
                 model.GetOscillatorPatchOpt(trunkKey, key).getOrElse(
-                    throw new TrunkException(Cell.ErrorCodes.OscillatorPatchInvalid))
+                    throw TrunkException(Cell.ErrorCodes.OscillatorPatchInvalid))
 
             case key: SignalInput.Key =>
                 model.GetSignalInputOpt(trunkKey, key).getOrElse(
-                    throw new TrunkException(Cell.ErrorCodes.SignalInputInvalid))
+                    throw TrunkException(Cell.ErrorCodes.SignalInputInvalid))
 
             case key: SignalBridge.Key =>
                 model.GetSignalBridgeOpt(trunkKey, key).getOrElse(
-                    throw new TrunkException(Cell.ErrorCodes.SignalBridgeInvalid))
+                    throw TrunkException(Cell.ErrorCodes.SignalBridgeInvalid))
 
             case key: SignalOutput.Key =>
                 model.GetSignalOutputOpt(trunkKey, key).getOrElse(
-                    throw new TrunkException(Cell.ErrorCodes.SignalOutputInvalid))
+                    throw TrunkException(Cell.ErrorCodes.SignalOutputInvalid))
         }
     }
 }
@@ -128,11 +124,14 @@ trait SignalModulator[KeyType <: SignalModulator.Key]
     /**
      * Modulate the given signal into zero or more new signals.
      */
-    def Modulate (signal: Signal[_ >: SignalTypes]): SignalModulator.ModulatedSignals =
-        SignalModulator.ModulatedSignals()
+    def Modulate (signal: Signal[_ >: SignalTypes]): ModulatableElement.ModulatedSignals =
+    {
+        ModulatableElement.ModulatedSignals()
+    }
 
     /**
-     * Trigger a modulation cycle.
+     * Activate a modulation cycle.
      */
-    def Trigger (): Unit = {}
+    def Activate (): Unit =
+    {}
 }

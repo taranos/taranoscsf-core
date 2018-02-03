@@ -84,14 +84,14 @@ class SignalInterfacePlant
                 trunk.UnbindSignalInterface(interface.GetKey)
 
                 // 5: Destroy children:
-                val portDestructors = interface.GetPortKeys.map(new SignalPort.Destructor(_))
+                val portDestructors = interface.GetPortKeys.map(SignalPort.Destructor)
                 if (portDestructors.nonEmpty)
                     _trunkModel.DestroySignalPorts(trunk.GetKey, portDestructors.toVector)
 
                 // 6: Remove element from store:
                 _interfaces -= ((trunk.GetKey, interface.GetKey))
 
-            case None => throw new TrunkException(Cell.ErrorCodes.SignalInterfaceUnknown)
+            case None => throw TrunkException(Cell.ErrorCodes.SignalInterfaceUnknown)
         }
 
         // Return interface key:
@@ -106,7 +106,7 @@ class SignalInterfacePlant
         _interfaces.filter(_._1._1 == trunkKey).foreach(interfacePair =>
         {
             val ((_, pairInterfaceKey), _) = interfacePair
-            val interfaceDestructor = new SignalInterface.Destructor(pairInterfaceKey)
+            val interfaceDestructor = SignalInterface.Destructor(pairInterfaceKey)
             DestroySignalInterface(trunk, interfaceDestructor)
         })
     }
@@ -122,10 +122,10 @@ class SignalInterfacePlant
             case _: SignalInterface.Key =>
                 val opt = _interfaces.get((trunk.GetKey, key))
                 if (isRequired && opt.isEmpty)
-                    throw new TrunkException(Cell.ErrorCodes.SignalInterfaceUnknown)
+                    throw TrunkException(Cell.ErrorCodes.SignalInterfaceUnknown)
                 opt
 
-            case _ => throw new TrunkException(Cell.ErrorCodes.SignalInterfaceKeyInvalid)
+            case _ => throw TrunkException(Cell.ErrorCodes.SignalInterfaceKeyInvalid)
         }
     }
 
@@ -145,5 +145,6 @@ class SignalInterfacePlant
         _interfaces.filter(_._1._1 == trunkKey).keys.map(_._2).toVector
     }
 
-    def GetElementCount (trunkKey: Trunk.Key): Int = _interfaces.count(_._1._1 == trunkKey)
+    def GetElementCount (trunkKey: Trunk.Key): Int =
+        _interfaces.count(_._1._1 == trunkKey)
 }

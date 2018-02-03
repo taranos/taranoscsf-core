@@ -22,10 +22,10 @@ import org.taranos.mc.Cell
 import org.taranos.mc.Common.ReportSectionsParser
 import org.taranos.mc.trunk.intraprocess.AliasedElement.AliasedConstructorMetaDecoder
 import org.taranos.mc.trunk.intraprocess.BiasedElement.BiasedConstructorMetaDecoder
-import org.taranos.mc.trunk.intraprocess.Signal.SignalTypes
 import org.taranos.mc.trunk.intraprocess.TestableElement.TestableUpdateStateDecoder
-import org.taranos.mc.trunk.intraprocess.TrunkElement.{CommonConstructorMetaDecoder, CommonDestructorMetaDecoder, CommonQueryDecoder, CommonUpdateMetaDecoder}
-import play.api.libs.json.{JsObject, Json}
+import org.taranos.mc.trunk.intraprocess.TrunkElement.{CommonConstructorMetaDecoder, CommonDestructorMetaDecoder,
+    CommonQueryDecoder, CommonUpdateMetaDecoder}
+import play.api.libs.json.{JsError, JsObject, JsSuccess, Json}
 
 
 object SignalPort
@@ -69,7 +69,7 @@ object SignalPort
     class Refs (
         trunkKey: Trunk.Key,
         val _interfaceKey: SignalInterface.Key,
-        val _tapKey: SignalTap.Key)
+        val _inputKeyOpt: Option[SignalInput.Key])
         extends TrunkElement.Refs(trunkKey)
     {
         override
@@ -80,11 +80,9 @@ object SignalPort
             report ++=
                 Json.obj(TrunkModel.Glossary.kESignalInterface -> TrunkElement.EncodeKey(_interfaceKey))
 
-            if (!sections.HasChildReports)
-            {
+            if (_inputKeyOpt.isDefined)
                 report ++=
-                    Json.obj(TrunkModel.Glossary.kESignalTap -> TrunkElement.EncodeKey(_tapKey))
-            }
+                    Json.obj(TrunkModel.Glossary.kESignalInput -> TrunkElement.EncodeKey(_inputKeyOpt.get))
 
             report
         }
@@ -99,7 +97,8 @@ object SignalPort
         _nameOpt: Option[String] = None,
         _descriptionOpt: Option[String] = None,
         _aliasOpt: Option[String],
-        _mode: Signal.ModeEnum.Mode)
+        _mode: Signal.ModeEnum.Mode,
+        _inputKeyOpt: Option[SignalInput.Key])
 
     case class Destructor (
         _key: SignalPort.Key)
@@ -134,22 +133,31 @@ object SignalPort
                 {
                     case Signal.ModeEnum.Continuous | Signal.ModeEnum.Discrete => value
 
-                    case _ => throw new TrunkException(Cell.ErrorCodes.SignalModeInvalid)
+                    case _ => throw TrunkException(Cell.ErrorCodes.SignalModeInvalid)
                 }
 
             case _ =>
-                throw new TrunkException(Cell.ErrorCodes.SignalPortConstructorInvalid, "missing mode element")
+                throw TrunkException(Cell.ErrorCodes.SignalPortConstructorInvalid, "missing mode element")
         }
 
         val aliasedMeta = new AliasedConstructorMetaDecoder(constructor)
 
-        new Constructor(
+        val inputKeyOpt: Option[SignalInput.Key] =
+            (constructor \ TrunkModel.Glossary.kPSRefs \ TrunkModel.Glossary.kESignalInput).validate[String] match
+            {
+                case JsSuccess(value, _) => Some(TrunkElement.DecodeKey[SignalInput.Key](value))
+
+                case JsError(_) => None
+            }
+
+        Constructor(
             commonMeta._tag,
             commonMeta._badgeOpt,
             commonMeta._nameOpt,
             commonMeta._descriptionOpt,
             aliasedMeta._aliasOpt,
-            mode)
+            mode,
+            inputKeyOpt)
     }
 
     def DecodeDestructor (encoded: String): Destructor =
@@ -159,7 +167,7 @@ object SignalPort
         val commonMeta = new CommonDestructorMetaDecoder[SignalPort.Key](
             destructor, Cell.ErrorCodes.SignalPortDestructorInvalid)
 
-        new Destructor(commonMeta._key)
+        Destructor(commonMeta._key)
     }
 
     def DecodeQuery (encoded: String): Query =
@@ -168,7 +176,7 @@ object SignalPort
 
         val commonQuery = new CommonQueryDecoder[SignalPort.Key](query)
 
-        new Query(commonQuery._keysOpt.get, commonQuery._sectionsOpt)
+        Query(commonQuery._keysOpt.get, commonQuery._sectionsOpt)
     }
 
     def DecodeUpdate (encoded: String): Update =
@@ -182,7 +190,7 @@ object SignalPort
 
         val testableState = new TestableUpdateStateDecoder(update)
 
-        new Update(
+        Update(
             commonMeta._key,
             commonMeta._nameOpt,
             commonMeta._descriptionOpt,
@@ -198,10 +206,6 @@ class SignalPort (
     (implicit protected val _trunkModel: TrunkModel)
     extends BiasedElement[SignalPort.Key]
         with AliasedElement
-        with IngressElement
-        with PropagatorElement
-        with TappableElement
-        with TestableElement
 {
     //
     // Meta:
@@ -209,11 +213,14 @@ class SignalPort (
     protected
     val _meta = meta
 
-    def GetAliasOpt = _meta._aliasOpt
+    def GetAliasOpt: Option[String]
+        = _meta._aliasOpt
 
-    def GetMode = _meta._mode
+    def GetMode: Signal.ModeEnum.Mode
+        = _meta._mode
 
-    def SetAliasOpt (aliasOpt: Option[String]) = _meta._aliasOpt = aliasOpt
+    def SetAliasOpt (aliasOpt: Option[String]): Unit
+        = _meta._aliasOpt = aliasOpt
 
     //
     // Attrs:
@@ -227,60 +234,17 @@ class SignalPort (
     protected
     val _refs = refs
 
-    def GetInterfaceKey = _refs._interfaceKey
+    def GetInterfaceKey: SignalInterface.Key =
+        _refs._interfaceKey
+
+    def GetInputKeyOpt: Option[SignalInput.Key] =
+        _refs._inputKeyOpt
 
     //
     // State:
     //
     protected
     val _state = null
-
-    def GetSourceKey: SignalSource.Key =
-    {
-        _trunkModel.GetSignalTapOpt(GetTrunkKey, _refs._tapKey) match
-        {
-            case Some(tap) => tap.GetSourceKey
-
-            case None => throw new TrunkException(Cell.ErrorCodes.SignalPortTapless)
-        }
-    }
-
-    def GetTapKey: SignalTap.Key = _refs._tapKey
-
-    def Propagate (
-        signalOpt: Option[Signal[_ >: SignalTypes]] = None,
-        partOpt: Option[String]): Unit =
-    {
-        // Port must be injecting a signal (ports do not perform default propagation):
-        val signal = signalOpt.getOrElse(
-            throw new TrunkException(Cell.ErrorCodes.SignalInvalid))
-
-        // If signal is virtual then accept its mark:
-        if (signal._scalar.isInstanceOf[Signal.Virtual])
-            SetMark(signal._ordinal)
-
-        // Propagate signal through child tap's sink:
-        _trunkModel.GetSignalTapOpt(GetTrunkKey, _refs._tapKey) match
-        {
-            case Some(tap) =>
-                val sinkKey = tap.GetSinkKey
-                _trunkModel.GetSignalSinkOpt(GetTrunkKey, sinkKey) match
-                {
-                    case Some(sink) =>
-                        sink.Propagate(Some(signal))
-
-                    case None =>
-                        _trunkModel.Log(s"$GetTag stopagating ${signal.ToFriendly} due to sinkless tap")
-                }
-
-            case None => throw new TrunkException(Cell.ErrorCodes.SignalPortTapless)
-        }
-    }
-
-    def PutSignal (signal: Signal[_ >: SignalTypes]) =
-    {
-        Propagate(Some(signal))
-    }
 
     def Report (sectionsOpt: Option[String] = None): JsObject =
     {
@@ -300,20 +264,6 @@ class SignalPort (
         if (sections.HasRefsPropertyset)
             report ++= Json.obj(TrunkModel.Glossary.kPSRefs -> _refs.Report(sections))
 
-        // Add child reports:
-        if (sections.HasChildReports)
-        {
-            report ++=
-                Json.obj(TrunkModel.Glossary.kRSignalTaps -> _trunkModel.ReportSignalTaps(
-                    GetTrunkKey,
-                    new SignalTap.Query(Vector(_refs._tapKey), sectionsOpt)))
-        }
-
         report
-    }
-
-    def TestSignal (signal: Signal[_ >: SignalTypes]) =
-    {
-        PutSignal(signal)
     }
 }

@@ -87,7 +87,7 @@ object SignalingServices
         val inputKeys = inputs.map(_.GetKey)
 
         // Report inputs including state and children sections:
-        val query = new SignalInput.Query(inputKeys, Some(TrunkModel.Glossary.kRModulatorCreationSections))
+        val query = SignalInput.Query(inputKeys, Some(TrunkModel.Glossary.kRModulatorCreationSections))
         val inputReports = _trunkModel.ReportSignalInputs(trunkKey, query)
 
         // Wrap reports:
@@ -180,7 +180,7 @@ object SignalingServices
         val bridgeKeys = bridges.map(_.GetKey)
 
         // Report bridges including state and children sections:
-        val query = new SignalBridge.Query(bridgeKeys, Some(TrunkModel.Glossary.kRModulatorCreationSections))
+        val query = SignalBridge.Query(bridgeKeys, Some(TrunkModel.Glossary.kRModulatorCreationSections))
         val bridgeReports = _trunkModel.ReportSignalBridges(trunkKey, query)
 
         // Wrap reports:
@@ -273,7 +273,7 @@ object SignalingServices
         val outputKeys = outputs.map(_.GetKey)
 
         // Report outputs including state and children sections:
-        val query = new SignalOutput.Query(outputKeys, Some(TrunkModel.Glossary.kRModulatorCreationSections))
+        val query = SignalOutput.Query(outputKeys, Some(TrunkModel.Glossary.kRModulatorCreationSections))
         val outputReports = _trunkModel.ReportSignalOutputs(trunkKey, query)
 
         // Wrap reports:
@@ -354,7 +354,7 @@ object SignalingServices
         val trunkKeys = trunks.map(_.GetKey)
 
         // Report trunks:
-        val query = new Trunk.Query(trunkKeys, Some(TrunkModel.Glossary.kRStandardCreationSections))
+        val query = Trunk.Query(trunkKeys, Some(TrunkModel.Glossary.kRStandardCreationSections))
         val trunkReports = _trunkModel.ReportTrunks(query)
 
         // Wrap reports:
@@ -443,7 +443,7 @@ object SignalingServices
         val interfaceKeys = interfaces.map(_.GetKey)
 
         // Report interfaces including state and children sections:
-        val query = new SignalInterface.Query(interfaceKeys, Some(TrunkModel.Glossary.kRStandardCreationSections))
+        val query = SignalInterface.Query(interfaceKeys, Some(TrunkModel.Glossary.kRStandardCreationSections))
         val interfaceReports = _trunkModel.ReportSignalInterfaces(trunkKey, query)
 
         // Wrap reports:
@@ -573,7 +573,7 @@ object SignalingServices
         val portKeys = ports.map(_.GetKey)
 
         // Report ports including state and children sections:
-        val query = new SignalPort.Query(portKeys, Some(TrunkModel.Glossary.kRStandardCreationSections))
+        val query = SignalPort.Query(portKeys, Some(TrunkModel.Glossary.kRStandardCreationSections))
         val portReports = _trunkModel.ReportSignalPorts(
             trunkKey,
             interfaceKey,
@@ -669,7 +669,7 @@ object SignalingServices
         val signalSourceKeys = signalSources.map(_.GetKey)
 
         // Report sources including state and children sections:
-        val query = new SignalSource.Query(signalSourceKeys, Some(TrunkModel.Glossary.kRStandardCreationSections))
+        val query = SignalSource.Query(signalSourceKeys, Some(TrunkModel.Glossary.kRStandardCreationSections))
         val signalSourceReports = _trunkModel.ReportSignalSources(trunkKey, query)
 
         // Wrap reports:
@@ -762,7 +762,7 @@ object SignalingServices
         val signalSinkKeys = signalSinks.map(_.GetKey)
 
         // Report sinks including state and children sections:
-        val query = new SignalSink.Query(signalSinkKeys, Some(TrunkModel.Glossary.kRStandardCreationSections))
+        val query = SignalSink.Query(signalSinkKeys, Some(TrunkModel.Glossary.kRStandardCreationSections))
         val signalSinkReports = _trunkModel.ReportSignalSinks(trunkKey, query)
 
         // Wrap reports:
@@ -855,7 +855,7 @@ object SignalingServices
         val signalLinkKeys = signalLinks.map(_.GetKey)
 
         // Report links including state and children sections:
-        val query = new SignalLink.Query(signalLinkKeys, Some(TrunkModel.Glossary.kRStandardCreationSections))
+        val query = SignalLink.Query(signalLinkKeys, Some(TrunkModel.Glossary.kRStandardCreationSections))
         val signalLinkReports = _trunkModel.ReportSignalLinks(trunkKey, query)
 
         // Wrap reports:
@@ -948,7 +948,7 @@ object SignalingServices
         val signalTapKeys = signalTaps.map(_.GetKey)
 
         // Report taps including state and children sections:
-        val query = new SignalTap.Query(signalTapKeys, Some(TrunkModel.Glossary.kRStandardCreationSections))
+        val query = SignalTap.Query(signalTapKeys, Some(TrunkModel.Glossary.kRStandardCreationSections))
         val signalTapReports = _trunkModel.ReportSignalTaps(trunkKey, query)
 
         // Wrap reports:
